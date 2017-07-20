@@ -1,10 +1,12 @@
 package main
 
-// import "crypto/rsa"
-import "errors"
-import "flag"
-import "fmt"
-import "io/ioutil"
+import ( 
+	//"crypto/rsa"
+	//"errors"
+	"flag"
+	"fmt"
+	"io/ioutil"
+)
 
 func check(e error) {
 	if e != nil {
@@ -40,7 +42,8 @@ func main() {
 
 	// Did we get a public key file to read
 	if len(*publicKeyFile) > 0 {
-		pubKey := new(rsa.PublicKey)importKey(*publicKeyFile)
+		//pubKey := new(rsa.PublicKey)
+		importKey(*publicKeyFile)
 	} else {
 		fmt.Printf("[-] No public key specified. Nothing to do.\n")
 		return
