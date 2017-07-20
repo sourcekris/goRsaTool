@@ -1,8 +1,10 @@
 package main
 
 import ( 
-	//"crypto/rsa"
-	//"errors"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -14,15 +16,51 @@ func check(e error) {
 	}
 }
 
+// https://stackoverflow.com/a/44688503
+func ParseRsaPublicKeyFromPemStr(publicKeyStr string) (*rsa.PublicKey, error) {
+    block, _ := pem.Decode([]byte(publicKeyStr))
+    if block == nil {
+            return nil, errors.New("[-] Failed to decode PEM key.")
+    }
+
+    pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+    if err != nil {
+            return nil, errors.New("[-] Failed to parse public key.")
+    }
+
+    // XXX: we'll use this later for private keys too
+    switch pub := pub.(type) {
+    case *rsa.PublicKey:
+            return pub, nil
+    default:
+            break // fall through
+    }
+    return nil, errors.New("[-] Key type is not RSA")
+}
+
 // import a PEM public key file and return a rsa.PublicKey object
-func importKey(publicKeyFile string) { // (*rsa.PublicKey, error) {
+func importKey(publicKeyFile string) (*rsa.PublicKey, error) {
 	publicKeyStr, err := ioutil.ReadFile(publicKeyFile)
-	check(err)
-	fmt.Print(string(publicKeyStr))
+	if err != nil {
+		fmt.Printf("[-] Failed to open/read file %s\n", publicKeyFile)
+		return nil, err
+	}
+
+	// convert byte array to a string
+	p := string(publicKeyStr[:])
+
+	pubKey, err := ParseRsaPublicKeyFromPemStr(p)
+	if err != nil {
+		fmt.Printf("[-] Failed to open/read file %s\n", publicKeyFile)
+		return nil, err
+	}
+	return pubKey, err
 }
 
 func dumpKey(publicKeyFile string) {
-
+	pub, _ := importKey(publicKeyFile)
+	fmt.Printf("[*] n = %d\n", pub.N)
+	fmt.Printf("[*] e = %d\n", pub.E)
 }
 
 func main() {
@@ -42,10 +80,18 @@ func main() {
 
 	// Did we get a public key file to read
 	if len(*publicKeyFile) > 0 {
-		//pubKey := new(rsa.PublicKey)
-		importKey(*publicKeyFile)
+		
+		if *dumpKeyMode != false {
+			dumpKey(*publicKeyFile)
+			return
+		} else {
+			importKey(*publicKeyFile)
+		}
+
 	} else {
 		fmt.Printf("[-] No public key specified. Nothing to do.\n")
 		return
 	}
+
+
 }
