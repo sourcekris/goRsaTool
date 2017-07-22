@@ -7,3 +7,11 @@ RsaCtfTool is an RSA tool for CTF challenges, it attempts multiple attacks again
 Attacks supported in this go version:
 
 * Nothing yet
+
+## Usage:
+
+### Generate a public key :
+`./gorsatool -createkey -n 7828374823761928712873129873981723...12837182 -e 65537`
+
+### Dump the parameters from a key:
+`./gorsatool -dumpkey -key ./key.pub`
