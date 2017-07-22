@@ -8,64 +8,75 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	//"math/big"
+	//"reflect"
 )
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-// https://stackoverflow.com/a/44688503
-func ParseRsaPublicKeyFromPemStr(publicKeyStr string) (*rsa.PublicKey, error) {
-    block, _ := pem.Decode([]byte(publicKeyStr))
-    if block == nil {
-            return nil, errors.New("[-] Failed to decode PEM key.")
-    }
-
-    pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+// https://golang.org/pkg/crypto/x509/#ParsePKIXPublicKey
+func ParsePublicRsaKey(keyBytes []byte) (*rsa.PublicKey, error) {
+    key, err := x509.ParsePKIXPublicKey(keyBytes)//.Bytes)
     if err != nil {
-            return nil, errors.New("[-] Failed to parse public key.")
+    	return nil, errors.New("Failed to parse the DER key after decoding.")
     }
-
-    // XXX: we'll use this later for private keys too
-    switch pub := pub.(type) {
-    case *rsa.PublicKey:
-            return pub, nil
-    default:
-            break // fall through
-    }
-    return nil, errors.New("[-] Key type is not RSA")
+   
+    switch key := key.(type) {
+	case *rsa.PublicKey:
+		return key, nil
+	default:
+		return nil, errors.New("Given key is not an RSA Key")
+	}
 }
 
-// import a PEM public key file and return a rsa.PublicKey object
-func importKey(publicKeyFile string) (*rsa.PublicKey, error) {
-	publicKeyStr, err := ioutil.ReadFile(publicKeyFile)
+func ParsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
+    key, err := x509.ParsePKCS1PrivateKey(keyBytes)
+    if err != nil {
+    	return nil, errors.New("Failed to parse the DER key after decoding.")
+    }
+    return key, nil
+}
+
+// import a PEM key file and return a rsa.PrivateKey object
+func importKey(keyFile string) (*rsa.PrivateKey, error) {
+	// read the key from the disk
+	keyStr, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		fmt.Printf("[-] Failed to open/read file %s\n", publicKeyFile)
+		fmt.Printf("[-] Failed to open/read file %s\n", keyFile)
 		return nil, err
 	}
 
-	// convert byte array to a string
-	p := string(publicKeyStr[:])
+	// decode the PEM data to extract the DER format key
+	block, _ := pem.Decode([]byte(keyStr))
+    if block == nil {
+            return nil, errors.New("Failed to decode PEM key.")
+    }
+	
+	key, err := ParsePublicRsaKey(block.Bytes)
+	if err == nil {
+		fmt.Printf("[+] Parsed out a Public Key file %s: %s\n", keyFile, err)
+		priv := rsa.PrivateKey{PublicKey: *key}
+		return &priv, err
+	} 
 
-	pubKey, err := ParseRsaPublicKeyFromPemStr(p)
-	if err != nil {
-		fmt.Printf("[-] Failed to open/read file %s\n", publicKeyFile)
-		return nil, err
-	}
-	return pubKey, err
+	priv, err := ParsePrivateRsaKey(block.Bytes)
+	return priv, err
+
 }
 
-func dumpKey(publicKeyFile string) {
-	pub, _ := importKey(publicKeyFile)
-	fmt.Printf("[*] n = %d\n", pub.N)
-	fmt.Printf("[*] e = %d\n", pub.E)
+func dumpKey(key *rsa.PrivateKey) {
+	fmt.Printf("[*] n = %d\n", key.N)
+	fmt.Printf("[*] e = %d\n", key.E)
+
+	// XXX: Support RSA multiprime [where len(key.Primes) > 2]
+	if key.D != nil {
+		fmt.Printf("[*] d = %d\n", key.D)
+		fmt.Printf("[*] p = %d\n", key.Primes[0])
+		fmt.Printf("[*] q = %d\n", key.Primes[1])
+	}
 }
 
 func main() {
 	// Parse command line arguments
-	publicKeyFile := flag.String("publickey", "", "The filename of the public key to attack.")
+	keyFile       := flag.String("key", "", "The filename of the RSA key to attack or dump")
 	verboseMode   := flag.Bool("verbose", false, "Enable verbose output.")
 	dumpKeyMode   := flag.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
 	flag.Parse()
@@ -73,23 +84,22 @@ func main() {
 	// Print verbose information
 	if *verboseMode != false {
 		fmt.Printf("[*] goRsaTool\n")
-		fmt.Printf("[*] Public Key Filename:\t%s\n", *publicKeyFile)
+		fmt.Printf("[*] RSA Key Filename:\t%s\n", *keyFile)
 		fmt.Printf("[*] Verbose Mode:\t%t\n", *verboseMode)
 		fmt.Printf("[*] Dump Key Mode:\t%t\n", *dumpKeyMode)
 	}
 
 	// Did we get a public key file to read
-	if len(*publicKeyFile) > 0 {
+	if len(*keyFile) > 0 {
+		key, _ := importKey(*keyFile)
 		
 		if *dumpKeyMode != false {
-			dumpKey(*publicKeyFile)
+			dumpKey(key)
 			return
-		} else {
-			importKey(*publicKeyFile)
-		}
+		} 
 
 	} else {
-		fmt.Printf("[-] No public key specified. Nothing to do.\n")
+		fmt.Printf("[-] No key file specified. Nothing to do.\n")
 		return
 	}
 
