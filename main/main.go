@@ -8,7 +8,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	//"math/big"
+	"math/big"
+	"strconv"
 	//"reflect"
 )
 
@@ -35,6 +36,21 @@ func ParsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
     return key, nil
 }
 
+func encodePublicKey(pub *rsa.PublicKey) (string, error) {
+	pubder, err := x509.MarshalPKIXPublicKey(pub)
+	if err != nil {
+        return "", err
+    }
+    pubpem := pem.EncodeToMemory(
+    	&pem.Block{
+    		Type: "RSA PUBLIC KEY", 
+    		Bytes: pubder,
+    	},
+    )
+
+    return string(pubpem), nil
+}
+
 // import a PEM key file and return a rsa.PrivateKey object
 func importKey(keyFile string) (*rsa.PrivateKey, error) {
 	// read the key from the disk
@@ -52,12 +68,14 @@ func importKey(keyFile string) (*rsa.PrivateKey, error) {
 	
 	key, err := ParsePublicRsaKey(block.Bytes)
 	if err == nil {
-		fmt.Printf("[+] Parsed out a Public Key file %s: %s\n", keyFile, err)
 		priv := rsa.PrivateKey{PublicKey: *key}
 		return &priv, err
 	} 
 
 	priv, err := ParsePrivateRsaKey(block.Bytes)
+	if err != nil {
+		return nil, errors.New("Failed to parse the key as either a public or private key.")
+	}
 	return priv, err
 
 }
@@ -79,6 +97,9 @@ func main() {
 	keyFile       := flag.String("key", "", "The filename of the RSA key to attack or dump")
 	verboseMode   := flag.Bool("verbose", false, "Enable verbose output.")
 	dumpKeyMode   := flag.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
+	createKeyMode := flag.Bool("createkey", false, "Create a public key given an E and N.")
+	exponentArg   := flag.String("e","", "The exponent value - for use with createkey flag.")
+	modulusArg    := flag.String("n","", "The modulus value - for use with createkey flag.")
 	flag.Parse()
 
 	// Print verbose information
@@ -99,6 +120,26 @@ func main() {
 		} 
 
 	} else {
+		if *createKeyMode != false {
+			if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
+				n := new(big.Int)
+				n.SetString(*modulusArg, 10)
+				e, err := strconv.Atoi(*exponentArg)
+				if err != nil {
+					fmt.Printf("[-] Failed converting exponent to integer.")
+					return
+				}
+				
+
+				pub := rsa.PublicKey{N: n, E: e}
+				pubStr,_ := encodePublicKey(&pub)
+				fmt.Print(pubStr)		
+				return
+			} else {
+		 		fmt.Printf("[-] No exponent or modulus specified. Nothing to do.\n")
+		 		return		
+			}
+		}
 		fmt.Printf("[-] No key file specified. Nothing to do.\n")
 		return
 	}
