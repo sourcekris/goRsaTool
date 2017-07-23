@@ -5,6 +5,10 @@
 *.dylib
 main
 
+# sublime project files
+*.sublime-project
+*.sublime-workspace
+
 # Test binary, build with `go test -c`
 *.test
 

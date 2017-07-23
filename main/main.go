@@ -109,7 +109,7 @@ func main() {
 		attacks.Factordb(key)
 
 		if key.D != nil {
-			privStr, _ := utils.EncodePrivateKey(key)
+			privStr := utils.EncodePrivateKey(key)
 			fmt.Print(privStr)
 			return
 		}
