@@ -6,7 +6,7 @@ RsaCtfTool is an RSA tool for CTF challenges, it attempts multiple attacks again
 
 Attacks supported in this go version:
 
-* Nothing yet
+* factordb attack (i.e. is the modulus already fully factored on factordb.com)
 
 ## Usage:
 

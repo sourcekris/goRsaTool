@@ -10,7 +10,8 @@ import (
 	"io/ioutil"
 	"math/big"
 	"strconv"
-	//"reflect"
+	"github.com/sourcekris/goRsaTool/attacks"
+	"github.com/sourcekris/goRsaTool/utils"
 )
 
 // https://golang.org/pkg/crypto/x509/#ParsePKIXPublicKey
@@ -34,21 +35,6 @@ func ParsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
     	return nil, errors.New("Failed to parse the DER key after decoding.")
     }
     return key, nil
-}
-
-func encodePublicKey(pub *rsa.PublicKey) (string, error) {
-	pubder, err := x509.MarshalPKIXPublicKey(pub)
-	if err != nil {
-        return "", err
-    }
-    pubpem := pem.EncodeToMemory(
-    	&pem.Block{
-    		Type: "RSA PUBLIC KEY", 
-    		Bytes: pubder,
-    	},
-    )
-
-    return string(pubpem), nil
 }
 
 // import a PEM key file and return a rsa.PrivateKey object
@@ -118,6 +104,15 @@ func main() {
 			dumpKey(key)
 			return
 		} 
+		fmt.Printf("[*] Begin attacks\n")
+		// attacks begin here?
+		attacks.Factordb(key)
+
+		if key.D != nil {
+			privStr, _ := utils.EncodePrivateKey(key)
+			fmt.Print(privStr)
+			return
+		}
 
 	} else {
 		if *createKeyMode != false {
@@ -132,7 +127,7 @@ func main() {
 				
 
 				pub := rsa.PublicKey{N: n, E: e}
-				pubStr,_ := encodePublicKey(&pub)
+				pubStr,_ := utils.EncodePublicKey(&pub)
 				fmt.Print(pubStr)		
 				return
 			} else {
