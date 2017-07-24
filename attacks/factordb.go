@@ -13,18 +13,8 @@ package attacks
  	"strings"
  	"regexp"
  	"time"
- 	"unicode"
+ 	"github.com/sourcekris/goRsaTool/utils"
  )
-
-// XXX: move to some util package
-func isInt(s string) bool {
-	for _, c := range s {
-		if !unicode.IsDigit(c) {
-			return false
-		}
-	}
-	return true
-}
 
 // given e, p and q solve for the private exponent d
 func solveforD(p *big.Int, q *big.Int, e int) *big.Int {
@@ -34,12 +24,38 @@ func solveforD(p *big.Int, q *big.Int, e int) *big.Int {
 	return big.NewInt(0).ModInverse(big.NewInt(int64(e)), phi)
 }
 
-// XXX: this should update the privatekey 
+// extract components of an equation we get back from factordb and solve it
+func solveforP(equation string) (*big.Int) {
+	// sometimes the input is not an equation
+	if utils.IsInt(equation) {
+		m := new(big.Int)
+		m.SetString(equation, 10)
+		return m
+	}
+
+	reResult, _ := regexp.MatchString("^\\d+\\^\\d+\\-\\d+$", equation)
+	if reResult != false {
+		baseExp := strings.Split(equation, "^")
+		subMe   := strings.Split(baseExp[1], "-")[1]
+
+		var e, f, g big.Int 
+		e.SetString(string(baseExp[0]), 10)
+		f.SetString(string(baseExp[1]), 10)
+		g.SetString(string(subMe), 10)
+		e.Exp(&e,&f,nil)
+		e.Sub(&e,&g)
+		
+		return &e
+	 } 
+	
+	return big.NewInt(0)
+}
+
+// XXX: this should return errors not print them
 func Factordb(pubKey *rsa.PrivateKey) {
 	url2 := "http://www.factordb.com/"
 	url1 := url2 + "index.php?query="
 	
-
 	var httpClient = &http.Client{
 		Timeout: 15 * time.Second,
 	}
@@ -74,10 +90,20 @@ func Factordb(pubKey *rsa.PrivateKey) {
 		r2Prime    := strings.Split(string(re2.Find(r2Bytes)), "\"")[1]
 
 		// check if the returned values are all digits
-		if !isInt(r1Prime) || !isInt(r2Prime) {
-			// XXX: Handle non integer, but valid, primes here
-			// XXX: e.g. https://github.com/sourcekris/RsaCtfTool/blob/master/RsaCtfTool.py#L125
-			fmt.Printf("[-] One or more of the primes returned by factordb wasnt an integer.\n")
+		if !utils.IsInt(r1Prime) || !utils.IsInt(r2Prime) {
+			// Try solve them as equations of the form x^y-z
+			tmp_p := solveforP(r1Prime)
+			tmp_q := solveforP(r2Prime)
+
+			if tmp_p.Cmp(big.NewInt(0)) == 0  || tmp_q.Cmp(big.NewInt(0)) == 0 {
+				fmt.Printf("[-] One or more of the primes could not be resolved.\n")
+				return
+			}
+
+			fmt.Printf("[+] Found the factors:\n")
+			pubKey.Primes = []*big.Int{tmp_p, tmp_q}
+			pubKey.D      = solveforD(tmp_p, tmp_q, pubKey.E)
+
 			return
 		}
 

@@ -125,7 +125,6 @@ func main() {
 					return
 				}
 				
-
 				pub := rsa.PublicKey{N: n, E: e}
 				pubStr,_ := utils.EncodePublicKey(&pub)
 				fmt.Print(pubStr)		
