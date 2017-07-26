@@ -16,14 +16,6 @@ package attacks
  	"github.com/sourcekris/goRsaTool/utils"
  )
 
-// given e, p and q solve for the private exponent d
-func solveforD(p *big.Int, q *big.Int, e int) *big.Int {
-	pm1 := big.NewInt(0).Sub(p, big.NewInt(1))
-	qm1 := big.NewInt(0).Sub(q, big.NewInt(1))
-	phi := big.NewInt(0).Mul(pm1, qm1)
-	return big.NewInt(0).ModInverse(big.NewInt(int64(e)), phi)
-}
-
 // extract components of an equation we get back from factordb and solve it
 func solveforP(equation string) (*big.Int) {
 	// sometimes the input is not an equation
@@ -102,7 +94,7 @@ func Factordb(pubKey *rsa.PrivateKey) {
 
 			fmt.Printf("[+] Found the factors:\n")
 			pubKey.Primes = []*big.Int{tmp_p, tmp_q}
-			pubKey.D      = solveforD(tmp_p, tmp_q, pubKey.E)
+			pubKey.D      = utils.SolveforD(tmp_p, tmp_q, pubKey.E)
 
 			return
 		}
@@ -120,7 +112,7 @@ func Factordb(pubKey *rsa.PrivateKey) {
 		} else {
 			fmt.Printf("[+] Found the factors:\n")
 			pubKey.Primes = []*big.Int{key_p, key_q}
-			pubKey.D      = solveforD(key_p, key_q, pubKey.E)
+			pubKey.D      = utils.SolveforD(key_p, key_q, pubKey.E)
 		}
 	} else {
 		fmt.Printf("[-] Unexpected HTTP code (%d) so we failed to lookup modulus.\n", resp.StatusCode)
