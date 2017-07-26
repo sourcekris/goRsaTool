@@ -106,7 +106,7 @@ func main() {
 		} 
 		fmt.Printf("[*] Begin attacks\n")
 		// attacks begin here?
-		//attacks.Factordb(key)
+		attacks.Factordb(key)
 		attacks.Smallq(key)
 
 		if key.D != nil {
