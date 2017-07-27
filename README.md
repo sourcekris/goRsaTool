@@ -8,10 +8,11 @@ Attacks supported in this go version:
 
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
+* novelty primes attack
 
 ## Installation
 Get dependencies:
-`go get github.com/kavehmz/prime"` 
+`go get github.com/kavehmz/prime` 
 
 ## Usage:
 

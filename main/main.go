@@ -108,6 +108,7 @@ func main() {
 		// attacks begin here?
 		attacks.Factordb(key)
 		attacks.Smallq(key)
+		attacks.Noveltyprimes(key)
 
 		if key.D != nil {
 			privStr := utils.EncodePrivateKey(key)
