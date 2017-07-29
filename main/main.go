@@ -111,6 +111,7 @@ func main() {
 		attacks.SmallQ(key)
 		attacks.NoveltyPrimes(key)
 		attacks.PastCTFPrimes(key, *pastPrimesFile)
+		attacks.FermatFactorization(key)
 
 		if key.D != nil {
 			privStr := utils.EncodePrivateKey(key)
