@@ -10,7 +10,7 @@ import (
 
 const maxnoveltylen = 25
 
-func Noveltyprimes(pubKey *rsa.PrivateKey) {
+func NoveltyPrimes(pubKey *rsa.PrivateKey) {
 	modp := new(big.Int)
 	bigZero := big.NewInt(0)
 

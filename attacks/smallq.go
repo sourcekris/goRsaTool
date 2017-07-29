@@ -14,7 +14,7 @@ const maxprimeint = 100000
 /* 
  * iterate small primes < maxprimeint and test them as factors of N at a memory cost
  */
-func Smallq(pubKey *rsa.PrivateKey) {
+func SmallQ(pubKey *rsa.PrivateKey) {
 	primes  := prime.Primes(maxprimeint)
 	modp    := new(big.Int)
 	bigZero := big.NewInt(0)
@@ -28,6 +28,8 @@ func Smallq(pubKey *rsa.PrivateKey) {
 			key_q  = key_q.Div(pubKey.N, key_p)
 			pubKey.Primes = []*big.Int{key_p, key_q}
 			pubKey.D      = utils.SolveforD(key_p, key_q, pubKey.E)
+
+			return
 		}
 	}
 }

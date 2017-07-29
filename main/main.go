@@ -80,12 +80,13 @@ func dumpKey(key *rsa.PrivateKey) {
 
 func main() {
 	// Parse command line arguments
-	keyFile       := flag.String("key", "", "The filename of the RSA key to attack or dump")
-	verboseMode   := flag.Bool("verbose", false, "Enable verbose output.")
-	dumpKeyMode   := flag.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
-	createKeyMode := flag.Bool("createkey", false, "Create a public key given an E and N.")
-	exponentArg   := flag.String("e","", "The exponent value - for use with createkey flag.")
-	modulusArg    := flag.String("n","", "The modulus value - for use with createkey flag.")
+	keyFile        := flag.String("key", "", "The filename of the RSA key to attack or dump")
+	pastPrimesFile := flag.String("pastprimes", "../pastctfprimes.txt", "The filename of a file containing past CTF prime numbers.")
+	verboseMode    := flag.Bool("verbose", false, "Enable verbose output.")
+	dumpKeyMode    := flag.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
+	createKeyMode  := flag.Bool("createkey", false, "Create a public key given an E and N.")
+	exponentArg    := flag.String("e","", "The exponent value - for use with createkey flag.")
+	modulusArg     := flag.String("n","", "The modulus value - for use with createkey flag.")
 	flag.Parse()
 
 	// Print verbose information
@@ -106,9 +107,10 @@ func main() {
 		} 
 		fmt.Printf("[*] Begin attacks\n")
 		// attacks begin here?
-		attacks.Factordb(key)
-		attacks.Smallq(key)
-		attacks.Noveltyprimes(key)
+		attacks.FactorDB(key)
+		attacks.SmallQ(key)
+		attacks.NoveltyPrimes(key)
+		attacks.PastCTFPrimes(key, *pastPrimesFile)
 
 		if key.D != nil {
 			privStr := utils.EncodePrivateKey(key)
@@ -139,6 +141,4 @@ func main() {
 		fmt.Printf("[-] No key file specified. Nothing to do.\n")
 		return
 	}
-
-
 }

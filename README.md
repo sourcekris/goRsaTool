@@ -9,6 +9,7 @@ Attacks supported in this go version:
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
 * novelty primes attack
+* past CTF primes attack
 
 ## Installation
 Get dependencies:
@@ -21,3 +22,6 @@ Get dependencies:
 
 ### Dump the parameters from a key:
 `./gorsatool -dumpkey -key ./key.pub`
+
+### Attack a public key
+`./gorsatool -key ./key.pub`

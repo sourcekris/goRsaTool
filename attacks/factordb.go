@@ -44,7 +44,7 @@ func solveforP(equation string) (*big.Int) {
 }
 
 // XXX: this should return errors not print them
-func Factordb(pubKey *rsa.PrivateKey) {
+func FactorDB(pubKey *rsa.PrivateKey) {
 	url2 := "http://www.factordb.com/"
 	url1 := url2 + "index.php?query="
 	
