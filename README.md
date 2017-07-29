@@ -10,6 +10,7 @@ Attacks supported in this go version:
 * small q attack
 * novelty primes attack
 * past CTF primes attack
+* fermat factorization for close p & q
 
 ## Installation
 Get dependencies:
