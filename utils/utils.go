@@ -7,10 +7,10 @@ import (
 
 // given e, p and q solve for the private exponent d
 func SolveforD(p *big.Int, q *big.Int, e int) *big.Int {
-	pm1 := big.NewInt(0).Sub(p, big.NewInt(1))
-	qm1 := big.NewInt(0).Sub(q, big.NewInt(1))
-	phi := big.NewInt(0).Mul(pm1, qm1)
-	return big.NewInt(0).ModInverse(big.NewInt(int64(e)), phi)
+	pm1 := new(big.Int).Sub(p, big.NewInt(1))
+	qm1 := new(big.Int).Sub(q, big.NewInt(1))
+	phi := new(big.Int).Mul(pm1, qm1)
+	return new(big.Int).ModInverse(big.NewInt(int64(e)), phi)
 }
 
 func IsInt(s string) bool {

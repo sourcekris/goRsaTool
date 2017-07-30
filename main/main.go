@@ -104,9 +104,14 @@ func main() {
 		if *dumpKeyMode != false {
 			dumpKey(key)
 			return
-		} 
-		fmt.Printf("[*] Begin attacks\n")
-		// attacks begin here?
+		}
+
+		if *verboseMode != false {
+			fmt.Printf("[*] Begin attacks\n")
+		}
+
+		// attacks begin here
+		// XXX: need an idomatic way to check if each function wins before moving to the next
 		attacks.FactorDB(key)
 		attacks.SmallQ(key)
 		attacks.NoveltyPrimes(key)

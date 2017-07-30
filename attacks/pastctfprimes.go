@@ -26,8 +26,7 @@ func PastCTFPrimes(pubKey *rsa.PrivateKey, pastctffile string) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, "#") && len(strings.Trim(line, "\n\r")) != 0 {
-			tmp_p := new(big.Int)
-			tmp_p.SetString(line, 10)
+			tmp_p, _ := new(big.Int).SetString(line, 10)
 			primes = append(primes, *tmp_p)
 		}
 	}
@@ -39,8 +38,7 @@ func PastCTFPrimes(pubKey *rsa.PrivateKey, pastctffile string) {
 		modp = modp.Mod(pubKey.N, &p)
 		if modp.Cmp(bigZero) == 0 {
 			key_p := &p
-			key_q := new(big.Int)
-			key_q  = key_q.Div(pubKey.N, key_p)
+			key_q := new(big.Int).Div(pubKey.N, key_p)
 			pubKey.Primes = []*big.Int{key_p, key_q}
 			pubKey.D      = utils.SolveforD(key_p, key_q, pubKey.E)
 			

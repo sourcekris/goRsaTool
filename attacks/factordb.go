@@ -20,8 +20,7 @@ package attacks
 func solveforP(equation string) (*big.Int) {
 	// sometimes the input is not an equation
 	if utils.IsInt(equation) {
-		m := new(big.Int)
-		m.SetString(equation, 10)
+		m, _ := new(big.Int).SetString(equation, 10)
 		return m
 	}
 
@@ -30,14 +29,13 @@ func solveforP(equation string) (*big.Int) {
 		baseExp := strings.Split(equation, "^")
 		subMe   := strings.Split(baseExp[1], "-")[1]
 
-		var e, f, g big.Int 
-		e.SetString(string(baseExp[0]), 10)
-		f.SetString(string(baseExp[1]), 10)
-		g.SetString(string(subMe), 10)
-		e.Exp(&e,&f,nil)
-		e.Sub(&e,&g)
+		e, _ := new(big.Int).SetString(string(baseExp[0]), 10)
+		f, _ := new(big.Int).SetString(string(baseExp[1]), 10)
+		g, _ := new(big.Int).SetString(string(subMe), 10)
+		e.Exp(e,f,nil)
+		e.Sub(e,g)
 		
-		return &e
+		return e
 	 } 
 	
 	return big.NewInt(0)
@@ -54,7 +52,6 @@ func FactorDB(pubKey *rsa.PrivateKey) {
 
 	resp, err := httpClient.Get(url1 + pubKey.N.String())
 	if err != nil {
-		// return nil, errors.New("Failed to contact url."
 		fmt.Printf("[-] FactorDB was unreachable?\n")
 		return
 	}
@@ -100,10 +97,8 @@ func FactorDB(pubKey *rsa.PrivateKey) {
 		}
 
 		// convert them to big Ints
-		key_p := new(big.Int)
-		key_p.SetString(r1Prime, 10)
-		key_q := new(big.Int)
-		key_q.SetString(r2Prime, 10)
+		key_p, _ := new(big.Int).SetString(r1Prime, 10)
+		key_q, _ := new(big.Int).SetString(r2Prime, 10)
 
 		// if p == q then the whole thing failed rather gracefully
 		if key_p.Cmp(key_q) == 0 {
@@ -118,6 +113,4 @@ func FactorDB(pubKey *rsa.PrivateKey) {
 		fmt.Printf("[-] Unexpected HTTP code (%d) so we failed to lookup modulus.\n", resp.StatusCode)
 		return
 	}
-
-
 }
