@@ -4,14 +4,13 @@ import (
   "fmt"
   "math/big"
   "strings"
-  "crypto/rsa"
   "github.com/sourcekris/goRsaTool/utils"
   )
 
 const maxnoveltylen = 25
 
-func NoveltyPrimes(pubKey *rsa.PrivateKey) {
-  if pubKey.D != nil {
+func NoveltyPrimes(targetRSA *utils.RSAStuff) {
+  if targetRSA.Key.D != nil {
     return
   }
   
@@ -21,13 +20,14 @@ func NoveltyPrimes(pubKey *rsa.PrivateKey) {
   for i := 0; i < (maxnoveltylen-4); i++ {
     prime := "3133" + strings.Repeat("3", i) + "7"
     p, _  := new(big.Int).SetString(prime,10)
-    modp   = modp.Mod(pubKey.N, p)
+    modp   = modp.Mod(targetRSA.Key.N, p)
 
     if modp.Cmp(bigZero) == 0 {
       fmt.Printf("[+] Novelty Factor found: %d\n", p)
-      key_q := new(big.Int).Div(pubKey.N, p)
-      pubKey.Primes = []*big.Int{p, key_q}
-      pubKey.D      = utils.SolveforD(p, key_q, pubKey.E)
+      key_q := new(big.Int).Div(targetRSA.Key.N, p)
+      targetRSA.Key.Primes = []*big.Int{p, key_q}
+      targetRSA.Key.D      = utils.SolveforD(p, key_q, targetRSA.Key.E)
+
 
       return
     }

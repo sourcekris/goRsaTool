@@ -5,7 +5,6 @@
 package attacks
 
  import (
-  "crypto/rsa"
   "fmt"
   "io/ioutil"
   "math/big"
@@ -42,8 +41,8 @@ func solveforP(equation string) (*big.Int) {
 }
 
 // XXX: this should return errors not print them
-func FactorDB(pubKey *rsa.PrivateKey) {
-  if pubKey.D != nil {
+func FactorDB(targetRSA *utils.RSAStuff) {
+  if targetRSA.Key.D != nil {
     return
   }
 
@@ -54,7 +53,7 @@ func FactorDB(pubKey *rsa.PrivateKey) {
     Timeout: 15 * time.Second,
   }
 
-  resp, err := httpClient.Get(url1 + pubKey.N.String())
+  resp, err := httpClient.Get(url1 + targetRSA.Key.N.String())
   if err != nil {
     fmt.Printf("[-] FactorDB was unreachable?\n")
     return
@@ -94,8 +93,8 @@ func FactorDB(pubKey *rsa.PrivateKey) {
       }
 
       fmt.Printf("[+] Found the factors:\n")
-      pubKey.Primes = []*big.Int{tmp_p, tmp_q}
-      pubKey.D      = utils.SolveforD(tmp_p, tmp_q, pubKey.E)
+      targetRSA.Key.Primes = []*big.Int{tmp_p, tmp_q}
+      targetRSA.Key.D      = utils.SolveforD(tmp_p, tmp_q, targetRSA.Key.E)
 
       return
     }
@@ -110,8 +109,8 @@ func FactorDB(pubKey *rsa.PrivateKey) {
       return
     } else {
       fmt.Printf("[+] Found the factors:\n")
-      pubKey.Primes = []*big.Int{key_p, key_q}
-      pubKey.D      = utils.SolveforD(key_p, key_q, pubKey.E)
+      targetRSA.Key.Primes = []*big.Int{key_p, key_q}
+      targetRSA.Key.D      = utils.SolveforD(key_p, key_q, targetRSA.Key.E)
     }
   } else {
     fmt.Printf("[-] Unexpected HTTP code (%d) so we failed to lookup modulus.\n", resp.StatusCode)

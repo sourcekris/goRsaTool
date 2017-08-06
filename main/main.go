@@ -93,9 +93,6 @@ func main() {
   // Print verbose information
   if *verboseMode != false {
     fmt.Printf("[*] goRsaTool\n")
-    fmt.Printf("[*] RSA Key Filename:\t%s\n", *keyFile)
-    fmt.Printf("[*] Verbose Mode:\t%t\n", *verboseMode)
-    fmt.Printf("[*] Dump Key Mode:\t%t\n", *dumpKeyMode)
   }
 
   // Did we get a public key file to read
@@ -107,20 +104,36 @@ func main() {
       return
     }
 
-    if *verboseMode != false {
-      fmt.Printf("[*] Begin attacks\n")
+    // pack the RSAStuff struct
+    targetRSA := &utils.RSAStuff{
+      Key: *key,
+    }
+
+    if len(*cipherText) > 0 {
+      cipherData, err := utils.ReadCipherText(*cipherText)
+
+      if err != nil {
+        fmt.Printf("[-] Failed reading ciphertext file.")
+        return
+      }
+
+      targetRSA.CipherText = cipherData
+    }
+
+    if len(*pastPrimesFile) > 0 {
+      targetRSA.PastPrimesFile = *pastPrimesFile
     }
 
     // attacks begin here
-    attacks.FactorDB(key)
-    attacks.SmallQ(key)
-    attacks.NoveltyPrimes(key)
-    attacks.PastCTFPrimes(key, *pastPrimesFile)
-    attacks.FermatFactorization(key)
-    attacks.Hastads(key, *cipherText)
+    attacks.FactorDB(targetRSA)
+    attacks.SmallQ(targetRSA)
+    attacks.NoveltyPrimes(targetRSA)
+    attacks.PastCTFPrimes(targetRSA)
+    attacks.FermatFactorization(targetRSA)
+    attacks.Hastads(targetRSA)
 
-    if key.D != nil {
-      privStr := utils.EncodePrivateKey(key)
+    if targetRSA.Key.D != nil {
+      privStr := utils.EncodePrivateKey(&targetRSA.Key)
       fmt.Print(privStr)
       return
     }

@@ -6,20 +6,19 @@ import (
   "math/big"
   "os"
   "strings"
-  "crypto/rsa"
   "github.com/sourcekris/goRsaTool/utils"
   )
 
-func PastCTFPrimes(pubKey *rsa.PrivateKey, pastctffile string) {
-  if pubKey.D != nil {
+func PastCTFPrimes(targetRSA *utils.RSAStuff) {
+  if targetRSA.Key.D != nil {
     return
   }
 
   var primes []big.Int
 
-  file, err := os.Open(pastctffile)
+  file, err := os.Open(targetRSA.PastPrimesFile)
   if err != nil {
-    fmt.Printf("[-] Error opening past CTF primes file: %s\n", pastctffile)
+    fmt.Printf("[-] Error opening past CTF primes file: %s\n", targetRSA.PastPrimesFile)
     return
   }
 
@@ -39,12 +38,12 @@ func PastCTFPrimes(pubKey *rsa.PrivateKey, pastctffile string) {
   bigZero := big.NewInt(0)
 
   for _, p := range primes {
-    modp = modp.Mod(pubKey.N, &p)
+    modp = modp.Mod(targetRSA.Key.N, &p)
     if modp.Cmp(bigZero) == 0 {
       key_p := &p
-      key_q := new(big.Int).Div(pubKey.N, key_p)
-      pubKey.Primes = []*big.Int{key_p, key_q}
-      pubKey.D      = utils.SolveforD(key_p, key_q, pubKey.E)
+      key_q := new(big.Int).Div(targetRSA.Key.N, key_p)
+      targetRSA.Key.Primes = []*big.Int{key_p, key_q}
+      targetRSA.Key.D      = utils.SolveforD(key_p, key_q, targetRSA.Key.E)
       
       fmt.Printf("[+] Past CTF prime factor found: %d\n", key_p)
       return
