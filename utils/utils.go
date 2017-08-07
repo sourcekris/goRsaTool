@@ -1,20 +1,11 @@
 package utils
 
 import (
-  "crypto/rsa"
   "fmt"
   "math/big"
   "io/ioutil"
   "unicode"
 )
-
-// wrap rsa.PrivateKey and add a field for cipher and plaintexts
-type RSAStuff struct {
-  Key rsa.PrivateKey
-  CipherText []byte
-  PlainText []byte
-  PastPrimesFile string
-}
 
 func ReadCipherText(cipherFile string) ([]byte, error) {
   ct, err := ioutil.ReadFile(cipherFile)
