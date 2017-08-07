@@ -3,7 +3,6 @@ package attacks
 import (
   "fmt"
   "math/big"
-  "github.com/sourcekris/goRsaTool/utils"
 )
 
 func (targetRSA *RSAStuff) FermatFactorization() {
@@ -12,7 +11,7 @@ func (targetRSA *RSAStuff) FermatFactorization() {
   }
 
   a  := new(big.Int).Sqrt(targetRSA.Key.N)
-  b  := new(big.Int).Sqrt(targetRSA.Key.N)
+  b  := new(big.Int).Set(a)
   b2 := new(big.Int).Mul(a, a)
   b2.Sub(b2, targetRSA.Key.N)
 
@@ -27,11 +26,6 @@ func (targetRSA *RSAStuff) FermatFactorization() {
     c.Mul(b,b)
   }
 
-  key_p := new(big.Int).Add(a,b)
-  key_q := new(big.Int).Sub(a,b)
-  targetRSA.Key.Primes = []*big.Int{key_p, key_q}
-  targetRSA.Key.D      = utils.SolveforD(key_p, key_q, targetRSA.Key.E)
-
+  targetRSA.PackGivenP(new(big.Int).Add(a,b))
   fmt.Printf("[+] Factors found with fermat\n")
-
 }

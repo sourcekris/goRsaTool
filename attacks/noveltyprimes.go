@@ -4,7 +4,6 @@ import (
   "fmt"
   "math/big"
   "strings"
-  "github.com/sourcekris/goRsaTool/utils"
   )
 
 const maxnoveltylen = 25
@@ -24,11 +23,7 @@ func (targetRSA *RSAStuff) NoveltyPrimes() {
 
     if modp.Cmp(bigZero) == 0 {
       fmt.Printf("[+] Novelty Factor found: %d\n", p)
-      key_q := new(big.Int).Div(targetRSA.Key.N, p)
-      targetRSA.Key.Primes = []*big.Int{p, key_q}
-      targetRSA.Key.D      = utils.SolveforD(p, key_q, targetRSA.Key.E)
-
-
+      targetRSA.PackGivenP(p)
       return
     }
   }

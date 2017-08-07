@@ -6,7 +6,6 @@ import (
   "math/big"
   "os"
   "strings"
-  "github.com/sourcekris/goRsaTool/utils"
   )
 
 func (targetRSA *RSAStuff) PastCTFPrimes() {
@@ -40,12 +39,9 @@ func (targetRSA *RSAStuff) PastCTFPrimes() {
   for _, p := range primes {
     modp = modp.Mod(targetRSA.Key.N, &p)
     if modp.Cmp(bigZero) == 0 {
-      key_p := &p
-      key_q := new(big.Int).Div(targetRSA.Key.N, key_p)
-      targetRSA.Key.Primes = []*big.Int{key_p, key_q}
-      targetRSA.Key.D      = utils.SolveforD(key_p, key_q, targetRSA.Key.E)
+      targetRSA.PackGivenP(&p)
       
-      fmt.Printf("[+] Past CTF prime factor found: %d\n", key_p)
+      fmt.Printf("[+] Past CTF prime factor found: %d\n", &p)
       return
     }
   }

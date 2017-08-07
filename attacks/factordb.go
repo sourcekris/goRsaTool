@@ -92,9 +92,8 @@ func (targetRSA *RSAStuff) FactorDB() {
         return
       }
 
-      fmt.Printf("[+] Found the factors:\n")
-      targetRSA.Key.Primes = []*big.Int{tmp_p, tmp_q}
-      targetRSA.Key.D      = utils.SolveforD(tmp_p, tmp_q, targetRSA.Key.E)
+      targetRSA.PackGivenP(tmp_p)
+      fmt.Printf("[+] Found the factors.\n")
 
       return
     }
@@ -108,9 +107,8 @@ func (targetRSA *RSAStuff) FactorDB() {
       fmt.Printf("[-] FactorDB didn't know the factors.\n")
       return
     } else {
-      fmt.Printf("[+] Found the factors:\n")
-      targetRSA.Key.Primes = []*big.Int{key_p, key_q}
-      targetRSA.Key.D      = utils.SolveforD(key_p, key_q, targetRSA.Key.E)
+      targetRSA.PackGivenP(key_p)
+      fmt.Printf("[+] Found the factors.\n")
     }
   } else {
     fmt.Printf("[-] Unexpected HTTP code (%d) so we failed to lookup modulus.\n", resp.StatusCode)
