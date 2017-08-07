@@ -3,7 +3,7 @@ package attacks
 import (
   "fmt"
   "math/big"
-  "github.com/sourcekris/goRsaTool/utils"
+  //"github.com/sourcekris/goRsaTool/utils"
   "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -24,7 +24,7 @@ func NthRoot(k int64, n *big.Int) *big.Int {
   return s
 }
 
-func Hastads(targetRSA *utils.RSAStuff) {
+func Hastads(targetRSA *RSAStuff) {
   if targetRSA.Key.D != nil || targetRSA.Key.E > 11  || len(targetRSA.CipherText) == 0 {
     return
   }

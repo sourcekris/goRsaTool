@@ -9,7 +9,7 @@ import (
   "github.com/sourcekris/goRsaTool/utils"
   )
 
-func PastCTFPrimes(targetRSA *utils.RSAStuff) {
+func PastCTFPrimes(targetRSA *RSAStuff) {
   if targetRSA.Key.D != nil {
     return
   }
