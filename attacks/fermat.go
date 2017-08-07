@@ -6,7 +6,7 @@ import (
   "github.com/sourcekris/goRsaTool/utils"
 )
 
-func FermatFactorization(targetRSA *utils.RSAStuff) {
+func (targetRSA *RSAStuff) FermatFactorization() {
   if targetRSA.Key.D != nil {
     return
   }
