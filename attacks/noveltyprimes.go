@@ -17,13 +17,12 @@ func (targetRSA *RSAStuff) NoveltyPrimes() {
   bigZero := big.NewInt(0)
 
   for i := 0; i < (maxnoveltylen-4); i++ {
-    prime := "3133" + strings.Repeat("3", i) + "7"
-    p, _  := new(big.Int).SetString(prime,10)
-    modp   = modp.Mod(targetRSA.Key.N, p)
+    p, _  := new(big.Int).SetString("3133" + strings.Repeat("3", i) + "7",10)
+    modp.Mod(targetRSA.Key.N, p)
 
     if modp.Cmp(bigZero) == 0 {
-      fmt.Printf("[+] Novelty Factor found: %d\n", p)
       targetRSA.PackGivenP(p)
+      fmt.Printf("[+] Novelty Factor found.\n")
       return
     }
   }
