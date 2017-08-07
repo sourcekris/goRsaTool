@@ -13,7 +13,7 @@ const maxprimeint = 100000
 /* 
  * iterate small primes < maxprimeint and test them as factors of N at a memory cost
  */
-func SmallQ(targetRSA *RSAStuff) {
+func (targetRSA *RSAStuff) SmallQ() {
   if targetRSA.Key.D != nil {
     return
   }

@@ -9,7 +9,7 @@ import (
 
 const maxnoveltylen = 25
 
-func NoveltyPrimes(targetRSA *RSAStuff) {
+func (targetRSA *RSAStuff) NoveltyPrimes() {
   if targetRSA.Key.D != nil {
     return
   }

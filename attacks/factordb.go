@@ -41,7 +41,7 @@ func solveforP(equation string) (*big.Int) {
 }
 
 // XXX: this should return errors not print them
-func FactorDB(targetRSA *RSAStuff) {
+func (targetRSA *RSAStuff) FactorDB() {
   if targetRSA.Key.D != nil {
     return
   }

@@ -24,7 +24,7 @@ func NthRoot(k int64, n *big.Int) *big.Int {
   return s
 }
 
-func Hastads(targetRSA *RSAStuff) {
+func (targetRSA *RSAStuff) Hastads() {
   if targetRSA.Key.D != nil || targetRSA.Key.E > 11  || len(targetRSA.CipherText) == 0 {
     return
   }

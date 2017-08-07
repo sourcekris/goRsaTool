@@ -118,12 +118,12 @@ func main() {
     targetRSA, _ := attacks.NewRSAStuff(key, c, nil, *pastPrimesFile)
 
     // attacks begin here
-    //attacks.FactorDB(targetRSA)
-    //targetRSA.SmallQ()
-    //attacks.NoveltyPrimes(targetRSA)
-    //attacks.PastCTFPrimes(targetRSA)
+    targetRSA.SmallQ()
+    targetRSA.NoveltyPrimes()
+    targetRSA.PastCTFPrimes()
     targetRSA.FermatFactorization()
-    //attacks.Hastads(targetRSA)
+    targetRSA.Hastads()
+    targetRSA.FactorDB()
 
     if targetRSA.Key.D != nil {
       privStr := utils.EncodePrivateKey(&targetRSA.Key)
