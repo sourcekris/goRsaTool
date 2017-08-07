@@ -104,33 +104,26 @@ func main() {
       return
     }
 
-    // pack the RSAStuff struct
-    targetRSA := &utils.RSAStuff{
-      Key: *key,
-    }
-
+    var c []byte
+    var err error
     if len(*cipherText) > 0 {
-      cipherData, err := utils.ReadCipherText(*cipherText)
+      c, err = utils.ReadCipherText(*cipherText)
 
       if err != nil {
         fmt.Printf("[-] Failed reading ciphertext file.")
         return
       }
-
-      targetRSA.CipherText = cipherData
     }
 
-    if len(*pastPrimesFile) > 0 {
-      targetRSA.PastPrimesFile = *pastPrimesFile
-    }
+    targetRSA, _ := attacks.NewRSAStuff(key, c, nil, *pastPrimesFile)
 
     // attacks begin here
-    attacks.FactorDB(targetRSA)
-    attacks.SmallQ(targetRSA)
-    attacks.NoveltyPrimes(targetRSA)
-    attacks.PastCTFPrimes(targetRSA)
-    attacks.FermatFactorization(targetRSA)
-    attacks.Hastads(targetRSA)
+    //attacks.FactorDB(targetRSA)
+    //targetRSA.SmallQ()
+    //attacks.NoveltyPrimes(targetRSA)
+    //attacks.PastCTFPrimes(targetRSA)
+    targetRSA.FermatFactorization()
+    //attacks.Hastads(targetRSA)
 
     if targetRSA.Key.D != nil {
       privStr := utils.EncodePrivateKey(&targetRSA.Key)
