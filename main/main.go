@@ -51,12 +51,12 @@ func main() {
     }
 
     // attacks begin here
-    targetRSA.SmallQ()
-    targetRSA.NoveltyPrimes()
-    targetRSA.PastCTFPrimes()
-    targetRSA.FermatFactorization()
+    //targetRSA.SmallQ()
+    //targetRSA.NoveltyPrimes()
+    //targetRSA.PastCTFPrimes()
+    //targetRSA.FermatFactorization()
     targetRSA.Hastads()
-    targetRSA.FactorDB()
+    //targetRSA.FactorDB()
 
     // were we able to solve for the private key?
     if targetRSA.Key.D != nil {
