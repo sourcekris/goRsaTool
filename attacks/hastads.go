@@ -3,7 +3,6 @@ package attacks
 import (
   "fmt"
   "math/big"
-  //"github.com/sourcekris/goRsaTool/utils"
   "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -15,17 +14,20 @@ func NthRoot(k int64, n *big.Int) *big.Int {
   k1   := new(big.Int).Sub(bigK, big.NewInt(1))
   s    := new(big.Int).Add(n, big.NewInt(1))
   
+  //fmt.Printf("k = %d\n, n = %d\n", k, n)
   for u.Cmp(s) < 0 {
     s.Set(u)
     a.Mul(u, k1)
     u.Exp(u, k1, nil).Div(n, u).Add(a,u).Div(u, bigK)
   }
 
+  ///fmt.Printf("root = %d\n", s)
   return s
 }
 
 func (targetRSA *RSAStuff) Hastads() {
   if targetRSA.Key.D != nil || targetRSA.Key.E > 11  || len(targetRSA.CipherText) == 0 {
+    fmt.Printf("e = %d, len(c) = %d, d = %d\n", targetRSA.Key.E, len(targetRSA.CipherText),targetRSA.Key.D)
     return
   }
 
@@ -40,7 +42,7 @@ func (targetRSA *RSAStuff) Hastads() {
     m.Set(NthRoot(int64(targetRSA.Key.E), c))
     pow.Exp(m, bigE, targetRSA.Key.N)
 
-    fmt.Printf("pow = %d\n",pow)
+    //fmt.Printf("pow = %d\n",pow)
     if pow.Cmp(c) == 0 {
       targetRSA.PlainText = libnum.NumberToBytes(m)
       return

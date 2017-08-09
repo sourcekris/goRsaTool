@@ -2,81 +2,15 @@ package main
 
 import ( 
   "crypto/rsa"
-  "crypto/x509"
-  "encoding/pem"
-  "errors"
   "flag"
   "fmt"
-  "io/ioutil"
   "math/big"
   "strconv"
   "github.com/sourcekris/goRsaTool/attacks"
   "github.com/sourcekris/goRsaTool/utils"
 )
 
-// https://golang.org/pkg/crypto/x509/#ParsePKIXPublicKey
-func ParsePublicRsaKey(keyBytes []byte) (*rsa.PublicKey, error) {
-  key, err := x509.ParsePKIXPublicKey(keyBytes)//.Bytes)
-  if err != nil {
-    return nil, errors.New("Failed to parse the DER key after decoding.")
-  }
-  
-  switch key := key.(type) {
-  case *rsa.PublicKey:
-    return key, nil
-  default:
-    return nil, errors.New("Given key is not an RSA Key")
-  }
-}
 
-func ParsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
-  key, err := x509.ParsePKCS1PrivateKey(keyBytes)
-  if err != nil {
-    return nil, errors.New("Failed to parse the DER key after decoding.")
-  }
-  return key, nil
-}
-
-// import a PEM key file and return a rsa.PrivateKey object
-func importKey(keyFile string) (*rsa.PrivateKey, error) {
-  // read the key from the disk
-  keyStr, err := ioutil.ReadFile(keyFile)
-  if err != nil {
-    fmt.Printf("[-] Failed to open/read file %s\n", keyFile)
-    return nil, err
-  }
-
-  // decode the PEM data to extract the DER format key
-  block, _ := pem.Decode([]byte(keyStr))
-  if block == nil {
-    return nil, errors.New("Failed to decode PEM key.")
-  }
-  
-  key, err := ParsePublicRsaKey(block.Bytes)
-  if err == nil {
-    priv := rsa.PrivateKey{PublicKey: *key}
-    return &priv, err
-  } 
-
-  priv, err := ParsePrivateRsaKey(block.Bytes)
-  if err != nil {
-    return nil, errors.New("Failed to parse the key as either a public or private key.")
-  }
-  return priv, err
-
-}
-
-func dumpKey(key *rsa.PrivateKey) {
-  fmt.Printf("[*] n = %d\n", key.N)
-  fmt.Printf("[*] e = %d\n", key.E)
-
-  // XXX: Support RSA multiprime [where len(key.Primes) > 2]
-  if key.D != nil {
-    fmt.Printf("[*] d = %d\n", key.D)
-    fmt.Printf("[*] p = %d\n", key.Primes[0])
-    fmt.Printf("[*] q = %d\n", key.Primes[1])
-  }
-}
 
 func main() {
   // Parse command line arguments
@@ -92,30 +26,29 @@ func main() {
 
   // Print verbose information
   if *verboseMode != false {
-    fmt.Printf("[*] goRsaTool\n")
+    fmt.Println("[*] goRsaTool")
   }
 
   // Did we get a public key file to read
   if len(*keyFile) > 0 {
-    key, _ := importKey(*keyFile)
+    key, _ := utils.ImportKey(*keyFile)
     
-    if *dumpKeyMode != false {
-      dumpKey(key)
-      return
-    }
-
     var c []byte
     var err error
     if len(*cipherText) > 0 {
       c, err = utils.ReadCipherText(*cipherText)
-
       if err != nil {
-        fmt.Printf("[-] Failed reading ciphertext file.")
+        fmt.Println("[-] Failed reading ciphertext file.")
         return
       }
     }
 
     targetRSA, _ := attacks.NewRSAStuff(key, c, nil, *pastPrimesFile)
+
+    if *dumpKeyMode != false {
+      targetRSA.DumpKey()
+      return
+    }
 
     // attacks begin here
     targetRSA.SmallQ()
@@ -125,33 +58,39 @@ func main() {
     targetRSA.Hastads()
     targetRSA.FactorDB()
 
+    // were we able to solve for the private key?
     if targetRSA.Key.D != nil {
       privStr := utils.EncodePrivateKey(&targetRSA.Key)
       fmt.Print(privStr)
       return
     }
 
+    if len(targetRSA.PlainText) > 0 {
+      fmt.Println("[+] Recovered plaintext:")
+      fmt.Print(targetRSA.PlainText)
+    }
+
   } else {
     if *createKeyMode != false {
       if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
-        n := new(big.Int)
-        n.SetString(*modulusArg, 10)
+        n, _ := new(big.Int).SetString(*modulusArg, 10)
+
         e, err := strconv.Atoi(*exponentArg)
         if err != nil {
-          fmt.Printf("[-] Failed converting exponent to integer.")
+          fmt.Println("[-] Failed converting exponent to integer.")
           return
         }
         
         pub := rsa.PublicKey{N: n, E: e}
         pubStr,_ := utils.EncodePublicKey(&pub)
-        fmt.Print(pubStr)   
+        fmt.Println(pubStr)   
         return
       } else {
-        fmt.Printf("[-] No exponent or modulus specified. Nothing to do.\n")
+        fmt.Println("[-] No exponent or modulus specified.")
         return    
       }
     }
-    fmt.Printf("[-] No key file specified. Nothing to do.\n")
+    fmt.Println("[-] No key file specified. Nothing to do.")
     return
   }
 }
