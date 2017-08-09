@@ -1,14 +1,12 @@
 package attacks
 
 import (
-  "fmt"
   "math/big"
   "github.com/sourcekris/goRsaTool/libnum"
 )
 
 func (targetRSA *RSAStuff) Hastads() {
   if targetRSA.Key.D != nil || targetRSA.Key.E > 11  || len(targetRSA.CipherText) == 0 {
-    fmt.Printf("e = %d, len(c) = %d, d = %d\n", targetRSA.Key.E, len(targetRSA.CipherText),targetRSA.Key.D)
     return
   }
 
@@ -22,7 +20,8 @@ func (targetRSA *RSAStuff) Hastads() {
     m.Set(libnum.NthRoot(int64(targetRSA.Key.E), c))
     pow.Exp(m, bigE, targetRSA.Key.N)
 
-    fmt.Printf("pow = %d\n",pow)
+    //fmt.Printf("root = %d\n", m)
+    //fmt.Printf("pow = %d\n",pow)
     if pow.Cmp(c) == 0 {
       targetRSA.PlainText = libnum.NumberToBytes(m)
       return

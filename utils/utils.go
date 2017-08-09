@@ -1,6 +1,7 @@
 package utils
 
 import (
+  "bytes"
   "fmt"
   "math/big"
   "io/ioutil"
@@ -14,7 +15,7 @@ func ReadCipherText(cipherFile string) ([]byte, error) {
     return nil, err
   }
 
-  return ct, nil
+  return bytes.TrimRight(ct, "\n\r"), nil
 }
 
 // given e, p and q solve for the private exponent d
