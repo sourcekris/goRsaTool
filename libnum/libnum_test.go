@@ -1,7 +1,9 @@
 package libnum
 
-import "math/big"
-import "testing"
+import (
+  "math/big"
+  "testing"
+)
 
 func TestFindGcd(t *testing.T) {
   a := big.NewInt(121891891892166)

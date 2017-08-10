@@ -16,19 +16,18 @@ func (targetRSA *RSAStuff) Hastads() {
   m := new(big.Int)
   pow := new(big.Int)
 
+  original := new(big.Int).Set(c)
+
   for {
     m.Set(libnum.NthRoot(int64(targetRSA.Key.E), c))
     pow.Exp(m, bigE, targetRSA.Key.N)
 
-    //fmt.Printf("root = %d\n", m)
-    //fmt.Printf("pow = %d\n",pow)
-    if pow.Cmp(c) == 0 {
+    if pow.Cmp(original) == 0 {
       targetRSA.PlainText = libnum.NumberToBytes(m)
       return
     } 
 
     c.Add(c, targetRSA.Key.N)
-
   }
 
   return
