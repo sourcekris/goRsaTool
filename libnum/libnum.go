@@ -1,24 +1,24 @@
 package libnum
 
 import (
-  "math/big"
+  "github.com/ncw/gmp"
 )
 
-func BytesToNumber(src []byte) *big.Int {
-  return new(big.Int).SetBytes(src)
+func BytesToNumber(src []byte) *gmp.Int {
+  return new(gmp.Int).SetBytes(src)
 }
 
-func NumberToBytes(src *big.Int) []byte {
+func NumberToBytes(src *gmp.Int) []byte {
   return src.Bytes()
 }
 
-func NthRoot(k int64, n *big.Int) *big.Int {
-  a    := new(big.Int)
-  bigK := big.NewInt(k)
-  u    := new(big.Int).Set(n)
+func NthRoot(k int64, n *gmp.Int) *gmp.Int {
+  a    := new(gmp.Int)
+  bigK := gmp.NewInt(k)
+  u    := new(gmp.Int).Set(n)
 
-  k1   := new(big.Int).Sub(bigK, big.NewInt(1))
-  s    := new(big.Int).Add(n, big.NewInt(1))
+  k1   := new(gmp.Int).Sub(bigK, gmp.NewInt(1))
+  s    := new(gmp.Int).Add(n, gmp.NewInt(1))
 
   for u.Cmp(s) < 0 {
     s.Set(u)

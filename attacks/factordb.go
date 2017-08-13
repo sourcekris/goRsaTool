@@ -7,7 +7,7 @@ package attacks
  import (
   "fmt"
   "io/ioutil"
-  "math/big"
+  "github.com/ncw/gmp"
   "net/http"
   "strings"
   "regexp"
@@ -16,10 +16,10 @@ package attacks
  )
 
 // extract components of an equation we get back from factordb and solve it
-func solveforP(equation string) (*big.Int) {
+func solveforP(equation string) (*gmp.Int) {
   // sometimes the input is not an equation
   if utils.IsInt(equation) {
-    m, _ := new(big.Int).SetString(equation, 10)
+    m, _ := new(gmp.Int).SetString(equation, 10)
     return m
   }
 
@@ -28,16 +28,16 @@ func solveforP(equation string) (*big.Int) {
     baseExp := strings.Split(equation, "^")
     subMe   := strings.Split(baseExp[1], "-")[1]
 
-    e, _ := new(big.Int).SetString(string(baseExp[0]), 10)
-    f, _ := new(big.Int).SetString(string(baseExp[1]), 10)
-    g, _ := new(big.Int).SetString(string(subMe), 10)
+    e, _ := new(gmp.Int).SetString(string(baseExp[0]), 10)
+    f, _ := new(gmp.Int).SetString(string(baseExp[1]), 10)
+    g, _ := new(gmp.Int).SetString(string(subMe), 10)
     e.Exp(e,f,nil)
     e.Sub(e,g)
     
     return e
    } 
   
-  return big.NewInt(0)
+  return gmp.NewInt(0)
 }
 
 // XXX: this should return errors not print them
@@ -87,7 +87,7 @@ func (targetRSA *RSAStuff) FactorDB() {
       tmp_p := solveforP(r1Prime)
       tmp_q := solveforP(r2Prime)
 
-      if tmp_p.Cmp(big.NewInt(0)) == 0  || tmp_q.Cmp(big.NewInt(0)) == 0 {
+      if tmp_p.Cmp(gmp.NewInt(0)) == 0  || tmp_q.Cmp(gmp.NewInt(0)) == 0 {
         fmt.Printf("[-] One or more of the primes could not be resolved.\n")
         return
       }
@@ -98,9 +98,9 @@ func (targetRSA *RSAStuff) FactorDB() {
       return
     }
 
-    // convert them to big Ints
-    key_p, _ := new(big.Int).SetString(r1Prime, 10)
-    key_q, _ := new(big.Int).SetString(r2Prime, 10)
+    // convert them to gmp Ints
+    key_p, _ := new(gmp.Int).SetString(r1Prime, 10)
+    key_q, _ := new(gmp.Int).SetString(r2Prime, 10)
 
     // if p == q then the whole thing failed rather gracefully
     if key_p.Cmp(key_q) == 0 {

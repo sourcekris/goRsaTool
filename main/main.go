@@ -52,15 +52,15 @@ func main() {
 
     // attacks begin here
     targetRSA.SmallQ()
-    targetRSA.NoveltyPrimes()
-    targetRSA.PastCTFPrimes()
-    targetRSA.FermatFactorization()
+    //targetRSA.NoveltyPrimes()
+    //targetRSA.PastCTFPrimes()
+    //targetRSA.FermatFactorization()
     targetRSA.Hastads()
-    targetRSA.FactorDB()
+    //targetRSA.FactorDB()
 
     // were we able to solve for the private key?
     if targetRSA.Key.D != nil {
-      privStr := utils.EncodePrivateKey(&targetRSA.Key)
+      privStr := attacks.EncodeGMPPrivateKey(&targetRSA.Key)
       fmt.Print(privStr)
       return
     }
@@ -81,8 +81,12 @@ func main() {
           return
         }
         
-        pub := rsa.PublicKey{N: n, E: e}
-        pubStr,_ := utils.EncodePublicKey(&pub)
+        pub := rsa.PublicKey{
+          N: n, 
+          E: e,
+        }
+
+        pubStr,_ := attacks.EncodePublicKey(&pub)
         fmt.Println(pubStr)   
         return
       } else {

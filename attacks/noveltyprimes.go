@@ -2,7 +2,7 @@ package attacks
 
 import (
   "fmt"
-  "math/big"
+  "github.com/ncw/gmp"
   "strings"
   )
 
@@ -13,11 +13,11 @@ func (targetRSA *RSAStuff) NoveltyPrimes() {
     return
   }
   
-  modp := new(big.Int)
-  bigZero := big.NewInt(0)
+  modp := new(gmp.Int)
+  bigZero := gmp.NewInt(0)
 
   for i := 0; i < (maxnoveltylen-4); i++ {
-    p, _  := new(big.Int).SetString("3133" + strings.Repeat("3", i) + "7",10)
+    p, _  := new(gmp.Int).SetString("3133" + strings.Repeat("3", i) + "7",10)
     modp.Mod(targetRSA.Key.N, p)
 
     if modp.Cmp(bigZero) == 0 {

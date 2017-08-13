@@ -1,7 +1,8 @@
 package attacks
 
 import (
-  "math/big"
+  "fmt"
+  "github.com/ncw/gmp"
   "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -11,12 +12,14 @@ func (targetRSA *RSAStuff) Hastads() {
   }
 
   c := libnum.BytesToNumber(targetRSA.CipherText)
-  bigE := big.NewInt(int64(targetRSA.Key.E))
+  bigE := gmp.NewInt(int64(targetRSA.Key.E))
 
-  m := new(big.Int)
-  pow := new(big.Int)
+  m := new(gmp.Int)
+  pow := new(gmp.Int)
 
-  original := new(big.Int).Set(c)
+  original := new(gmp.Int).Set(c)
+
+  count := 0
 
   for {
     m.Set(libnum.NthRoot(int64(targetRSA.Key.E), c))
@@ -26,6 +29,13 @@ func (targetRSA *RSAStuff) Hastads() {
       targetRSA.PlainText = libnum.NumberToBytes(m)
       return
     } 
+
+    count++
+
+    if count == 1000 {
+      fmt.Printf("hit 1000\n")
+      return
+    }
 
     c.Add(c, targetRSA.Key.N)
   }

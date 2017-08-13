@@ -2,18 +2,35 @@ package attacks
 
 import (
   "crypto/rsa"
+  "crypto/x509"
+  "encoding/pem"
   "errors"
   "fmt"
   "math/big"
+  "github.com/ncw/gmp"
   "github.com/sourcekris/goRsaTool/libnum"
   "github.com/sourcekris/goRsaTool/utils"
 )
+
+
+type GMPPublicKey struct {
+  N *gmp.Int
+  E int
+}
+
+type GMPPrivateKey struct {
+  PublicKey GMPPublicKey
+  D *gmp.Int
+  Primes []*gmp.Int
+  N *gmp.Int
+  E int
+}
 
 /*
  * wrap rsa.PrivateKey and add a field for cipher and plaintexts
  */
 type RSAStuff struct {
-  Key rsa.PrivateKey
+  Key GMPPrivateKey
   CipherText []byte
   PlainText []byte
   PastPrimesFile string
@@ -37,9 +54,12 @@ func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff,
       cipherText = c
   }
 
+  // copy a rsa.PrivateKey to a GMPPrivateKey that uses gmp.Int types
+  gmpPrivateKey := RSAtoGMPPrivateKey(key)
+
 	// pack the RSAStuff struct
    return &RSAStuff{
-      Key: *key,
+      Key: *gmpPrivateKey,
       PastPrimesFile: pastPrimesFile,
       CipherText: cipherText,
     }, nil
@@ -48,9 +68,9 @@ func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff,
 /*
  * Given one prime p, pack the Key member of the RSAStuff struct with the private key values, p, q & d
  */
-func (targetRSA *RSAStuff) PackGivenP(p *big.Int) {
-  q := new(big.Int).Div(targetRSA.Key.N, p)
-  targetRSA.Key.Primes = []*big.Int{p, q}
+func (targetRSA *RSAStuff) PackGivenP(p *gmp.Int) {
+  q := new(gmp.Int).Div(targetRSA.Key.N, p)
+  targetRSA.Key.Primes = []*gmp.Int{p, q}
   targetRSA.Key.D      = utils.SolveforD(p, q, targetRSA.Key.E)
 }
 
@@ -69,3 +89,74 @@ func (targetRSA *RSAStuff) DumpKey() {
     fmt.Printf("[*] c = %d\n", libnum.BytesToNumber(targetRSA.CipherText))
   }
 }
+
+/*
+ * Takes a rsa.PrivateKey and returns a GMPPrivateKey that uses gmp.Int types
+ */
+func RSAtoGMPPrivateKey(key *rsa.PrivateKey) *GMPPrivateKey {
+  gmpPubKey := &GMPPublicKey{
+    N: new(gmp.Int).SetBytes(key.N.Bytes()),
+    E: key.E,
+  }
+
+  gmpPrivateKey := &GMPPrivateKey{
+    PublicKey: *gmpPubKey,
+    D: new(gmp.Int).SetBytes(key.D.Bytes()),
+    Primes: []*gmp.Int{
+      new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
+      new(gmp.Int).SetBytes(key.Primes[1].Bytes()),
+      },
+  }
+
+  return gmpPrivateKey
+}
+
+func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
+  pubKey := &rsa.PublicKey{
+    N: new(big.Int).SetBytes(key.N.Bytes()),
+    E: key.E,
+  }
+
+  privateKey := &rsa.PrivateKey{
+    PublicKey: *pubKey,
+    D: new(big.Int).SetBytes(key.D.Bytes()),
+    Primes: []*big.Int{
+      new(big.Int).SetBytes(key.Primes[0].Bytes()), 
+      new(big.Int).SetBytes(key.Primes[1].Bytes()),
+      },
+  }
+
+  return privateKey
+}
+
+func encodeDerToPem(der []byte, t string) string {
+  p := pem.EncodeToMemory(
+    &pem.Block{
+      Type: t, 
+      Bytes: der,
+      },
+      )
+
+  return string(p)
+}
+
+func EncodePublicKey(pub *rsa.PublicKey) (string, error) {
+  pubder, err := x509.MarshalPKIXPublicKey(pub)
+  if err != nil {
+    return "", err
+  }
+
+  return encodeDerToPem(pubder, "RSA PUBLIC KEY"), nil
+}
+
+func EncodePrivateKey(priv *rsa.PrivateKey) string {
+  privder := x509.MarshalPKCS1PrivateKey(priv)
+  return encodeDerToPem(privder, "RSA PRIVATE KEY")
+}
+
+func EncodeGMPPrivateKey(priv *GMPPrivateKey) string {
+  privder := x509.MarshalPKCS1PrivateKey(GMPtoRSAPrivateKey(priv))
+  return encodeDerToPem(privder, "RSA PRIVATE KEY")
+}
+
+
