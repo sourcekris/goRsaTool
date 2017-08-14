@@ -99,13 +99,20 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) *GMPPrivateKey {
     E: key.E,
   }
 
-  gmpPrivateKey := &GMPPrivateKey{
-    PublicKey: *gmpPubKey,
-    D: new(gmp.Int).SetBytes(key.D.Bytes()),
-    Primes: []*gmp.Int{
-      new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
-      new(gmp.Int).SetBytes(key.Primes[1].Bytes()),
-      },
+  var gmpPrivateKey *GMPPrivateKey
+  if key.D != nil {
+    gmpPrivateKey = &GMPPrivateKey{
+      PublicKey: *gmpPubKey,
+      D: new(gmp.Int).SetBytes(key.D.Bytes()),
+      Primes: []*gmp.Int{
+        new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(gmp.Int).SetBytes(key.Primes[1].Bytes()),
+        },
+    }
+  } else {
+    gmpPrivateKey = &GMPPrivateKey{
+      PublicKey: *gmpPubKey,
+    }
   }
 
   return gmpPrivateKey
@@ -117,13 +124,20 @@ func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
     E: key.E,
   }
 
-  privateKey := &rsa.PrivateKey{
-    PublicKey: *pubKey,
-    D: new(big.Int).SetBytes(key.D.Bytes()),
-    Primes: []*big.Int{
-      new(big.Int).SetBytes(key.Primes[0].Bytes()), 
-      new(big.Int).SetBytes(key.Primes[1].Bytes()),
+  var privateKey *rsa.PrivateKey
+  if key.D != nil {
+    privateKey = &rsa.PrivateKey{
+      PublicKey: *pubKey,
+      D: new(big.Int).SetBytes(key.D.Bytes()),
+      Primes: []*big.Int{
+        new(big.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(big.Int).SetBytes(key.Primes[1].Bytes()),
       },
+    }    
+  } else {
+    privateKey = &rsa.PrivateKey{
+      PublicKey: *pubKey,
+    }
   }
 
   return privateKey
@@ -158,5 +172,3 @@ func EncodeGMPPrivateKey(priv *GMPPrivateKey) string {
   privder := x509.MarshalPKCS1PrivateKey(GMPtoRSAPrivateKey(priv))
   return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }
-
-
