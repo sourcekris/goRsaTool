@@ -41,7 +41,7 @@ func (targetRSA *RSAStuff) PastCTFPrimes() {
     if modp.Cmp(bigZero) == 0 {
       targetRSA.PackGivenP(&p)
       
-      fmt.Printf("[+] Past CTF prime factor found: %d\n", &p)
+      fmt.Printf("[+] Past CTF prime factor found.\n")
       return
     }
   }

@@ -52,11 +52,11 @@ func main() {
 
     // attacks begin here
     targetRSA.SmallQ()
-    //targetRSA.NoveltyPrimes()
-    //targetRSA.PastCTFPrimes()
-    //targetRSA.FermatFactorization()
+    targetRSA.NoveltyPrimes()
+    targetRSA.PastCTFPrimes()
     targetRSA.Hastads()
-    //targetRSA.FactorDB()
+    targetRSA.FermatFactorization()
+    targetRSA.FactorDB()
 
     // were we able to solve for the private key?
     if targetRSA.Key.D != nil {
@@ -67,7 +67,7 @@ func main() {
 
     if len(targetRSA.PlainText) > 0 {
       fmt.Println("[+] Recovered plaintext:")
-      fmt.Print(targetRSA.PlainText)
+      fmt.Print(string(targetRSA.PlainText))
     }
 
   } else {
