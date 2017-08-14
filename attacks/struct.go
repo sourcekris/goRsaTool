@@ -19,7 +19,7 @@ type GMPPublicKey struct {
 }
 
 type GMPPrivateKey struct {
-  PublicKey GMPPublicKey
+  PublicKey *GMPPublicKey
   D *gmp.Int
   Primes []*gmp.Int
   N *gmp.Int
@@ -59,7 +59,7 @@ func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff,
 
 	// pack the RSAStuff struct
    return &RSAStuff{
-      Key: *gmpPrivateKey,
+      Key: gmpPrivateKey,
       PastPrimesFile: pastPrimesFile,
       CipherText: cipherText,
     }, nil
@@ -93,7 +93,7 @@ func (targetRSA *RSAStuff) DumpKey() {
 /*
  * Takes a rsa.PrivateKey and returns a GMPPrivateKey that uses gmp.Int types
  */
-func RSAtoGMPPrivateKey(key *rsa.PrivateKey) *GMPPrivateKey {
+func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
   gmpPubKey := &GMPPublicKey{
     N: new(gmp.Int).SetBytes(key.N.Bytes()),
     E: key.E,
@@ -102,7 +102,7 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) *GMPPrivateKey {
   var gmpPrivateKey *GMPPrivateKey
   if key.D != nil {
     gmpPrivateKey = &GMPPrivateKey{
-      PublicKey: *gmpPubKey,
+      PublicKey: gmpPubKey,
       D: new(gmp.Int).SetBytes(key.D.Bytes()),
       Primes: []*gmp.Int{
         new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
@@ -111,11 +111,12 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) *GMPPrivateKey {
     }
   } else {
     gmpPrivateKey = &GMPPrivateKey{
-      PublicKey: *gmpPubKey,
+      PublicKey: gmpPubKey,
+      N: new(gmp.Int).SetBytes(key.N.Bytes()),
     }
   }
 
-  return gmpPrivateKey
+  return *gmpPrivateKey
 }
 
 func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
