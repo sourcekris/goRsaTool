@@ -26,13 +26,13 @@ func solveforP(equation string) (*gmp.Int) {
   reResult, _ := regexp.MatchString("^\\d+\\^\\d+\\-\\d+$", equation)
   if reResult != false {
     baseExp := strings.Split(equation, "^")
-    subMe   := strings.Split(baseExp[1], "-")[1]
-
+    subMe   := strings.Split(baseExp[1], "-")
+  
+    f, _ := new(gmp.Int).SetString(string(subMe[0]), 10)
+    g, _ := new(gmp.Int).SetString(string(subMe[1]), 10)
     e, _ := new(gmp.Int).SetString(string(baseExp[0]), 10)
-    f, _ := new(gmp.Int).SetString(string(baseExp[1]), 10)
-    g, _ := new(gmp.Int).SetString(string(subMe), 10)
-    e.Exp(e,f,nil)
-    e.Sub(e,g)
+
+    e.Exp(e,f,nil).Sub(e,g)
     
     return e
    } 

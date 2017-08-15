@@ -11,6 +11,7 @@ Attacks supported in this go version:
 * novelty primes attack
 * past CTF primes attack
 * fermat factorization for close p & q
+* low public exponent attack (requires ciphertext)
 
 ## Installation
 Get dependencies:
