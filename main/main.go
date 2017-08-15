@@ -10,8 +10,6 @@ import (
   "github.com/sourcekris/goRsaTool/utils"
 )
 
-
-
 func main() {
   // Parse command line arguments
   keyFile        := flag.String("key", "", "The filename of the RSA key to attack or dump")
