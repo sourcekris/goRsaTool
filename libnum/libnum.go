@@ -37,3 +37,19 @@ func IsPerfectSquare(n *gmp.Int) bool {
 
   return false
 }
+
+func RationalToContfract(x, y *gmp.Int) []int {
+  a := new(gmp.Int).Div(x,y)
+  b := new(gmp.Int).Mul(a,y)
+  c := new(gmp.Int)
+
+  var pquotients []int
+
+  if b.Cmp(x) == 0 {
+    return []int{int(a.Int64())}
+  }
+  c.Mul(y,a).Sub(x,c)
+  pquotients = RationalToContfract(y, c)
+  pquotients = append([]int{int(a.Int64())}, pquotients...)
+  return pquotients
+}
