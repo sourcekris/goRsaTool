@@ -53,3 +53,19 @@ func RationalToContfract(x, y *gmp.Int) []int {
   pquotients = append([]int{int(a.Int64())}, pquotients...)
   return pquotients
 }
+
+func ContfractToRational(frac []int) (*gmp.Int, *gmp.Int) {
+  var remainder []int
+
+  switch l := len(frac); l {
+    case 0: 
+      return gmp.NewInt(0), gmp.NewInt(1)
+    case 1: 
+      return gmp.NewInt(int64(frac[0])), gmp.NewInt(1)
+    default: 
+      remainder = frac[1:l]
+      num, denom := ContfractToRational(remainder)
+      fracZ := gmp.NewInt(int64(frac[0]))
+      return fracZ.Mul(fracZ, num).Add(fracZ, denom), num
+  }
+}
