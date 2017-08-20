@@ -31,7 +31,7 @@ func IsPerfectSquare(n *gmp.Int) bool {
     if t.Mul(t,t).Cmp(n) == 0 {
       return true
     } else {
-      false
+      return false
     }
   }
 
@@ -70,7 +70,7 @@ func ContfractToRational(frac []int) (*gmp.Int, *gmp.Int) {
   }
 }
 
-func ConvergantsFromContfract(frac []int) [][2]gmp.int {
+func ConvergantsFromContfract(frac []int) [][2]gmp.Int {
   var convs [][2]gmp.Int
 
   for i, _ := range frac {
