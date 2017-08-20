@@ -37,3 +37,23 @@ func TestContfractToRational(t *testing.T) {
     t.Errorf("got %d %d; want %d %d\n", e, n, expectedE, expectedN)
   }
 }
+
+func TestIsPerfectSquare(t *testing.T) {
+  if !IsPerfectSquare(gmp.NewInt(64)) || IsPerfectSquare(gmp.NewInt(65)) {
+    t.Error("IsPerfectSquare Failed\n")
+  }
+}
+
+func TestRationalToContfract(t *testing.T) {
+  e,_ := new(gmp.Int).SetString("8372927498234629874",10)
+  n,_ := new(gmp.Int).SetString("9823749823749273297",10)
+  frac := []int{0,1,5,1,3,2,1,2,2,1,1,1,154,2,2,8,1,1,1,4,3,4,3,1,1,1,19,1,1,7,2,1,3,1,10,1,14,3,1,2,2,6,2}
+
+  testfrac := RationalToContfract(e, n)
+
+  for i, _ := range testfrac {
+    if testfrac[i] != frac[i] {
+      t.Errorf("Index %d of the result was %d wanted %d\n", i, testfrac[i], frac[i])
+    }
+  }
+}
