@@ -24,7 +24,6 @@ type GMPPrivateKey struct {
   D *gmp.Int
   Primes []*gmp.Int
   N *gmp.Int
-  E *gmp.Int
 }
 
 /*
@@ -72,12 +71,12 @@ func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff,
 func (targetRSA *RSAStuff) PackGivenP(p *gmp.Int) {
   q := new(gmp.Int).Div(targetRSA.Key.N, p)
   targetRSA.Key.Primes = []*gmp.Int{p, q}
-  targetRSA.Key.D      = utils.SolveforD(p, q, targetRSA.Key.E)
+  targetRSA.Key.D      = utils.SolveforD(p, q, targetRSA.Key.PublicKey.E)
 }
 
 func (targetRSA *RSAStuff) DumpKey() {
-  fmt.Printf("[*] n = %d\n", targetRSA.Key.N)
-  fmt.Printf("[*] e = %d\n", targetRSA.Key.E)
+  fmt.Printf("[*] n = %d\n", targetRSA.Key.PublicKey.N)
+  fmt.Printf("[*] e = %d\n", targetRSA.Key.PublicKey.E)
 
   // XXX: Support RSA multiprime [where len(key.Primes) > 2]
   if targetRSA.Key.D!= nil {
@@ -121,7 +120,7 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
 }
 
 func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
-  if key.E.Cmp(gmp.NewInt(math.MaxInt64)) > 0 {
+  if key.PublicKey.E.Cmp(gmp.NewInt(math.MaxInt64)) > 0 {
     // XXX todo: handle better? phase out rsa.PrivateKey types
     panic("[-] Exponent is too large for the private key to be converted to type rsa.PrivateKey")
     
@@ -129,7 +128,7 @@ func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
 
   pubKey := &rsa.PublicKey{
     N: new(big.Int).SetBytes(key.N.Bytes()),
-    E: int(key.E.Int64()),
+    E: int(key.PublicKey.E.Int64()),
   }
 
   var privateKey *rsa.PrivateKey
