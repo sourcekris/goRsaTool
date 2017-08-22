@@ -6,12 +6,11 @@ import (
 )
 
 func (targetRSA *RSAStuff) Hastads() {
-  if targetRSA.Key.D != nil || targetRSA.Key.PublicKey.E > 11  || len(targetRSA.CipherText) == 0 {
+  if targetRSA.Key.D != nil || targetRSA.Key.PublicKey.E.Cmp(gmp.NewInt(11)) > 0  || len(targetRSA.CipherText) == 0 {
     return
   }
 
   c := libnum.BytesToNumber(targetRSA.CipherText)
-  bigE := gmp.NewInt(int64(targetRSA.Key.PublicKey.E))
 
   m := new(gmp.Int)
   pow := new(gmp.Int)
@@ -19,8 +18,8 @@ func (targetRSA *RSAStuff) Hastads() {
   original := new(gmp.Int).Set(c)
 
   for {
-    m.Root(c, uint32(targetRSA.Key.PublicKey.E))
-    pow.Exp(m, bigE, targetRSA.Key.N)
+    m.Root(c, uint32(targetRSA.Key.PublicKey.E.Int64()))
+    pow.Exp(m, targetRSA.Key.PublicKey.E, targetRSA.Key.N)
 
     if pow.Cmp(original) == 0 {
       targetRSA.PlainText = libnum.NumberToBytes(m)

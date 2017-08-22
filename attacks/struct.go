@@ -6,6 +6,7 @@ import (
   "encoding/pem"
   "errors"
   "fmt"
+  "math"
   "math/big"
   "github.com/ncw/gmp"
   "github.com/sourcekris/goRsaTool/libnum"
@@ -15,7 +16,7 @@ import (
 
 type GMPPublicKey struct {
   N *gmp.Int
-  E int
+  E *gmp.Int
 }
 
 type GMPPrivateKey struct {
@@ -23,7 +24,7 @@ type GMPPrivateKey struct {
   D *gmp.Int
   Primes []*gmp.Int
   N *gmp.Int
-  E int
+  E *gmp.Int
 }
 
 /*
@@ -96,7 +97,7 @@ func (targetRSA *RSAStuff) DumpKey() {
 func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
   gmpPubKey := &GMPPublicKey{
     N: new(gmp.Int).SetBytes(key.N.Bytes()),
-    E: key.E,
+    E: gmp.NewInt(int64(key.E)),
   }
 
   var gmpPrivateKey *GMPPrivateKey
@@ -120,9 +121,15 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
 }
 
 func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
+  if key.E.Cmp(gmp.NewInt(math.MaxInt64)) > 0 {
+    // XXX todo: handle better? phase out rsa.PrivateKey types
+    panic("[-] Exponent is too large for the private key to be converted to type rsa.PrivateKey")
+    
+  }
+
   pubKey := &rsa.PublicKey{
     N: new(big.Int).SetBytes(key.N.Bytes()),
-    E: key.E,
+    E: int(key.E.Int64()),
   }
 
   var privateKey *rsa.PrivateKey

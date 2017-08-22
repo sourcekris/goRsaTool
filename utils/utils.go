@@ -3,9 +3,10 @@ package utils
 import (
   "bytes"
   "fmt"
-  "github.com/ncw/gmp"
   "io/ioutil"
   "unicode"
+
+  "github.com/ncw/gmp"
 )
 
 func ReadCipherText(cipherFile string) ([]byte, error) {
@@ -19,11 +20,11 @@ func ReadCipherText(cipherFile string) ([]byte, error) {
 }
 
 // given e, p and q solve for the private exponent d
-func SolveforD(p *gmp.Int, q *gmp.Int, e int) *gmp.Int {
+func SolveforD(p *gmp.Int, q *gmp.Int, e *gmp.Int) *gmp.Int {
   pm1 := new(gmp.Int).Sub(p, gmp.NewInt(1))
   qm1 := new(gmp.Int).Sub(q, gmp.NewInt(1))
   phi := new(gmp.Int).Mul(pm1, qm1)
-  return new(gmp.Int).ModInverse(gmp.NewInt(int64(e)), phi)
+  return new(gmp.Int).ModInverse(e, phi)
 }
 
 func IsInt(s string) bool {
