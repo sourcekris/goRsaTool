@@ -1,9 +1,14 @@
 package attacks
 
 import (
+  "bytes"
+  "crypto/x509"
   "crypto/x509/pkix"
   "encoding/asn1"
-  "math/big"
+  "encoding/pem"
+  "errors"
+  "fmt"
+  "io/ioutil"
 )
 
 type publicKeyInfo struct {
@@ -20,11 +25,11 @@ const (
   DSA
   ECDSA
 )
-  
+
 // ParsePKIXPublicKey parses a DER encoded public key. These values are
 // typically found in PEM blocks with "BEGIN PUBLIC KEY".
 // Taken from the standard library so we can return a gmp PublicKey
-func GMPParsePKIXPublicKey(derBytes []byte) (pub interface{}, err error) {
+func BigParsePKIXPublicKey(derBytes []byte) (pub interface{}, err error) {
   var pki publicKeyInfo
   if rest, err := asn1.Unmarshal(derBytes, &pki); err != nil {
     return nil, err
@@ -58,11 +63,6 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
   return UnknownPublicKeyAlgorithm
 }
 
-type BigPublicKey struct {
-  N *big.Int
-  E *big.Int
-}
-
 // Taken from standard library, removed DSA, ECDSA support and added 
 func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
   asn1Data := keyData.PublicKey.RightAlign()
@@ -94,6 +94,7 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
       E: p.E,
       N: p.N,
     }
+
     return pub, nil
   case DSA:
     return nil,errors.New("DSA Public Keys not supported")
@@ -106,24 +107,31 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 
 // Use local variant of the standard x509 library to yield a gmp Public Key
 func parsePublicRsaKey(keyBytes []byte) (*BigPublicKey, error) {
-  key, err := GMPParsePKIXPublicKey(keyBytes)
+  key, err := BigParsePKIXPublicKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
   }
 
-  return key, nil
+  switch key := key.(type) {
+    case *BigPublicKey:
+      fmt.Printf("n = %d\ne = %d\n", key.N, key.E)
+      return key, nil
+    default:
+      return nil, errors.New("Given key is not an RSA Key")
+  }
 }
 
-func parsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
+func parsePrivateRsaKey(keyBytes []byte) (*BigPrivateKey, error) {
   key, err := x509.ParsePKCS1PrivateKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
   }
-  return key, nil
+  k := RSAtoBigPrivateKey(key)
+  return &k, nil
 }
 
 // import a PEM key file and return a rsa.PrivateKey object
-func ImportKey(keyFile string) (*rsa.PrivateKey, error) {
+func ImportKey(keyFile string) (*BigPrivateKey, error) {
   // read the key from the disk
   keyStr, err := ioutil.ReadFile(keyFile)
   if err != nil {
@@ -139,7 +147,7 @@ func ImportKey(keyFile string) (*rsa.PrivateKey, error) {
   
   key, err := parsePublicRsaKey(block.Bytes)
   if err == nil {
-    priv := rsa.PrivateKey{PublicKey: *key}
+    priv := BigPrivateKey{PublicKey: key}
     return &priv, err
   } 
 

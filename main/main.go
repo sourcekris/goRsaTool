@@ -29,7 +29,7 @@ func main() {
 
   // Did we get a public key file to read
   if len(*keyFile) > 0 {
-    key, _ := utils.ImportKey(*keyFile)
+    key, _ := attacks.ImportKey(*keyFile)
     
     var c []byte
     var err error

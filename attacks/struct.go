@@ -13,7 +13,7 @@ import (
   "github.com/sourcekris/goRsaTool/utils"
 )
 
-
+// final internal representation for keys
 type GMPPublicKey struct {
   N *gmp.Int
   E *gmp.Int
@@ -24,6 +24,19 @@ type GMPPrivateKey struct {
   D *gmp.Int
   Primes []*gmp.Int
   N *gmp.Int
+}
+
+// an unfortunate intermediate representation for keys
+type BigPublicKey struct {
+  N *big.Int
+  E *big.Int
+}
+
+type BigPrivateKey struct {
+  PublicKey *BigPublicKey
+  D *big.Int
+  Primes []*big.Int
+  N *big.Int
 }
 
 /*
@@ -39,7 +52,7 @@ type RSAStuff struct {
 /*
  * constructor for RSAStuff struct
  */
-func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff, error) {
+func NewRSAStuff(key *BigPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, error) {
 	if key.N == nil {
 		return nil, errors.New("Key had no modulus or exponent")
 	}
@@ -55,7 +68,7 @@ func NewRSAStuff(key *rsa.PrivateKey, c []byte, m []byte, pf string) (*RSAStuff,
   }
 
   // copy a rsa.PrivateKey to a GMPPrivateKey that uses gmp.Int types
-  gmpPrivateKey := RSAtoGMPPrivateKey(key)
+  gmpPrivateKey := BigtoGMPPrivateKey(key)
 
 	// pack the RSAStuff struct
    return &RSAStuff{
@@ -148,6 +161,89 @@ func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
   }
 
   return privateKey
+}
+
+func RSAtoBigPrivateKey(key *rsa.PrivateKey) BigPrivateKey {
+  bigPubKey := &BigPublicKey{
+    N: new(big.Int).SetBytes(key.N.Bytes()),
+    E: big.NewInt(int64(key.E)),
+  }
+
+  var bigPrivateKey *BigPrivateKey
+  if key.D != nil {
+    bigPrivateKey = &BigPrivateKey{
+      PublicKey: bigPubKey,
+      D: new(big.Int).SetBytes(key.D.Bytes()),
+      Primes: []*big.Int{
+        new(big.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(big.Int).SetBytes(key.Primes[1].Bytes()),
+        },
+    }
+  } else {
+    bigPrivateKey = &BigPrivateKey{
+      PublicKey: bigPubKey,
+      N: new(big.Int).SetBytes(key.N.Bytes()),
+    }
+  }
+
+  return *bigPrivateKey
+}
+
+func BigtoRSAPrivateKey(key *BigPrivateKey) *rsa.PrivateKey {
+  if key.PublicKey.E.Cmp(big.NewInt(math.MaxInt64)) > 0 {
+    // XXX todo: handle better? phase out rsa.PrivateKey types
+    panic("[-] Exponent is too large for the private key to be converted to type rsa.PrivateKey")
+    
+  }
+
+  pubKey := &rsa.PublicKey{
+    N: new(big.Int).SetBytes(key.N.Bytes()),
+    E: int(key.PublicKey.E.Int64()),
+  }
+
+  var privateKey *rsa.PrivateKey
+  if key.D != nil {
+    privateKey = &rsa.PrivateKey{
+      PublicKey: *pubKey,
+      D: new(big.Int).SetBytes(key.D.Bytes()),
+      Primes: []*big.Int{
+        new(big.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(big.Int).SetBytes(key.Primes[1].Bytes()),
+      },
+    }    
+  } else {
+    privateKey = &rsa.PrivateKey{
+      PublicKey: *pubKey,
+    }
+  }
+
+  return privateKey
+}
+
+func BigtoGMPPrivateKey(key *BigPrivateKey) GMPPrivateKey {
+  gmpPubKey := &GMPPublicKey{
+    N: new(gmp.Int).SetBytes(key.N.Bytes()),
+    E: new(gmp.Int).SetBytes(key.PublicKey.E.Bytes()),
+  }
+
+  var gmpPrivateKey *GMPPrivateKey
+  if key.D != nil {
+    gmpPrivateKey = &GMPPrivateKey{
+      PublicKey: gmpPubKey,
+      D: new(gmp.Int).SetBytes(key.D.Bytes()),
+      Primes: []*gmp.Int{
+        new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(gmp.Int).SetBytes(key.Primes[1].Bytes()),
+        },
+    }
+  } else {
+    gmpPrivateKey = &GMPPrivateKey{
+      PublicKey: gmpPubKey,
+      N: new(gmp.Int).SetBytes(key.N.Bytes()),
+    }
+  }
+
+  return *gmpPrivateKey
 }
 
 func encodeDerToPem(der []byte, t string) string {

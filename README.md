@@ -14,7 +14,8 @@ Attacks supported in this go version:
 * low public exponent attack (requires ciphertext)
 
 ## Installation
-Get dependencies:
+ * Requires go 1.9
+ * Get dependencies:
 `go get github.com/kavehmz/prime` 
 
 ## Usage:
