@@ -1,13 +1,9 @@
-package utils
+package attacks
 
 import (
-  "crypto/rsa"
   "crypto/x509/pkix"
   "encoding/asn1"
-  "encoding/pem"
-  "errors"
-  "fmt"
-  "io/ioutil"
+  "math/big"
 )
 
 type publicKeyInfo struct {
@@ -62,6 +58,11 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
   return UnknownPublicKeyAlgorithm
 }
 
+type BigPublicKey struct {
+  N *big.Int
+  E *big.Int
+}
+
 // Taken from standard library, removed DSA, ECDSA support and added 
 func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
   asn1Data := keyData.PublicKey.RightAlign()
@@ -73,7 +74,7 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
       return nil, errors.New("RSA key missing NULL parameters")
     }
 
-    p := new(pkcs1PublicKey)
+    p := new(BigPublicKey)
     rest, err := asn1.Unmarshal(asn1Data, p)
     if err != nil {
       return nil, err
@@ -85,11 +86,11 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
     if p.N.Sign() <= 0 {
       return nil, errors.New("RSA modulus is not a positive number")
     }
-    if p.E <= 0 {
+    if p.E.Sign() <= 0 {
       return nil, errors.New("RSA public exponent is not a positive number")
     }
 
-    pub := &rsa.PublicKey{
+    pub := &BigPublicKey{
       E: p.E,
       N: p.N,
     }
@@ -104,18 +105,13 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 }
 
 // Use local variant of the standard x509 library to yield a gmp Public Key
-func parsePublicRsaKey(keyBytes []byte) (*rsa.PublicKey, error) {
+func parsePublicRsaKey(keyBytes []byte) (*BigPublicKey, error) {
   key, err := GMPParsePKIXPublicKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
   }
-  
-  switch key := key.(type) {
-  case *rsa.PublicKey:
-    return key, nil
-  default:
-    return nil, errors.New("Given key is not an RSA Key")
-  }
+
+  return key, nil
 }
 
 func parsePrivateRsaKey(keyBytes []byte) (*rsa.PrivateKey, error) {
