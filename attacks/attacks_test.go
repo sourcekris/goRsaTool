@@ -67,10 +67,7 @@ bJMtE+mGE0btphU=
       q,
     },
     N: n, 
-    E: e,
   }
-
-  //fmt.Printf("n = %d\ne = %d\nd = %d\np = %d\nq = %d\n", testKey.PublickKey.N)
 
   convertedTestKey := GMPtoRSAPrivateKey(&testKey)
   encodedKey := EncodePrivateKey(convertedTestKey)
