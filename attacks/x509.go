@@ -63,7 +63,7 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
   return UnknownPublicKeyAlgorithm
 }
 
-// Taken from standard library, removed DSA, ECDSA support and added 
+// Taken from standard library, removed DSA, ECDSA support and added big.Int exponent support
 func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
   asn1Data := keyData.PublicKey.RightAlign()
   switch algo {
@@ -114,7 +114,6 @@ func parsePublicRsaKey(keyBytes []byte) (*BigPublicKey, error) {
 
   switch key := key.(type) {
     case *BigPublicKey:
-      fmt.Printf("n = %d\ne = %d\n", key.N, key.E)
       return key, nil
     default:
       return nil, errors.New("Given key is not an RSA Key")

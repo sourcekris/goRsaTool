@@ -53,7 +53,7 @@ type RSAStuff struct {
  * constructor for RSAStuff struct
  */
 func NewRSAStuff(key *BigPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, error) {
-	if key.N == nil {
+	if key.PublicKey.N == nil {
 		return nil, errors.New("Key had no modulus or exponent")
 	}
 
@@ -222,12 +222,13 @@ func BigtoRSAPrivateKey(key *BigPrivateKey) *rsa.PrivateKey {
 
 func BigtoGMPPrivateKey(key *BigPrivateKey) GMPPrivateKey {
   gmpPubKey := &GMPPublicKey{
-    N: new(gmp.Int).SetBytes(key.N.Bytes()),
+    N: new(gmp.Int).SetBytes(key.PublicKey.N.Bytes()),
     E: new(gmp.Int).SetBytes(key.PublicKey.E.Bytes()),
   }
 
   var gmpPrivateKey *GMPPrivateKey
   if key.D != nil {
+      
     gmpPrivateKey = &GMPPrivateKey{
       PublicKey: gmpPubKey,
       D: new(gmp.Int).SetBytes(key.D.Bytes()),
@@ -239,7 +240,7 @@ func BigtoGMPPrivateKey(key *BigPrivateKey) GMPPrivateKey {
   } else {
     gmpPrivateKey = &GMPPrivateKey{
       PublicKey: gmpPubKey,
-      N: new(gmp.Int).SetBytes(key.N.Bytes()),
+      N: new(gmp.Int).SetBytes(key.PublicKey.N.Bytes()),
     }
   }
 
