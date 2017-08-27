@@ -45,7 +45,7 @@ func (targetRSA *RSAStuff) FactorDB() {
   if targetRSA.Key.D != nil {
     return
   }
-
+   
   url2 := "http://www.factordb.com/"
   url1 := url2 + "index.php?query="
   

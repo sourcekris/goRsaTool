@@ -16,6 +16,7 @@ Attacks supported in this go version:
 ## Installation
  * Requires go 1.9
  * Get dependencies:
+`go get github.com/ncw/gmp` 
 `go get github.com/kavehmz/prime` 
 
 ## Usage:

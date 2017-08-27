@@ -30,7 +30,7 @@ func main() {
   // Did we get a public key file to read
   if len(*keyFile) > 0 {
     key, _ := attacks.ImportKey(*keyFile)
-    
+
     var c []byte
     var err error
     if len(*cipherText) > 0 {

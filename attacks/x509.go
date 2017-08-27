@@ -9,6 +9,7 @@ import (
   "errors"
   "fmt"
   "io/ioutil"
+  "github.com/ncw/gmp"
 )
 
 type publicKeyInfo struct {
@@ -106,7 +107,7 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 }
 
 // Use local variant of the standard x509 library to yield a gmp Public Key
-func parsePublicRsaKey(keyBytes []byte) (*BigPublicKey, error) {
+func parsePublicRsaKey(keyBytes []byte) (*GMPPublicKey, error) {
   key, err := BigParsePKIXPublicKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
@@ -114,23 +115,27 @@ func parsePublicRsaKey(keyBytes []byte) (*BigPublicKey, error) {
 
   switch key := key.(type) {
     case *BigPublicKey:
-      return key, nil
+      k := &GMPPublicKey{
+        N: new(gmp.Int).SetBytes(key.N.Bytes()),
+        E: new(gmp.Int).SetBytes(key.E.Bytes()),
+      }
+      return k, nil
     default:
       return nil, errors.New("Given key is not an RSA Key")
   }
 }
 
-func parsePrivateRsaKey(keyBytes []byte) (*BigPrivateKey, error) {
+func parsePrivateRsaKey(keyBytes []byte) (*GMPPrivateKey, error) {
   key, err := x509.ParsePKCS1PrivateKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
   }
-  k := RSAtoBigPrivateKey(key)
+  k := RSAtoGMPPrivateKey(key)
   return &k, nil
 }
 
 // import a PEM key file and return a rsa.PrivateKey object
-func ImportKey(keyFile string) (*BigPrivateKey, error) {
+func ImportKey(keyFile string) (*GMPPrivateKey, error) {
   // read the key from the disk
   keyStr, err := ioutil.ReadFile(keyFile)
   if err != nil {
@@ -146,7 +151,10 @@ func ImportKey(keyFile string) (*BigPrivateKey, error) {
   
   key, err := parsePublicRsaKey(block.Bytes)
   if err == nil {
-    priv := BigPrivateKey{PublicKey: key}
+    priv := GMPPrivateKey{
+              PublicKey: key,
+              N: key.N,
+            }
     return &priv, err
   } 
 
