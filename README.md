@@ -18,6 +18,7 @@ Attacks supported in this go version:
  * Get dependencies:
  * `go get github.com/ncw/gmp` 
  * `go get github.com/kavehmz/prime` 
+ * `go get github.com/sourcekris/x509big` 
 
 ## Usage:
 
