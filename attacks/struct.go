@@ -113,10 +113,7 @@ func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
         },
     }
   } else {
-    gmpPrivateKey = &GMPPrivateKey{
-      PublicKey: gmpPubKey,
-      N: new(gmp.Int).SetBytes(key.N.Bytes()),
-    }
+    gmpPrivateKey = PrivateFromPublic(gmpPubKey)
   }
 
   return *gmpPrivateKey
@@ -159,7 +156,7 @@ func encodeDerToPem(der []byte, t string) string {
       Type: t, 
       Bytes: der,
       },
-      )
+    )
 
   return string(p)
 }

@@ -55,7 +55,7 @@ func main() {
     targetRSA.PastCTFPrimes()
     targetRSA.Hastads()
     targetRSA.FermatFactorization()
-    //targetRSA.Wiener()
+    targetRSA.Wiener()
     
 
     // were we able to solve for the private key?

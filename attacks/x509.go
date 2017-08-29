@@ -133,6 +133,15 @@ func parsePrivateRsaKey(keyBytes []byte) (*GMPPrivateKey, error) {
   k := RSAtoGMPPrivateKey(key)
   return &k, nil
 }
+/*
+ * Take a Public Key and return an empty Private Key 
+ */
+func PrivateFromPublic(key *GMPPublicKey) *GMPPrivateKey {
+  return &GMPPrivateKey{
+            PublicKey: key,
+            N: key.N,
+          }
+}
 
 // import a PEM key file and return a rsa.PrivateKey object
 func ImportKey(keyFile string) (*GMPPrivateKey, error) {
@@ -149,13 +158,10 @@ func ImportKey(keyFile string) (*GMPPrivateKey, error) {
     return nil, errors.New("Failed to decode PEM key.")
   }
   
+  // extract a GMPPublicKey from the DER decoded data and pack a private key struct
   key, err := parsePublicRsaKey(block.Bytes)
   if err == nil {
-    priv := GMPPrivateKey{
-              PublicKey: key,
-              N: key.N,
-            }
-    return &priv, err
+    return PrivateFromPublic(key), err
   } 
 
   priv, err := parsePrivateRsaKey(block.Bytes)
