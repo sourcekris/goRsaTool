@@ -26,12 +26,6 @@ type GMPPrivateKey struct {
   N *gmp.Int
 }
 
-// an unfortunate intermediate representation for PublicKeys so we dont also have to fork asn1
-type BigPublicKey struct {
-  N *big.Int
-  E *big.Int
-}
-
 /*
  * wrap rsa.PrivateKey and add a field for cipher and plaintexts
  */
