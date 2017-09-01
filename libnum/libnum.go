@@ -70,12 +70,13 @@ func ContfractToRational(frac []int) (*gmp.Int, *gmp.Int) {
   }
 }
 
-func ConvergantsFromContfract(frac []int) [][2]gmp.Int {
-  var convs [][2]gmp.Int
+func ConvergantsFromContfract(frac []int) [][2]*gmp.Int {
+  var convs [][2]*gmp.Int
 
   for i, _ := range frac {
     a, b := ContfractToRational(frac[0:i])
-    convs = append(convs, [2]gmp.Int{*a, *b})
+    z := [2]*gmp.Int{a, b}
+    convs = append(convs, z)
   }
   return convs
 }

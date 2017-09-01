@@ -49,12 +49,12 @@ func main() {
     }
 
     // attacks begin here
-    targetRSA.FactorDB()
-    targetRSA.SmallQ()
-    targetRSA.NoveltyPrimes()
-    targetRSA.PastCTFPrimes()
-    targetRSA.Hastads()
-    targetRSA.FermatFactorization()
+    // targetRSA.FactorDB()
+    // targetRSA.SmallQ()
+    // targetRSA.NoveltyPrimes()
+    // targetRSA.PastCTFPrimes()
+    // targetRSA.Hastads()
+    // targetRSA.FermatFactorization()
     targetRSA.Wiener()
     
 
