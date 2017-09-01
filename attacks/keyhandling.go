@@ -6,6 +6,7 @@ import (
   "errors"
   "fmt"
   "io/ioutil"
+  
   "github.com/ncw/gmp"
   "github.com/sourcekris/x509big"
 )
@@ -38,7 +39,7 @@ func parsePrivateRsaKey(keyBytes []byte) (*GMPPrivateKey, error) {
   return &k, nil
 }
 /*
- * Take a Public Key and return an empty Private Key 
+ * Take a Public Key and return a Private Key with the public components packed
  */
 func PrivateFromPublic(key *GMPPublicKey) *GMPPrivateKey {
   return &GMPPrivateKey{

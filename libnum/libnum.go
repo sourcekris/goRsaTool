@@ -15,11 +15,12 @@ func NumberToBytes(src *gmp.Int) []byte {
 /*
  * returns true if n is a perfect square false otherwise
  */
-func IsPerfectSquare(n *gmp.Int) bool {
+func IsPerfectSquare(n *gmp.Int) *gmp.Int {
   h := new(gmp.Int).And(n, gmp.NewInt(0xF))
+  bigNegOne := gmp.NewInt(-1)
 
   if h.Cmp(gmp.NewInt(9)) > 1 {
-    return false
+    return bigNegOne
   }
 
   if (h.Cmp(gmp.NewInt(2)) != 0 && h.Cmp(gmp.NewInt(3)) != 0 && 
@@ -29,13 +30,13 @@ func IsPerfectSquare(n *gmp.Int) bool {
     t := new(gmp.Int).Sqrt(n)
 
     if t.Mul(t,t).Cmp(n) == 0 {
-      return true
+      return t
     } else {
-      return false
+      return bigNegOne
     }
   }
 
-  return false
+  return bigNegOne
 }
 
 func RationalToContfract(x, y *gmp.Int) []int {
