@@ -10,7 +10,6 @@ import (
   "math/big"
   "github.com/ncw/gmp"
   "github.com/sourcekris/goRsaTool/libnum"
-  "github.com/sourcekris/goRsaTool/utils"
 )
 
 // final internal representation for keys
@@ -68,7 +67,7 @@ func NewRSAStuff(key *GMPPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, 
 func (targetRSA *RSAStuff) PackGivenP(p *gmp.Int) {
   q := new(gmp.Int).Div(targetRSA.Key.N, p)
   targetRSA.Key.Primes = []*gmp.Int{p, q}
-  targetRSA.Key.D      = utils.SolveforD(p, q, targetRSA.Key.PublicKey.E)
+  targetRSA.Key.D      = libnum.SolveforD(p, q, targetRSA.Key.PublicKey.E)
 }
 
 func (targetRSA *RSAStuff) DumpKey() {

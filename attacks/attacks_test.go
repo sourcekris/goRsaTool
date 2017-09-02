@@ -6,7 +6,7 @@ import (
   "testing"
 
   "github.com/ncw/gmp"
-  "github.com/sourcekris/goRsaTool/utils"
+  ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
 func TestEncodePublicKey(t *testing.T) {
@@ -37,7 +37,7 @@ func TestEncodePrivateKey(t *testing.T) {
   q := gmp.NewInt(54311)
   e := gmp.NewInt(65537)
   n := new(gmp.Int).Mul(p,q)
-  d := utils.SolveforD(p, q, e)
+  d := ln.SolveforD(p, q, e)
   pemKey := `-----BEGIN RSA PRIVATE KEY-----
 MIICpwIBAAKBgwC60gz5ftUELfaWzk3z5aZ4z0+zaT098S3+n9P9jMiquLlVM+QU
 4/wMN39O5UgnEYsdMFYaPHQb6nx2iZeJtRdD4HYJLfnrBdyX6xUFzp6xK1q54Qq/

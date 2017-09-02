@@ -13,6 +13,7 @@ package attacks
   "regexp"
   "time"
   "github.com/sourcekris/goRsaTool/utils"
+  ln "github.com/sourcekris/goRsaTool/libnum"
  )
 
 // extract components of an equation we get back from factordb and solve it
@@ -37,7 +38,7 @@ func solveforP(equation string) (*gmp.Int) {
     return e
    } 
   
-  return gmp.NewInt(0)
+  return ln.BigZero
 }
 
 // XXX: this should return errors not print them
@@ -87,7 +88,7 @@ func (targetRSA *RSAStuff) FactorDB() {
       tmp_p := solveforP(r1Prime)
       tmp_q := solveforP(r2Prime)
 
-      if tmp_p.Cmp(gmp.NewInt(0)) == 0  || tmp_q.Cmp(gmp.NewInt(0)) == 0 {
+      if tmp_p.Cmp(ln.BigZero) == 0  || tmp_q.Cmp(ln.BigZero) == 0 {
         fmt.Printf("[-] One or more of the primes could not be resolved.\n")
         return
       }

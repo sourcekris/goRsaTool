@@ -2,15 +2,15 @@ package attacks
 
 import (
   "github.com/ncw/gmp"
-  "github.com/sourcekris/goRsaTool/libnum"
+  ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
 func (targetRSA *RSAStuff) Hastads() {
-  if targetRSA.Key.D != nil || targetRSA.Key.PublicKey.E.Cmp(gmp.NewInt(11)) > 0  || len(targetRSA.CipherText) == 0 {
+  if targetRSA.Key.D != nil || targetRSA.Key.PublicKey.E.Cmp(ln.BigEleven) > 0  || len(targetRSA.CipherText) == 0 {
     return
   }
 
-  c := libnum.BytesToNumber(targetRSA.CipherText)
+  c := ln.BytesToNumber(targetRSA.CipherText)
 
   m := new(gmp.Int)
   pow := new(gmp.Int)
@@ -22,7 +22,7 @@ func (targetRSA *RSAStuff) Hastads() {
     pow.Exp(m, targetRSA.Key.PublicKey.E, targetRSA.Key.N)
 
     if pow.Cmp(original) == 0 {
-      targetRSA.PlainText = libnum.NumberToBytes(m)
+      targetRSA.PlainText = ln.NumberToBytes(m)
       return
     } 
     c.Add(c, targetRSA.Key.N)

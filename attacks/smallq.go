@@ -4,6 +4,7 @@ import (
   "fmt"
   "github.com/ncw/gmp"
   "github.com/kavehmz/prime"
+  ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
 // go seems so fast making small primes we can probably make this much larger
@@ -19,11 +20,10 @@ func (targetRSA *RSAStuff) SmallQ() {
 
   primes  := prime.Primes(maxprimeint)
   modp    := new(gmp.Int)
-  bigZero := gmp.NewInt(0)
 
   for _, p := range primes {
     modp = modp.Mod(targetRSA.Key.N, gmp.NewInt(int64(p)))
-    if modp.Cmp(bigZero) == 0 {
+    if modp.Cmp(ln.BigZero) == 0 {
       targetRSA.PackGivenP(gmp.NewInt(int64(p)))
       fmt.Printf("[+] Small q Factor found\n")
       return
