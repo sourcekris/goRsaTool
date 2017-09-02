@@ -1,7 +1,6 @@
 package attacks
 
 import (
-  "fmt"
   "github.com/ncw/gmp"
   ln "github.com/sourcekris/goRsaTool/libnum"
 )
@@ -35,7 +34,6 @@ func (targetRSA *RSAStuff) Wiener() {
         if t.Cmp(ln.BigNOne) != 0 && z.Add(s,t).Mod(z,ln.BigTwo).Cmp(ln.BigZero) == 0 {
           // We found d, pack the private key
           targetRSA.PackGivenP(ln.FindPGivenD(d, targetRSA.Key.PublicKey.E, targetRSA.Key.N))
-          fmt.Printf("d = %d\np = %d\nq = %d\n", targetRSA.Key.D, targetRSA.Key.Primes[0], targetRSA.Key.Primes[1])
         }
       }
     }

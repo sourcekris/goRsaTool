@@ -12,6 +12,7 @@ Attacks supported in this go version:
 * past CTF primes attack
 * fermat factorization for close p & q
 * low public exponent attack (requires ciphertext)
+* wiener's attack for large public exponents
 
 ## Installation
  * Requires go 1.9

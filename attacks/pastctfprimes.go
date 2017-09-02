@@ -3,9 +3,11 @@ package attacks
 import (
   "bufio"
   "fmt"
-  "github.com/ncw/gmp"
   "os"
   "strings"
+
+  "github.com/ncw/gmp"
+  ln "github.com/sourcekris/goRsaTool/libnum"
   )
 
 func (targetRSA *RSAStuff) PastCTFPrimes() {
@@ -34,11 +36,10 @@ func (targetRSA *RSAStuff) PastCTFPrimes() {
   }
 
   modp := new(gmp.Int)
-  bigZero := gmp.NewInt(0)
 
   for _, p := range primes {
     modp = modp.Mod(targetRSA.Key.N, &p)
-    if modp.Cmp(bigZero) == 0 {
+    if modp.Cmp(ln.BigZero) == 0 {
       targetRSA.PackGivenP(&p)
       
       fmt.Printf("[+] Past CTF prime factor found.\n")

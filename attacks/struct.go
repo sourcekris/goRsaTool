@@ -10,6 +10,7 @@ import (
   "math/big"
   "github.com/ncw/gmp"
   "github.com/sourcekris/goRsaTool/libnum"
+  "github.com/sourcekris/x509big"
 )
 
 // final internal representation for keys
@@ -143,6 +144,31 @@ func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
   return privateKey
 }
 
+func GMPtoBigPrivateKey(key *GMPPrivateKey) *x509big.BigPrivateKey {
+  pubKey := &x509big.BigPublicKey{
+    N: new(big.Int).SetBytes(key.N.Bytes()),
+    E: new(big.Int).SetBytes(key.PublicKey.E.Bytes()),
+  }
+
+  var privateKey *x509big.BigPrivateKey
+  if key.D != nil {
+    privateKey = &x509big.BigPrivateKey{
+      PublicKey: *pubKey,
+      D: new(big.Int).SetBytes(key.D.Bytes()),
+      Primes: []*big.Int{
+        new(big.Int).SetBytes(key.Primes[0].Bytes()), 
+        new(big.Int).SetBytes(key.Primes[1].Bytes()),
+      },
+    }    
+  } else {
+    privateKey = &x509big.BigPrivateKey{
+      PublicKey: *pubKey,
+    }
+  }
+
+  return privateKey
+}
+
 func encodeDerToPem(der []byte, t string) string {
   p := pem.EncodeToMemory(
     &pem.Block{
@@ -169,6 +195,6 @@ func EncodePrivateKey(priv *rsa.PrivateKey) string {
 }
 
 func EncodeGMPPrivateKey(priv *GMPPrivateKey) string {
-  privder := x509.MarshalPKCS1PrivateKey(GMPtoRSAPrivateKey(priv))
+  privder := x509big.MarshalPKCS1BigPrivateKey(GMPtoBigPrivateKey(priv))
   return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }
