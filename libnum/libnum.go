@@ -30,10 +30,12 @@ func NumberToBytes(src *gmp.Int) []byte {
 
 // given e, p and q solve for the private exponent d
 func SolveforD(p *gmp.Int, q *gmp.Int, e *gmp.Int) *gmp.Int {
-  pm1 := new(gmp.Int).Sub(p, BigOne)
-  qm1 := new(gmp.Int).Sub(q, BigOne)
-  phi := new(gmp.Int).Mul(pm1, qm1)
-  return new(gmp.Int).ModInverse(e, phi)
+  return new(gmp.Int).ModInverse(e, 
+            new(gmp.Int).Mul(
+                new(gmp.Int).Sub(p, BigOne), 
+                new(gmp.Int).Sub(q, BigOne)
+              )
+            )
 }
 
 /* 
