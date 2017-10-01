@@ -7,20 +7,20 @@ package attacks
  import (
   "fmt"
   "io/ioutil"
-  "github.com/ncw/gmp"
   "net/http"
   "strings"
   "regexp"
   "time"
+  fmp "github.com/sourcekris/goflint"
   "github.com/sourcekris/goRsaTool/utils"
   ln "github.com/sourcekris/goRsaTool/libnum"
  )
 
 // extract components of an equation we get back from factordb and solve it
-func solveforP(equation string) (*gmp.Int) {
+func solveforP(equation string) (*fmp.Fmpz) {
   // sometimes the input is not an equation
   if utils.IsInt(equation) {
-    m, _ := new(gmp.Int).SetString(equation, 10)
+    m, _ := new(fmp.Fmpz).SetString(equation, 10)
     return m
   }
 
@@ -29,9 +29,9 @@ func solveforP(equation string) (*gmp.Int) {
     baseExp := strings.Split(equation, "^")
     subMe   := strings.Split(baseExp[1], "-")
   
-    f, _ := new(gmp.Int).SetString(string(subMe[0]), 10)
-    g, _ := new(gmp.Int).SetString(string(subMe[1]), 10)
-    e, _ := new(gmp.Int).SetString(string(baseExp[0]), 10)
+    f, _ := new(fmp.Fmpz).SetString(string(subMe[0]), 10)
+    g, _ := new(fmp.Fmpz).SetString(string(subMe[1]), 10)
+    e, _ := new(fmp.Fmpz).SetString(string(baseExp[0]), 10)
 
     e.Exp(e,f,nil).Sub(e,g)
     
@@ -99,9 +99,9 @@ func (targetRSA *RSAStuff) FactorDB() {
       return
     }
 
-    // convert them to gmp Ints
-    key_p, _ := new(gmp.Int).SetString(r1Prime, 10)
-    key_q, _ := new(gmp.Int).SetString(r2Prime, 10)
+    // convert them to fmpz
+    key_p, _ := new(fmp.Fmpz).SetString(r1Prime, 10)
+    key_q, _ := new(fmp.Fmpz).SetString(r2Prime, 10)
 
     // if p == q then the whole thing failed rather gracefully
     if key_p.Cmp(key_q) == 0 {

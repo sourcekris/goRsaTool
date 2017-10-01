@@ -7,12 +7,12 @@ import (
   "fmt"
   "io/ioutil"
   
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   "github.com/sourcekris/x509big"
 )
 
 // Use local variant of the standard x509 library to yield a gmp Public Key
-func parsePublicRsaKey(keyBytes []byte) (*GMPPublicKey, error) {
+func parsePublicRsaKey(keyBytes []byte) (*FMPPublicKey, error) {
   key, err := x509big.ParseBigPKIXPublicKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
@@ -20,9 +20,9 @@ func parsePublicRsaKey(keyBytes []byte) (*GMPPublicKey, error) {
 
   switch key := key.(type) {
     case *x509big.BigPublicKey:
-      k := &GMPPublicKey{
-        N: new(gmp.Int).SetBytes(key.N.Bytes()),
-        E: new(gmp.Int).SetBytes(key.E.Bytes()),
+      k := &FMPPublicKey{
+        N: new(fmp.Fmpz).SetBytes(key.N.Bytes()),
+        E: new(fmp.Fmpz).SetBytes(key.E.Bytes()),
       }
       return k, nil
     default:
@@ -30,26 +30,26 @@ func parsePublicRsaKey(keyBytes []byte) (*GMPPublicKey, error) {
   }
 }
 
-func parsePrivateRsaKey(keyBytes []byte) (*GMPPrivateKey, error) {
+func parsePrivateRsaKey(keyBytes []byte) (*FMPPrivateKey, error) {
   key, err := x509.ParsePKCS1PrivateKey(keyBytes)
   if err != nil {
     return nil, errors.New("Failed to parse the DER key after decoding.")
   }
-  k := RSAtoGMPPrivateKey(key)
+  k := RSAtoFMPPrivateKey(key)
   return &k, nil
 }
 /*
  * Take a Public Key and return a Private Key with the public components packed
  */
-func PrivateFromPublic(key *GMPPublicKey) *GMPPrivateKey {
-  return &GMPPrivateKey{
+func PrivateFromPublic(key *FMPPublicKey) *FMPPrivateKey {
+  return &FMPPrivateKey{
             PublicKey: key,
             N: key.N,
           }
 }
 
 // import a PEM key file and return a rsa.PrivateKey object
-func ImportKey(keyFile string) (*GMPPrivateKey, error) {
+func ImportKey(keyFile string) (*FMPPrivateKey, error) {
   // read the key from the disk
   keyStr, err := ioutil.ReadFile(keyFile)
   if err != nil {
@@ -63,7 +63,7 @@ func ImportKey(keyFile string) (*GMPPrivateKey, error) {
     return nil, errors.New("Failed to decode PEM key.")
   }
   
-  // extract a GMPPublicKey from the DER decoded data and pack a private key struct
+  // extract a FMPPublicKey from the DER decoded data and pack a private key struct
   key, err := parsePublicRsaKey(block.Bytes)
   if err == nil {
     return PrivateFromPublic(key), err

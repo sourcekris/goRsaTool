@@ -8,29 +8,29 @@ import (
   "fmt"
   "math"
   "math/big"
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   "github.com/sourcekris/goRsaTool/libnum"
   "github.com/sourcekris/x509big"
 )
 
 // final internal representation for keys
-type GMPPublicKey struct {
-  N *gmp.Int
-  E *gmp.Int
+type FMPPublicKey struct {
+  N *fmp.Fmpz
+  E *fmp.Fmpz
 }
 
-type GMPPrivateKey struct {
-  PublicKey *GMPPublicKey
-  D *gmp.Int
-  Primes []*gmp.Int
-  N *gmp.Int
+type FMPPrivateKey struct {
+  PublicKey *FMPPublicKey
+  D *fmp.Fmpz
+  Primes []*fmp.Fmpz
+  N *fmp.Fmpz
 }
 
 /*
  * wrap rsa.PrivateKey and add a field for cipher and plaintexts
  */
 type RSAStuff struct {
-  Key GMPPrivateKey
+  Key FMPPrivateKey
   CipherText []byte
   PlainText []byte
   PastPrimesFile string
@@ -39,7 +39,7 @@ type RSAStuff struct {
 /*
  * constructor for RSAStuff struct
  */
-func NewRSAStuff(key *GMPPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, error) {
+func NewRSAStuff(key *FMPPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, error) {
 	if key.PublicKey.N == nil {
 		return nil, errors.New("Key had no modulus or exponent")
 	}
@@ -65,9 +65,9 @@ func NewRSAStuff(key *GMPPrivateKey, c []byte, m []byte, pf string) (*RSAStuff, 
 /*
  * Given one prime p, pack the Key member of the RSAStuff struct with the private key values, p, q & d
  */
-func (targetRSA *RSAStuff) PackGivenP(p *gmp.Int) {
-  q := new(gmp.Int).Div(targetRSA.Key.N, p)
-  targetRSA.Key.Primes = []*gmp.Int{p, q}
+func (targetRSA *RSAStuff) PackGivenP(p *fmp.Fmpz) {
+  q := new(fmp.Fmpz).Div(targetRSA.Key.N, p)
+  targetRSA.Key.Primes = []*fmp.Fmpz{p, q}
   targetRSA.Key.D      = libnum.SolveforD(p, q, targetRSA.Key.PublicKey.E)
 }
 
@@ -88,33 +88,33 @@ func (targetRSA *RSAStuff) DumpKey() {
 }
 
 /*
- * Takes a rsa.PrivateKey and returns a GMPPrivateKey that uses gmp.Int types
+ * Takes a rsa.PrivateKey and returns a FMPPrivateKey that uses fmp.Fmpz types
  */
-func RSAtoGMPPrivateKey(key *rsa.PrivateKey) GMPPrivateKey {
-  gmpPubKey := &GMPPublicKey{
-    N: new(gmp.Int).SetBytes(key.N.Bytes()),
-    E: gmp.NewInt(int64(key.E)),
+func RSAtoFMPPrivateKey(key *rsa.PrivateKey) FMPPrivateKey {
+  fmpPubKey := &FMPPublicKey{
+    N: new(fmp.Fmpz).SetBytes(key.N.Bytes()),
+    E: fmp.NewFmpz(int64(key.E)),
   }
 
-  var gmpPrivateKey *GMPPrivateKey
+  var fmpPrivateKey *FMPPrivateKey
   if key.D != nil {
-    gmpPrivateKey = &GMPPrivateKey{
-      PublicKey: gmpPubKey,
-      D: new(gmp.Int).SetBytes(key.D.Bytes()),
-      Primes: []*gmp.Int{
-        new(gmp.Int).SetBytes(key.Primes[0].Bytes()), 
-        new(gmp.Int).SetBytes(key.Primes[1].Bytes()),
+    fmpPrivateKey = &FMPPrivateKey{
+      PublicKey: fmpPubKey,
+      D: new(fmp.Fmpz).SetBytes(key.D.Bytes()),
+      Primes: []*fmp.Fmpz{
+        new(fmp.Fmpz).SetBytes(key.Primes[0].Bytes()), 
+        new(fmp.Fmpz).SetBytes(key.Primes[1].Bytes()),
         },
     }
   } else {
-    gmpPrivateKey = PrivateFromPublic(gmpPubKey)
+    fmpPrivateKey = PrivateFromPublic(fmpPubKey)
   }
 
-  return *gmpPrivateKey
+  return *fmpPrivateKey
 }
 
-func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
-  if key.PublicKey.E.Cmp(gmp.NewInt(math.MaxInt64)) > 0 {
+func FMPtoRSAPrivateKey(key *FMPPrivateKey) *rsa.PrivateKey {
+  if key.PublicKey.E.Cmp(fmp.NewFmpz(math.MaxInt64)) > 0 {
     // XXX todo: handle better? phase out rsa.PrivateKey types
     panic("[-] Exponent is too large for the private key to be converted to type rsa.PrivateKey")
     
@@ -144,7 +144,7 @@ func GMPtoRSAPrivateKey(key *GMPPrivateKey) *rsa.PrivateKey {
   return privateKey
 }
 
-func GMPtoBigPrivateKey(key *GMPPrivateKey) *x509big.BigPrivateKey {
+func GMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
   pubKey := &x509big.BigPublicKey{
     N: new(big.Int).SetBytes(key.N.Bytes()),
     E: new(big.Int).SetBytes(key.PublicKey.E.Bytes()),
@@ -194,7 +194,7 @@ func EncodePrivateKey(priv *rsa.PrivateKey) string {
   return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }
 
-func EncodeGMPPrivateKey(priv *GMPPrivateKey) string {
-  privder := x509big.MarshalPKCS1BigPrivateKey(GMPtoBigPrivateKey(priv))
+func EncodeFMPPrivateKey(priv *FMPPrivateKey) string {
+  privder := x509big.MarshalPKCS1BigPrivateKey(FMPtoBigPrivateKey(priv))
   return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }

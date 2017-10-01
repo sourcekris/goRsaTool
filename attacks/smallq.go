@@ -2,7 +2,7 @@ package attacks
 
 import (
   "fmt"
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   "github.com/kavehmz/prime"
   ln "github.com/sourcekris/goRsaTool/libnum"
 )
@@ -19,12 +19,12 @@ func (targetRSA *RSAStuff) SmallQ() {
   }
 
   primes  := prime.Primes(maxprimeint)
-  modp    := new(gmp.Int)
+  modp    := new(fmp.Fmpz)
 
   for _, p := range primes {
-    modp = modp.Mod(targetRSA.Key.N, gmp.NewInt(int64(p)))
+    modp = modp.Mod(targetRSA.Key.N, fmp.NewFmpz(int64(p)))
     if modp.Cmp(ln.BigZero) == 0 {
-      targetRSA.PackGivenP(gmp.NewInt(int64(p)))
+      targetRSA.PackGivenP(fmp.NewFmpz(int64(p)))
       fmt.Printf("[+] Small q Factor found\n")
       return
     }

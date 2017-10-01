@@ -1,8 +1,8 @@
 package libnum
 
-import "github.com/ncw/gmp"
+import fmp "github.com/sourcekris/goflint"
 
-// Returns a big.Int GCD of a and b or 1 if a and b are co-prime
-func FindGcd(a, b *gmp.Int) *gmp.Int {
-  return new(gmp.Int).GCD(nil, nil, a, b)
+// Returns a Fmpz GCD of a and b or 1 if a and b are co-prime
+func FindGcd(a, b *fmp.Fmpz) *fmp.Fmpz {
+  return new(fmp.Fmpz).GCD(nil, nil, a, b)
 }

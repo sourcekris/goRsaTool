@@ -2,7 +2,7 @@ package attacks
 
 import (
   "fmt"
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -11,12 +11,12 @@ func (targetRSA *RSAStuff) FermatFactorization() {
     return
   }
 
-  a  := new(gmp.Int).Sqrt(targetRSA.Key.N)
-  b  := new(gmp.Int).Set(a)
-  b2 := new(gmp.Int).Mul(a, a)
+  a  := new(fmp.Fmpz).Sqrt(targetRSA.Key.N)
+  b  := new(fmp.Fmpz).Set(a)
+  b2 := new(fmp.Fmpz).Mul(a, a)
   b2.Sub(b2, targetRSA.Key.N)
 
-  c := new(gmp.Int).Mul(b,b)
+  c := new(fmp.Fmpz).Mul(b,b)
 
   for c.Cmp(b2) != 0 {
     a.Add(a, ln.BigOne)
@@ -25,6 +25,6 @@ func (targetRSA *RSAStuff) FermatFactorization() {
     c.Mul(b,b)
   }
 
-  targetRSA.PackGivenP(new(gmp.Int).Add(a,b))
+  targetRSA.PackGivenP(new(fmp.Fmpz).Add(a,b))
   fmt.Printf("[+] Factors found with fermat\n")
 }

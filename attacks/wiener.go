@@ -1,7 +1,7 @@
 package attacks
 
 import (
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -19,16 +19,16 @@ func (targetRSA *RSAStuff) Wiener() {
   frac := ln.RationalToContfract(targetRSA.Key.PublicKey.E, targetRSA.Key.N)
   convergants := ln.ConvergantsFromContfract(frac)
 
-  z := new(gmp.Int)
+  z := new(fmp.Fmpz)
 
   for _, g := range convergants {
     k := g[0]
     d := g[1]
 
     if k.Cmp(ln.BigZero) != 0 && z.Mul(d,targetRSA.Key.PublicKey.E).Sub(z,ln.BigOne).Mod(z,k).Cmp(ln.BigZero) == 0 {
-      phi := new(gmp.Int).Set(z.Mul(d,targetRSA.Key.PublicKey.E).Sub(z, ln.BigOne).Div(z,k))      // phi = (e*d-1)//k
-      s   := new(gmp.Int).Set(z.Sub(targetRSA.Key.N,phi).Add(z, ln.BigOne))                      // s = n - phi + 1
-      discr := new(gmp.Int).Set(z.Mul(s,s).Sub(z,new(gmp.Int).Mul(ln.BigFour, targetRSA.Key.N))) // discr = s*s - 4*n
+      phi := new(fmp.Fmpz).Set(z.Mul(d,targetRSA.Key.PublicKey.E).Sub(z, ln.BigOne).Div(z,k))      // phi = (e*d-1)//k
+      s   := new(fmp.Fmpz).Set(z.Sub(targetRSA.Key.N,phi).Add(z, ln.BigOne))                      // s = n - phi + 1
+      discr := new(fmp.Fmpz).Set(z.Mul(s,s).Sub(z,new(fmp.Fmpz).Mul(ln.BigFour, targetRSA.Key.N))) // discr = s*s - 4*n
       if discr.Sign() >= 0 {
         t := ln.IsPerfectSquare(discr)
         if t.Cmp(ln.BigNOne) != 0 && z.Add(s,t).Mod(z,ln.BigTwo).Cmp(ln.BigZero) == 0 {

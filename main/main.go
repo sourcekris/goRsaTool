@@ -50,18 +50,18 @@ func main() {
     }
 
     // attacks begin here
-    targetRSA.FactorDB()
-    targetRSA.SmallQ()
-    targetRSA.NoveltyPrimes()
-    targetRSA.PastCTFPrimes()
-    targetRSA.Hastads()
-    targetRSA.FermatFactorization()
+    //targetRSA.FactorDB()
+    //targetRSA.SmallQ()
+    //targetRSA.NoveltyPrimes()
+    //targetRSA.PastCTFPrimes()
+    //targetRSA.Hastads()
+    //targetRSA.FermatFactorization()
     targetRSA.Wiener()
     
 
     // were we able to solve for the private key?
     if targetRSA.Key.D != nil {
-      privStr := attacks.EncodeGMPPrivateKey(&targetRSA.Key)
+      privStr := attacks.EncodeFMPPrivateKey(&targetRSA.Key)
       fmt.Print(privStr)
       return
     }

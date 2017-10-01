@@ -6,7 +6,7 @@ import (
   "os"
   "strings"
 
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   ln "github.com/sourcekris/goRsaTool/libnum"
   )
 
@@ -15,7 +15,7 @@ func (targetRSA *RSAStuff) PastCTFPrimes() {
     return
   }
 
-  var primes []gmp.Int
+  var primes []fmp.Fmpz
 
   file, err := os.Open(targetRSA.PastPrimesFile)
   if err != nil {
@@ -30,12 +30,12 @@ func (targetRSA *RSAStuff) PastCTFPrimes() {
   for scanner.Scan() {
     line := scanner.Text()
     if !strings.HasPrefix(line, "#") && len(strings.Trim(line, "\n\r")) != 0 {
-      tmp_p, _ := new(gmp.Int).SetString(line, 10)
+      tmp_p, _ := new(fmp.Fmpz).SetString(line, 10)
       primes = append(primes, *tmp_p)
     }
   }
 
-  modp := new(gmp.Int)
+  modp := new(fmp.Fmpz)
 
   for _, p := range primes {
     modp = modp.Mod(targetRSA.Key.N, &p)

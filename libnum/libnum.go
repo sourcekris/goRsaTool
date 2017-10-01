@@ -1,40 +1,40 @@
 package libnum
 
 import (
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
 )
 
 var (
-  BigNOne  = gmp.NewInt(-1)
-  BigZero  = gmp.NewInt(0)
-  BigOne   = gmp.NewInt(1)
-  BigTwo   = gmp.NewInt(2)
-  BigThree = gmp.NewInt(3)
-  BigFour  = gmp.NewInt(4)
-  BigFive  = gmp.NewInt(5)
-  BigSix   = gmp.NewInt(6)
-  BigSeven = gmp.NewInt(7)
-  BigEight = gmp.NewInt(8)
-  BigNine  = gmp.NewInt(9)
-  BigEleven  = gmp.NewInt(11)
-  BigSixteen = gmp.NewInt(0xf)
+  BigNOne  = fmp.NewFmpz(-1)
+  BigZero  = fmp.NewFmpz(0)
+  BigOne   = fmp.NewFmpz(1)
+  BigTwo   = fmp.NewFmpz(2)
+  BigThree = fmp.NewFmpz(3)
+  BigFour  = fmp.NewFmpz(4)
+  BigFive  = fmp.NewFmpz(5)
+  BigSix   = fmp.NewFmpz(6)
+  BigSeven = fmp.NewFmpz(7)
+  BigEight = fmp.NewFmpz(8)
+  BigNine  = fmp.NewFmpz(9)
+  BigEleven  = fmp.NewFmpz(11)
+  BigSixteen = fmp.NewFmpz(0xf)
 )
 
-func BytesToNumber(src []byte) *gmp.Int {
-  return new(gmp.Int).SetBytes(src)
+func BytesToNumber(src []byte) *fmp.Fmpz {
+  return new(fmp.Fmpz).SetBytes(src)
 }
 
-func NumberToBytes(src *gmp.Int) []byte {
+func NumberToBytes(src *fmp.Fmpz) []byte {
   return src.Bytes()
 }
 
 // given e, p and q solve for the private exponent d
-func SolveforD(p *gmp.Int, q *gmp.Int, e *gmp.Int) *gmp.Int {
-  return new(gmp.Int).ModInverse(e, 
-            new(gmp.Int).Mul(
-                new(gmp.Int).Sub(p, BigOne), 
-                new(gmp.Int).Sub(q, BigOne)
-              )
+func SolveforD(p *fmp.Fmpz, q *fmp.Fmpz, e *fmp.Fmpz) *fmp.Fmpz {
+  return new(fmp.Fmpz).ModInverse(e, 
+            new(fmp.Fmpz).Mul(
+                new(fmp.Fmpz).Sub(p, BigOne), 
+                new(fmp.Fmpz).Sub(q, BigOne),
+              ),
             )
 }
 
@@ -42,23 +42,23 @@ func SolveforD(p *gmp.Int, q *gmp.Int, e *gmp.Int) *gmp.Int {
  * given d, e, and n, find p and q - uses an algorithm from pycrypto _slowmath.py [0]
  * [0]: https://github.com/dlitz/pycrypto/blob/master/lib/Crypto/PublicKey/_slowmath.py
  */
-func FindPGivenD(d *gmp.Int, e *gmp.Int, n *gmp.Int) *gmp.Int {
-  m       := new(gmp.Int)
-  tmp     := new(gmp.Int)
+func FindPGivenD(d *fmp.Fmpz, e *fmp.Fmpz, n *fmp.Fmpz) *fmp.Fmpz {
+  m       := new(fmp.Fmpz)
+  tmp     := new(fmp.Fmpz)
 
-  ktot    := new(gmp.Int).Set(tmp.Mul(d,e).Sub(tmp,BigOne))
-  t       := new(gmp.Int).Set(ktot)
+  ktot    := new(fmp.Fmpz).Set(tmp.Mul(d,e).Sub(tmp,BigOne))
+  t       := new(fmp.Fmpz).Set(ktot)
 
   for tmp.Mod(t,BigTwo).Cmp(BigZero) == 0 {
     t.DivMod(t, BigTwo, m)
   }
 
   for a := 2; a < 1000; a+=2 {
-    k := new(gmp.Int).Set(t)
+    k := new(fmp.Fmpz).Set(t)
 
-    cand := new(gmp.Int)
+    cand := new(fmp.Fmpz)
     for k.Cmp(ktot) < 0 {
-      cand.Exp(gmp.NewInt(int64(a)), k, n)
+      cand.Exp(fmp.NewFmpz(int64(a)), k, n)
 
       if cand.Cmp(BigOne) != 0 && cand.Cmp(tmp.Sub(n,BigOne)) != 0 && tmp.Exp(cand, BigTwo, n).Cmp(BigOne) == 0 {
         return FindGcd(tmp.Add(cand, BigOne), n)
@@ -74,10 +74,10 @@ func FindPGivenD(d *gmp.Int, e *gmp.Int, n *gmp.Int) *gmp.Int {
 /*
  * returns t if n is a perfect square -1 otherwise
  */
-func IsPerfectSquare(n *gmp.Int) *gmp.Int {
-  h := new(gmp.Int).And(n, BigSixteen)
+func IsPerfectSquare(n *fmp.Fmpz) *fmp.Fmpz {
+  h := new(fmp.Fmpz).And(n, BigSixteen)
 
-  if h.Cmp(gmp.NewInt(9)) > 1 {
+  if h.Cmp(fmp.NewFmpz(9)) > 1 {
     return BigNOne
   }
 
@@ -85,7 +85,7 @@ func IsPerfectSquare(n *gmp.Int) *gmp.Int {
      h.Cmp(BigFive) != 0 && h.Cmp(BigSix) != 0 &&
      h.Cmp(BigSeven) != 0 && h.Cmp(BigEight) != 0) {
 
-    t := new(gmp.Int).Sqrt(n)
+    t := new(fmp.Fmpz).Sqrt(n)
 
     if t.Mul(t,t).Cmp(n) == 0 {
       return t
@@ -97,10 +97,10 @@ func IsPerfectSquare(n *gmp.Int) *gmp.Int {
   return BigNOne
 }
 
-func RationalToContfract(x, y *gmp.Int) []int {
-  a := new(gmp.Int).Div(x,y)
-  b := new(gmp.Int).Mul(a,y)
-  c := new(gmp.Int)
+func RationalToContfract(x, y *fmp.Fmpz) []int {
+  a := new(fmp.Fmpz).Div(x,y)
+  b := new(fmp.Fmpz).Mul(a,y)
+  c := new(fmp.Fmpz)
 
   var pquotients []int
 
@@ -113,28 +113,28 @@ func RationalToContfract(x, y *gmp.Int) []int {
   return pquotients
 }
 
-func ContfractToRational(frac []int) (*gmp.Int, *gmp.Int) {
+func ContfractToRational(frac []int) (*fmp.Fmpz, *fmp.Fmpz) {
   var remainder []int
 
   switch l := len(frac); l {
     case 0: 
       return BigZero, BigOne
     case 1: 
-      return gmp.NewInt(int64(frac[0])), BigOne
+      return fmp.NewFmpz(int64(frac[0])), BigOne
     default: 
       remainder = frac[1:l]
       num, denom := ContfractToRational(remainder)
-      fracZ := gmp.NewInt(int64(frac[0]))
+      fracZ := fmp.NewFmpz(int64(frac[0]))
       return fracZ.Mul(fracZ, num).Add(fracZ, denom), num
   }
 }
 
-func ConvergantsFromContfract(frac []int) [][2]*gmp.Int {
-  var convs [][2]*gmp.Int
+func ConvergantsFromContfract(frac []int) [][2]*fmp.Fmpz {
+  var convs [][2]*fmp.Fmpz
 
   for i, _ := range frac {
     a, b := ContfractToRational(frac[0:i])
-    z := [2]*gmp.Int{a, b}
+    z := [2]*fmp.Fmpz{a, b}
     convs = append(convs, z)
   }
   return convs

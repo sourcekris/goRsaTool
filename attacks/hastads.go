@@ -1,7 +1,7 @@
 package attacks
 
 import (
-  "github.com/ncw/gmp"
+  fmp "github.com/sourcekris/goflint"
   ln "github.com/sourcekris/goRsaTool/libnum"
 )
 
@@ -12,10 +12,10 @@ func (targetRSA *RSAStuff) Hastads() {
 
   c := ln.BytesToNumber(targetRSA.CipherText)
 
-  m := new(gmp.Int)
-  pow := new(gmp.Int)
+  m := new(fmp.Fmpz)
+  pow := new(fmp.Fmpz)
 
-  original := new(gmp.Int).Set(c)
+  original := new(fmp.Fmpz).Set(c)
 
   for {
     m.Root(c, uint32(targetRSA.Key.PublicKey.E.Int64()))
