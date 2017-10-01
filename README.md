@@ -21,7 +21,7 @@ Attacks supported in this go version:
  * `go get github.com/sourcekris/goflint`
  * `go get github.com/sourcekris/x509big` 
  * You'll need the Fast Library for Number Theory (FLINT2) installed, on Debian this works:
-  * `apt-get install libflint-dev`
+  * `sudo apt-get install libflint-dev`
 
 ## Usage:
 
