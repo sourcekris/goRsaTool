@@ -144,7 +144,7 @@ func FMPtoRSAPrivateKey(key *FMPPrivateKey) *rsa.PrivateKey {
   return privateKey
 }
 
-func GMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
+func FMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
   pubKey := &x509big.BigPublicKey{
     N: new(big.Int).SetBytes(key.N.Bytes()),
     E: new(big.Int).SetBytes(key.PublicKey.E.Bytes()),

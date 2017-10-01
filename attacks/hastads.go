@@ -18,7 +18,7 @@ func (targetRSA *RSAStuff) Hastads() {
   original := new(fmp.Fmpz).Set(c)
 
   for {
-    m.Root(c, uint32(targetRSA.Key.PublicKey.E.Int64()))
+    m.Root(c, int32(targetRSA.Key.PublicKey.E.Int64()))
     pow.Exp(m, targetRSA.Key.PublicKey.E, targetRSA.Key.N)
 
     if pow.Cmp(original) == 0 {
