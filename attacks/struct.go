@@ -72,18 +72,18 @@ func (targetRSA *RSAStuff) PackGivenP(p *fmp.Fmpz) {
 }
 
 func (targetRSA *RSAStuff) DumpKey() {
-  fmt.Printf("[*] n = %d\n", targetRSA.Key.PublicKey.N)
-  fmt.Printf("[*] e = %d\n", targetRSA.Key.PublicKey.E)
+  fmt.Printf("[*] n = %s\n", targetRSA.Key.PublicKey.N)
+  fmt.Printf("[*] e = %s\n", targetRSA.Key.PublicKey.E)
 
   // XXX: Support RSA multiprime [where len(key.Primes) > 2]
   if targetRSA.Key.D!= nil {
-    fmt.Printf("[*] d = %d\n", targetRSA.Key.D)
-    fmt.Printf("[*] p = %d\n", targetRSA.Key.Primes[0])
-    fmt.Printf("[*] q = %d\n", targetRSA.Key.Primes[1])
+    fmt.Printf("[*] d = %s\n", targetRSA.Key.D)
+    fmt.Printf("[*] p = %s\n", targetRSA.Key.Primes[0])
+    fmt.Printf("[*] q = %s\n", targetRSA.Key.Primes[1])
   }
 
   if len(targetRSA.CipherText) > 0 {
-    fmt.Printf("[*] c = %d\n", libnum.BytesToNumber(targetRSA.CipherText))
+    fmt.Printf("[*] c = %s\n", libnum.BytesToNumber(targetRSA.CipherText))
   }
 }
 

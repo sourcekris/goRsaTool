@@ -30,7 +30,11 @@ func main() {
 
   // Did we get a public key file to read
   if len(*keyFile) > 0 {
-    key, _ := attacks.ImportKey(*keyFile)
+    key, errImport := attacks.ImportKey(*keyFile)
+
+    if errImport != nil {
+      return
+    }
 
     var c []byte
     var err error
@@ -56,7 +60,8 @@ func main() {
     //targetRSA.PastCTFPrimes()
     //targetRSA.Hastads()
     //targetRSA.FermatFactorization()
-    targetRSA.Wiener()
+    //targetRSA.Wiener()
+    targetRSA.SmallFractions()
     
 
     // were we able to solve for the private key?
