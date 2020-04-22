@@ -25,11 +25,17 @@ Attacks supported in this go version:
 
 ## Usage:
 
-### Generate a public key :
+### Generate a public key:
 `./gorsatool -createkey -n 7828374823761928712873129873981723...12837182 -e 65537`
 
 ### Dump the parameters from a key:
 `./gorsatool -dumpkey -key ./key.pub`
 
-### Attack a public key
-`./gorsatool -key ./key.pub`
+### Attack a public key:
+`./gorsatool -key ./key.pub -attacks all`
+
+### List available attacks:
+`./gorsatool -list`
+
+### Attack a public key with a specific attack:
+`./gorsatool -key ./key.pub -attacks wiener`
