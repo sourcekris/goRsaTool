@@ -1,30 +1,33 @@
 package attacks
 
 import (
-  "fmt"
-  "strings"
+	"fmt"
+	"strings"
 
-  fmp "github.com/sourcekris/goflint"
-  ln "github.com/sourcekris/goRsaTool/libnum"
-  )
+	ln "github.com/sourcekris/goRsaTool/libnum"
+	fmp "github.com/sourcekris/goflint"
+)
 
 const maxnoveltylen = 25
 
-func (targetRSA *RSAStuff) NoveltyPrimes() {
-  if targetRSA.Key.D != nil {
-    return
-  }
-  
-  modp := new(fmp.Fmpz)
+// NoveltyPrimes attack.
+func NoveltyPrimes(t *RSAStuff) error {
+	if t.Key.D != nil {
+		return nil
+	}
 
-  for i := 0; i < (maxnoveltylen-4); i++ {
-    p, _  := new(fmp.Fmpz).SetString("3133" + strings.Repeat("3", i) + "7",10)
-    modp.Mod(targetRSA.Key.N, p)
+	modp := new(fmp.Fmpz)
 
-    if modp.Cmp(ln.BigZero) == 0 {
-      targetRSA.PackGivenP(p)
-      fmt.Printf("[+] Novelty Factor found.\n")
-      return
-    }
-  }
+	for i := 0; i < (maxnoveltylen - 4); i++ {
+		p, _ := new(fmp.Fmpz).SetString("3133"+strings.Repeat("3", i)+"7", 10)
+		modp.Mod(t.Key.N, p)
+
+		if modp.Cmp(ln.BigZero) == 0 {
+			t.PackGivenP(p)
+			fmt.Printf("[+] Novelty Factor found.\n")
+			return nil
+		}
+	}
+
+	return nil
 }

@@ -1,58 +1,60 @@
 package attacks
 
 import (
-  "fmt"
-  fmp "github.com/sourcekris/goflint"
-  ln "github.com/sourcekris/goRsaTool/libnum"
+	"fmt"
+
+	ln "github.com/sourcekris/goRsaTool/libnum"
+	fmp "github.com/sourcekris/goflint"
 )
 
-func (targetRSA *RSAStuff) SmallFractions() {
-  if targetRSA.Key.D != nil {
-    return
-  }
+// SmallFractions attack.
+func SmallFractions(t *RSAStuff) error {
+	if t.Key.D != nil {
+		return nil
+	}
 
-  depth := 50
-  t := targetRSA.Key.N.BitLen()
-  //p := new(fmp.Fmpz)
-  r := new(fmp.Fmpz)
-  f_den := new(fmp.Fmpz)
-  f_num := new(fmp.Fmpz)
+	// TODO(sewid): Does this stuff even work?
+	depth := 50
+	//t := t.Key.N.BitLen()
 
-  fmt.Printf("depth: %d\nt: %d\n", depth, t)
+	r := new(fmp.Fmpz)
+	fDen := new(fmp.Fmpz)
+	fNum := new(fmp.Fmpz)
 
-  for den := 2; den < depth + 1; den++ {
-    for num := 1; num < den; num++ {
-      f_den.SetInt64(int64(den))
-      f_num.SetInt64(int64(num))
+	// fmt.Printf("n: %s\nt: %d\ndepth: %d\n", t.Key.N, depth, t)
 
-      g := new(fmp.Fmpz).GCD(f_den, f_num)
+	for den := 2; den < depth+1; den++ {
+		for num := 1; num < den; num++ {
+			fDen.SetInt64(int64(den))
+			fNum.SetInt64(int64(num))
 
-      if g.Cmp(ln.BigOne) == 0 {
-        r.Div(f_den, f_num)
-        phint := new(fmp.Fmpz).Sqrt(r.Mul(targetRSA.Key.N, r))
+			g := new(fmp.Fmpz).GCD(fDen, fNum)
 
-        d_maybe := new(fmp.Fmpz).ModInverse(targetRSA.Key.PublicKey.E, phint)
-        p_maybe := ln.FindPGivenD(d_maybe, targetRSA.Key.PublicKey.E, targetRSA.Key.N)
+			if g.Cmp(ln.BigOne) == 0 {
+				phint := r.Mul(fDen, t.Key.N).Div(r, fNum).Sqrt(r)
 
-        fmt.Printf("pmaybe:%s     %s\n", p_maybe, d_maybe)
-        if p_maybe.Cmp(ln.BigZero) > 0 {
-          fmt.Printf("p: %s\n", p_maybe)
+				// need to find the small roots of phint
+				//fmt.Printf("phint: %s\n", phint)
+				dMaybe := new(fmp.Fmpz).ModInverse(t.Key.PublicKey.E, phint)
+				pMaybe := ln.FindPGivenD(dMaybe, t.Key.PublicKey.E, t.Key.N)
 
-          return
-        }
+				fmt.Printf("pmaybe:%s\n", pMaybe)
+				if pMaybe.Cmp(ln.BigZero) > 0 {
+					fmt.Printf("p: %s\n", pMaybe)
 
-        fmt.Printf("phint: %s\n", phint)
-      }
-    }
-  }
-  //targetRSA.PackGivenP(new(fmp.Fmpz).Add(a,b))
-  //fmt.Printf("[+] Factors found with fermat\n")
+					return nil
+				}
+			}
+		}
+	}
+	//t.PackGivenP(new(fmp.Fmpz).Add(a,b))
+	//fmt.Printf("[+] Factors found with fermat\n")
+	return nil
 }
-
 
 /*
 
-p = 0 
+p = 0
 
 for den in xrange(2, depth+1):
   for num in xrange(1, den):

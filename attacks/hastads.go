@@ -1,32 +1,33 @@
 package attacks
 
 import (
-  fmp "github.com/sourcekris/goflint"
-  ln "github.com/sourcekris/goRsaTool/libnum"
+	ln "github.com/sourcekris/goRsaTool/libnum"
+	fmp "github.com/sourcekris/goflint"
 )
 
-func (targetRSA *RSAStuff) Hastads() {
-  if targetRSA.Key.D != nil || targetRSA.Key.PublicKey.E.Cmp(ln.BigEleven) > 0  || len(targetRSA.CipherText) == 0 {
-    return
-  }
+// Hastads attack.
+func Hastads(t *RSAStuff) error {
+	if t.Key.D != nil || t.Key.PublicKey.E.Cmp(ln.BigEleven) > 0 || len(t.CipherText) == 0 {
+		return nil
+	}
 
-  c := ln.BytesToNumber(targetRSA.CipherText)
+	c := ln.BytesToNumber(t.CipherText)
 
-  m := new(fmp.Fmpz)
-  pow := new(fmp.Fmpz)
+	m := new(fmp.Fmpz)
+	pow := new(fmp.Fmpz)
 
-  original := new(fmp.Fmpz).Set(c)
+	original := new(fmp.Fmpz).Set(c)
 
-  for {
-    m.Root(c, int32(targetRSA.Key.PublicKey.E.Int64()))
-    pow.Exp(m, targetRSA.Key.PublicKey.E, targetRSA.Key.N)
+	for {
+		m.Root(c, int32(t.Key.PublicKey.E.Int64()))
+		pow.Exp(m, t.Key.PublicKey.E, t.Key.N)
 
-    if pow.Cmp(original) == 0 {
-      targetRSA.PlainText = ln.NumberToBytes(m)
-      return
-    } 
-    c.Add(c, targetRSA.Key.N)
-  }
+		if pow.Cmp(original) == 0 {
+			t.PlainText = ln.NumberToBytes(m)
+			return nil
+		}
+		c.Add(c, t.Key.N)
+	}
 
-  return
+	return nil
 }
