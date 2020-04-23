@@ -9,9 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
 	"github.com/sourcekris/goRsaTool/utils"
 
-	ln "github.com/sourcekris/goRsaTool/libnum"
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -41,7 +42,7 @@ func solveforP(equation string) *fmp.Fmpz {
 }
 
 // FactorDB factors an RSA Public Key using FactorDB.
-func FactorDB(t *RSAStuff) error {
+func FactorDB(t *keys.RSA) error {
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil

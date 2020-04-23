@@ -5,7 +5,9 @@ import (
 
 	"github.com/kavehmz/prime"
 
-	ln "github.com/sourcekris/goRsaTool/libnum"
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -13,7 +15,7 @@ import (
 const maxprimeint = 1000000
 
 // SmallQ iterate small primes < maxprimeint and test them as factors of N at a memory cost.
-func SmallQ(t *RSAStuff) error {
+func SmallQ(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

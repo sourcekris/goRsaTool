@@ -1,12 +1,14 @@
 package attacks
 
 import (
-	ln "github.com/sourcekris/goRsaTool/libnum"
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
 // Hastads attack.
-func Hastads(t *RSAStuff) error {
+func Hastads(t *keys.RSA) error {
 	if t.Key.D != nil || t.Key.PublicKey.E.Cmp(ln.BigEleven) > 0 || len(t.CipherText) == 0 {
 		return nil
 	}

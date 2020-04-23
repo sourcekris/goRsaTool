@@ -3,12 +3,14 @@ package attacks
 import (
 	"fmt"
 
-	ln "github.com/sourcekris/goRsaTool/libnum"
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
 // SmallFractions attack.
-func SmallFractions(t *RSAStuff) error {
+func SmallFractions(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

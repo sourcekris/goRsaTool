@@ -6,12 +6,14 @@ import (
 	"os"
 	"strings"
 
-	ln "github.com/sourcekris/goRsaTool/libnum"
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
 // PastCTFPrimes attack.
-func PastCTFPrimes(t *RSAStuff) error {
+func PastCTFPrimes(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

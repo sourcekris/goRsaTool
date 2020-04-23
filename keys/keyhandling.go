@@ -1,4 +1,4 @@
-package attacks
+package keys
 
 import (
 	"crypto/x509"

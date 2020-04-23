@@ -1,4 +1,4 @@
-package libnum
+package ln
 
 import (
 	fmp "github.com/sourcekris/goflint"

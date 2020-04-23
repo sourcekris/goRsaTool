@@ -8,11 +8,12 @@ import (
 	"strconv"
 
 	"github.com/sourcekris/goRsaTool/attacks"
+	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
 )
 
 // unnatended will run all supported attacks against t that are listed as working in unnatended mode.
-func unnatended(t *attacks.RSAStuff) []error {
+func unnatended(t *keys.RSA) []error {
 	var errs []error
 	for _, a := range attacks.SupportedAttacks.Supported {
 		if a.Unnatended {
@@ -72,7 +73,7 @@ func main() {
 
 	// Did we get a public key file to read
 	if len(*keyFile) > 0 {
-		key, errImport := attacks.ImportKey(*keyFile)
+		key, errImport := keys.ImportKey(*keyFile)
 
 		if errImport != nil {
 			return
@@ -88,7 +89,7 @@ func main() {
 			}
 		}
 
-		targetRSA, _ := attacks.NewRSAStuff(key, c, nil, *pastPrimesFile)
+		targetRSA, _ := keys.NewRSA(key, c, nil, *pastPrimesFile)
 
 		if *dumpKeyMode != false {
 			targetRSA.DumpKey()
@@ -113,7 +114,7 @@ func main() {
 
 		// were we able to solve for the private key?
 		if targetRSA.Key.D != nil {
-			privStr := attacks.EncodeFMPPrivateKey(&targetRSA.Key)
+			privStr := keys.EncodeFMPPrivateKey(&targetRSA.Key)
 			fmt.Print(privStr)
 			return
 		}
@@ -141,7 +142,7 @@ func main() {
 					E: e,
 				}
 
-				pubStr, _ := attacks.EncodePublicKey(&pub)
+				pubStr, _ := keys.EncodePublicKey(&pub)
 				fmt.Println(pubStr)
 				return
 			} else {
