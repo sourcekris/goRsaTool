@@ -16,6 +16,11 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+var (
+	pRE = regexp.MustCompile("index\\.php\\?id\\=([0-9]+)")
+	qRE = regexp.MustCompile("value=\"([0-9\\^\\-]+)\"")
+)
+
 // solveforP extracts components of an equation we get back from factordb and solve it
 func solveforP(equation string) *fmp.Fmpz {
 	// sometimes the input is not an equation
@@ -57,34 +62,41 @@ func Attack(t *keys.RSA) error {
 
 	resp, err := httpClient.Get(url1 + t.Key.N.String())
 	if err != nil {
-		// TODO(sewid): Annotate error? - Was: fmt.Printf("[-] FactorDB was unreachable?\n")
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("unexpected HTTP code (%d) so we failed to lookup modulus", resp.StatusCode)
+		return fmt.Errorf("failed to lookup modulus - unexpected http code: %d", resp.StatusCode)
 	}
 
 	// read and response into []byte
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
 	// Extract the second url from the response using the regex
-	re, _ := regexp.Compile("index\\.php\\?id\\=([0-9]+)")
-	id := re.FindAll(bodyBytes, -1)
+	id := pRE.FindAll(bodyBytes, -1)
 
 	// Extract the primes from the second url
-	re2, _ := regexp.Compile("value=\"([0-9\\^\\-]+)\"")
-
-	r1, _ := httpClient.Get(url2 + string(id[1]))
+	r1, err := httpClient.Get(url2 + string(id[1]))
+	if err != nil {
+		return err
+	}
 	defer r1.Body.Close()
-	r1Bytes, _ := ioutil.ReadAll(r1.Body)
-	r1Prime := strings.Split(string(re2.Find(r1Bytes)), "\"")[1] // XXX: I bet this panics sometimes?
 
-	r2, _ := httpClient.Get(url2 + string(id[2]))
+	r1Bytes, _ := ioutil.ReadAll(r1.Body)
+	r1Prime := strings.Split(string(qRE.Find(r1Bytes)), "\"")[1] // XXX: I bet this panics sometimes?
+
+	r2, err := httpClient.Get(url2 + string(id[2]))
+	if err != nil {
+		return err
+	}
 	defer r2.Body.Close()
+
 	r2Bytes, _ := ioutil.ReadAll(r2.Body)
-	r2Prime := strings.Split(string(re2.Find(r2Bytes)), "\"")[1]
+	r2Prime := strings.Split(string(qRE.Find(r2Bytes)), "\"")[1]
 
 	// check if the returned values are all digits
 	if !utils.IsInt(r1Prime) || !utils.IsInt(r2Prime) {
@@ -97,8 +109,6 @@ func Attack(t *keys.RSA) error {
 		}
 
 		t.PackGivenP(tmpP)
-		fmt.Printf("[+] Found the factors.\n")
-
 		return nil
 	}
 
@@ -112,7 +122,5 @@ func Attack(t *keys.RSA) error {
 	}
 
 	t.PackGivenP(keyP)
-	fmt.Printf("[+] Found the factors.\n")
-
 	return nil
 }
