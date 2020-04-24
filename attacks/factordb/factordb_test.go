@@ -1,6 +1,7 @@
 package factordb
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/sourcekris/goRsaTool/keys"
@@ -72,5 +73,68 @@ func TestSolveForP(t *testing.T) {
 		if got.Cmp(ln.BigZero) != 0 && tc.wantErr {
 			t.Errorf("solveforP: %s unexpected result when expected error: %v", tc.name, got)
 		}
+	}
+}
+
+func TestGetHTMLAttr(t *testing.T) {
+	tt := []struct {
+		name    string
+		html    string
+		attr    string
+		prefix  string
+		match   int
+		want    string
+		wantErr bool
+	}{
+		{
+			name:   "expected format with specific prefix",
+			html:   `<img src="meme.gif"><a href="/p/link1.html">Link</a><p>text</p><a href="/p/link2.html">`,
+			attr:   "href",
+			prefix: "/p/",
+			match:  1,
+			want:   "/p/link2.html",
+		},
+		{
+			name:  "expected format with no prefix",
+			html:  `<img src="meme.gif"><input value="12345">Link</a><p>text</p><input src="/" value="5678">`,
+			attr:  "value",
+			match: 1,
+			want:  "5678",
+		},
+		{
+			name:    "expected format with no prefix but match out of range",
+			html:    `<img src="meme.gif"><input value="12345">Link</a><p>text</p><input src="/" value="5678">`,
+			attr:    "value",
+			match:   2,
+			wantErr: true,
+		},
+		{
+			name:    "expected format with wrong prefix",
+			html:    `<img src="meme.gif"><input value="12345">Link</a><p>text</p><input src="/" value="5678">`,
+			attr:    "value",
+			prefix:  "wrong",
+			wantErr: true,
+		},
+		{
+			name:    "attr not found",
+			html:    `<img src="meme.gif"><input value="12345">Link</a><p>text</p><input src="/" value="5678">`,
+			attr:    "chicken",
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tt {
+		r := strings.NewReader(tc.html)
+		got, err := getHTMLAttr(r, tc.attr, tc.prefix, tc.match)
+		if err != nil && !tc.wantErr {
+			t.Errorf("getHTMLAttr() failed: %s - got error when none expected: %v", tc.name, err)
+		}
+		if err == nil && tc.wantErr {
+			t.Errorf("getHTMLAttr() failed: %s - expected error but got none", tc.name)
+		}
+		if got != tc.want && !tc.wantErr {
+			t.Errorf("getHTMLAttr() failed: %s - got %v wanted %v", tc.name, got, tc.want)
+		}
+
 	}
 }

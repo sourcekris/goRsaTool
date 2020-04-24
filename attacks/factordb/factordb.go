@@ -44,11 +44,7 @@ func getHTMLAttr(r io.Reader, attr, prefix string, match int) (string, error) {
 		tt := z.Next()
 		switch tt {
 		case html.ErrorToken:
-			err := z.Err()
-			if err != io.EOF {
-				return "", err
-			}
-			return "", nil
+			return "", z.Err()
 		case html.StartTagToken:
 			for {
 				k, v, _ := z.TagAttr()
