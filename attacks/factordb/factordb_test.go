@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -23,5 +24,53 @@ func TestFactorDB(t *testing.T) {
 
 	if targetRSA.Key.D.Cmp(d) != 0 {
 		t.Errorf("got %v wanted %v for d\n", targetRSA.Key.D, d)
+	}
+}
+
+func TestSolveForP(t *testing.T) {
+	tt := []struct {
+		name    string
+		eq      string
+		want    *fmp.Fmpz
+		wantErr bool
+	}{
+		{
+			name: "expected equation format",
+			eq:   "2^10-1",
+			want: fmp.NewFmpz(1023),
+		},
+		{
+			name:    "partial equation format",
+			eq:      "2^10",
+			want:    fmp.NewFmpz(-1),
+			wantErr: true,
+		},
+		{
+			name:    "unexpected equation format",
+			eq:      "2+4-1",
+			want:    fmp.NewFmpz(-1),
+			wantErr: true,
+		},
+		{
+			name:    "empty equation",
+			eq:      "",
+			want:    fmp.NewFmpz(-1),
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tt {
+		got := solveforP(tc.eq)
+		if tc.want.Cmp(got) != 0 && !tc.wantErr {
+			t.Errorf("solveforP: %s failed - got %v want %v", tc.name, got, tc.want)
+		}
+
+		if got.Cmp(ln.BigZero) == 0 && !tc.wantErr {
+			t.Errorf("solveforP: %s unexpected error", tc.name)
+		}
+
+		if got.Cmp(ln.BigZero) != 0 && tc.wantErr {
+			t.Errorf("solveforP: %s unexpected result when expected error: %v", tc.name, got)
+		}
 	}
 }
