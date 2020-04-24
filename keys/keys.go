@@ -21,10 +21,11 @@ type RSA struct {
 	CipherText     []byte
 	PlainText      []byte
 	PastPrimesFile string
+	Verbose        bool
 }
 
 // NewRSA constructs an RSA object or returns an error.
-func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string) (*RSA, error) {
+func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string, v bool) (*RSA, error) {
 	if key.PublicKey.N == nil {
 		return nil, errors.New("Key had no modulus or exponent")
 	}
@@ -44,6 +45,7 @@ func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string) (*RSA, error) {
 		Key:            *key,
 		PastPrimesFile: pastPrimesFile,
 		CipherText:     cipherText,
+		Verbose:        v,
 	}, nil
 }
 
