@@ -1,4 +1,4 @@
-package attacks
+package noveltyprimes
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 
 const maxnoveltylen = 25
 
-// NoveltyPrimes attack.
-func NoveltyPrimes(t *keys.RSA) error {
+// Attack implements the NoveltyPrimes attack.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

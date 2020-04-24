@@ -1,4 +1,4 @@
-package attacks
+package fermat
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// FermatFactorization attack.
-func FermatFactorization(t *keys.RSA) error {
+// Attack implements the Fermat Factorization attack.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil

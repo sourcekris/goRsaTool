@@ -4,6 +4,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sourcekris/goRsaTool/attacks/factordb"
+	"github.com/sourcekris/goRsaTool/attacks/fermat"
+	"github.com/sourcekris/goRsaTool/attacks/hastads"
+	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
+	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
+	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
+	"github.com/sourcekris/goRsaTool/attacks/smallq"
+	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/keys"
 )
 
@@ -13,14 +21,14 @@ var SupportedAttacks *Attacks
 func init() {
 	SupportedAttacks = NewAttacks()
 	// TODO(sewid): Move attacks to their own packages and register them in each package init function.
-	SupportedAttacks.RegisterAttack("factordb", false, true, FactorDB)
-	SupportedAttacks.RegisterAttack("fermat", false, true, FermatFactorization)
-	SupportedAttacks.RegisterAttack("hastads", false, true, Hastads)
-	SupportedAttacks.RegisterAttack("novelty", false, true, NoveltyPrimes)
-	SupportedAttacks.RegisterAttack("pastctf", false, true, PastCTFPrimes)
-	SupportedAttacks.RegisterAttack("smallfractions", false, false, SmallFractions)
-	SupportedAttacks.RegisterAttack("smallq", false, true, SmallQ)
-	SupportedAttacks.RegisterAttack("wiener", false, true, Wiener)
+	SupportedAttacks.RegisterAttack("factordb", false, true, factordb.Attack)
+	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
+	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
+	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
+	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
+	SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
+	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
+	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
 }
 
 type attackFunc func(*keys.RSA) error

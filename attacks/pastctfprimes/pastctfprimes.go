@@ -1,4 +1,4 @@
-package attacks
+package pastctfprimes
 
 import (
 	"bufio"
@@ -12,8 +12,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// PastCTFPrimes attack.
-func PastCTFPrimes(t *keys.RSA) error {
+// Attack implements the PastCTFPrimes attack.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

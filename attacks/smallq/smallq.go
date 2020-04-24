@@ -1,4 +1,4 @@
-package attacks
+package smallq
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ import (
 // go seems so fast making small primes we can probably make this much larger
 const maxprimeint = 1000000
 
-// SmallQ iterate small primes < maxprimeint and test them as factors of N at a memory cost.
-func SmallQ(t *keys.RSA) error {
+// Attack iterate small primes < maxprimeint and test them as factors of N at a memory cost.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

@@ -1,4 +1,4 @@
-package attacks
+package hastads
 
 import (
 	"github.com/sourcekris/goRsaTool/keys"
@@ -7,8 +7,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// Hastads attack.
-func Hastads(t *keys.RSA) error {
+// Attack implements the Hastads attack.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil || t.Key.PublicKey.E.Cmp(ln.BigEleven) > 0 || len(t.CipherText) == 0 {
 		return nil
 	}

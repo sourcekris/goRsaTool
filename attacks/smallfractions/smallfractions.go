@@ -1,4 +1,4 @@
-package attacks
+package smallfractions
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// SmallFractions attack.
-func SmallFractions(t *keys.RSA) error {
+// Attack implements SmallFractions attack.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		return nil
 	}

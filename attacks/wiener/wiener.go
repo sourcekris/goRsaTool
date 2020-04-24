@@ -1,4 +1,4 @@
-package attacks
+package wiener
 
 import (
 	"github.com/sourcekris/goRsaTool/keys"
@@ -7,9 +7,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// Wiener attack based on the python implementation of the algorithm by Pablo Celayes:
+// Attack attack based on the python implementation of the algorithm by Pablo Celayes:
 // https://github.com/pablocelayes/rsa-wiener-attack
-func Wiener(t *keys.RSA) error {
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil

@@ -1,4 +1,4 @@
-package attacks
+package factordb
 
 import (
 	"errors"
@@ -41,8 +41,8 @@ func solveforP(equation string) *fmp.Fmpz {
 	return ln.BigZero
 }
 
-// FactorDB factors an RSA Public Key using FactorDB.
-func FactorDB(t *keys.RSA) error {
+// Attack factors an RSA Public Key using FactorDB.
+func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil
