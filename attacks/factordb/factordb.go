@@ -1,9 +1,8 @@
 package factordb
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -12,38 +11,69 @@ import (
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 	"github.com/sourcekris/goRsaTool/utils"
+	"golang.org/x/net/html"
 
 	fmp "github.com/sourcekris/goflint"
 )
 
 var (
-	pRE = regexp.MustCompile("index\\.php\\?id\\=([0-9]+)")
-	qRE = regexp.MustCompile("value=\"([0-9\\^\\-]+)\"")
+	base       = "http://www.factordb.com/"
+	query      = "index.php?query="
+	linkPrefix = "index.php?id="
+	// eqRE is a regex that matches equations in the form x^y-z
+	eqRE = regexp.MustCompile(`^(\d+)\^(\d+)\-(\d+)$`)
 )
 
 // solveforP extracts components of an equation we get back from factordb and solve it
 func solveforP(equation string) *fmp.Fmpz {
-	// sometimes the input is not an equation
-	if utils.IsInt(equation) {
-		m, _ := new(fmp.Fmpz).SetString(equation, 10)
-		return m
+	eq := eqRE.FindStringSubmatch(equation)
+	if len(eq) == 4 {
+		x, _ := new(fmp.Fmpz).SetString(eq[1], 10)
+		y, _ := new(fmp.Fmpz).SetString(eq[2], 10)
+		z, _ := new(fmp.Fmpz).SetString(eq[3], 10)
+		x.Exp(x, y, nil).Sub(x, z)
+		return x
 	}
-
-	reResult, _ := regexp.MatchString("^\\d+\\^\\d+\\-\\d+$", equation)
-	if reResult != false {
-		baseExp := strings.Split(equation, "^")
-		subMe := strings.Split(baseExp[1], "-")
-
-		f, _ := new(fmp.Fmpz).SetString(string(subMe[0]), 10)
-		g, _ := new(fmp.Fmpz).SetString(string(subMe[1]), 10)
-		e, _ := new(fmp.Fmpz).SetString(string(baseExp[0]), 10)
-
-		e.Exp(e, f, nil).Sub(e, g)
-
-		return e
-	}
-
 	return ln.BigZero
+}
+
+func getHTMLAttr(r io.Reader, attr, prefix string, match int) (string, error) {
+	var count int
+	z := html.NewTokenizer(r)
+	for {
+		tt := z.Next()
+		switch tt {
+		case html.ErrorToken:
+			err := z.Err()
+			if err != io.EOF {
+				return "", err
+			}
+			return "", nil
+		case html.StartTagToken:
+			for {
+				k, v, _ := z.TagAttr()
+				if string(k) == attr {
+					switch {
+					case prefix == "":
+						if count == match {
+							return string(v), nil
+						}
+						count++
+					case prefix != "" && strings.HasPrefix(string(v), prefix):
+						if count == match {
+							return string(v), nil
+						}
+						count++
+					}
+
+				}
+
+				if k == nil {
+					break
+				}
+			}
+		}
+	}
 }
 
 // Attack factors an RSA Public Key using FactorDB.
@@ -53,14 +83,11 @@ func Attack(t *keys.RSA) error {
 		return nil
 	}
 
-	url2 := "http://www.factordb.com/"
-	url1 := url2 + "index.php?query="
-
 	var httpClient = &http.Client{
 		Timeout: 15 * time.Second,
 	}
 
-	resp, err := httpClient.Get(url1 + t.Key.N.String())
+	resp, err := httpClient.Get(base + query + t.Key.N.String())
 	if err != nil {
 		return err
 	}
@@ -71,41 +98,40 @@ func Attack(t *keys.RSA) error {
 	}
 
 	// read and response into []byte
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	id, err := getHTMLAttr(resp.Body, "href", linkPrefix, 0)
 	if err != nil {
 		return err
 	}
 
-	// Extract the second url from the response using the regex
-	id := pRE.FindAll(bodyBytes, -1)
-
 	// Extract the primes from the second url
-	r1, err := httpClient.Get(url2 + string(id[1]))
+	r1, err := httpClient.Get(base + id)
 	if err != nil {
 		return err
 	}
 	defer r1.Body.Close()
 
-	r1Bytes, _ := ioutil.ReadAll(r1.Body)
-	r1Prime := strings.Split(string(qRE.Find(r1Bytes)), "\"")[1] // XXX: I bet this panics sometimes?
+	primeID, err := getHTMLAttr(r1.Body, "href", linkPrefix, 1)
+	if err != nil {
+		return err
+	}
 
-	r2, err := httpClient.Get(url2 + string(id[2]))
+	r2, err := httpClient.Get(base + primeID)
 	if err != nil {
 		return err
 	}
 	defer r2.Body.Close()
 
-	r2Bytes, _ := ioutil.ReadAll(r2.Body)
-	r2Prime := strings.Split(string(qRE.Find(r2Bytes)), "\"")[1]
+	p, err := getHTMLAttr(r2.Body, "value", "", 0)
+	if err != nil {
+		return err
+	}
 
 	// check if the returned values are all digits
-	if !utils.IsInt(r1Prime) || !utils.IsInt(r2Prime) {
+	if !utils.IsInt(p) {
 		// Try solve them as equations of the form x^y-z
-		tmpP := solveforP(r1Prime)
-		tmpQ := solveforP(r2Prime)
-
-		if tmpP.Cmp(ln.BigZero) == 0 || tmpQ.Cmp(ln.BigZero) == 0 {
-			return errors.New("one or more of the primes could not be resolved")
+		tmpP := solveforP(p)
+		if tmpP.Cmp(ln.BigZero) == 0 {
+			return fmt.Errorf("prime p could not be resolved: %v", p)
 		}
 
 		t.PackGivenP(tmpP)
@@ -113,14 +139,7 @@ func Attack(t *keys.RSA) error {
 	}
 
 	// convert them to fmpz
-	keyP, _ := new(fmp.Fmpz).SetString(r1Prime, 10)
-	keyQ, _ := new(fmp.Fmpz).SetString(r2Prime, 10)
-
-	// if p == q then the whole thing failed rather gracefully
-	if keyP.Cmp(keyQ) == 0 {
-		return errors.New("factorDB didn't know the factors")
-	}
-
+	keyP, _ := new(fmp.Fmpz).SetString(p, 10)
 	t.PackGivenP(keyP)
 	return nil
 }
