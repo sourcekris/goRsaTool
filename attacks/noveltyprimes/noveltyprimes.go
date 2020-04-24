@@ -1,7 +1,6 @@
 package noveltyprimes
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/sourcekris/goRsaTool/keys"
@@ -26,7 +25,6 @@ func Attack(t *keys.RSA) error {
 
 		if modp.Cmp(ln.BigZero) == 0 {
 			t.PackGivenP(p)
-			fmt.Printf("[+] Novelty Factor found.\n")
 			return nil
 		}
 	}

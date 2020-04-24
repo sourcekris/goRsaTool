@@ -1,8 +1,6 @@
 package smallq
 
 import (
-	"fmt"
-
 	"github.com/kavehmz/prime"
 
 	"github.com/sourcekris/goRsaTool/keys"
@@ -27,7 +25,6 @@ func Attack(t *keys.RSA) error {
 		modp = modp.Mod(t.Key.N, fmp.NewFmpz(int64(p)))
 		if modp.Cmp(ln.BigZero) == 0 {
 			t.PackGivenP(fmp.NewFmpz(int64(p)))
-			fmt.Printf("[+] Small q Factor found\n")
 			return nil
 		}
 	}

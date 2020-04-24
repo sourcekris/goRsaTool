@@ -1,8 +1,6 @@
 package fermat
 
 import (
-	"fmt"
-
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
@@ -31,7 +29,5 @@ func Attack(t *keys.RSA) error {
 	}
 
 	t.PackGivenP(new(fmp.Fmpz).Add(a, b))
-	fmt.Printf("[+] Factors found with fermat\n")
-
 	return nil
 }

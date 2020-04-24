@@ -2,7 +2,6 @@ package pastctfprimes
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 
@@ -43,8 +42,6 @@ func Attack(t *keys.RSA) error {
 		modp = modp.Mod(t.Key.N, &p)
 		if modp.Cmp(ln.BigZero) == 0 {
 			t.PackGivenP(&p)
-
-			fmt.Printf("[+] Past CTF prime factor found.\n")
 			return nil
 		}
 	}
