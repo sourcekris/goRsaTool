@@ -1,7 +1,14 @@
 package ln
 
 import (
+	"github.com/jbarham/primegen"
+
 	fmp "github.com/sourcekris/goflint"
+)
+
+const (
+	// The number of Miller-Rabin rounds for Golangs ProbablyPrime.
+	mrRounds = 20
 )
 
 var (
@@ -154,19 +161,16 @@ func ConvergantsFromContfract(frac []int) [][2]*fmp.Fmpz {
 	return convs
 }
 
-// SieveRangeOfEratosthenes returns primes from begin to n and this implementation comes from:
+// SieveOfEratosthenes returns primes from begin to n and this implementation comes from:
 // https://stackoverflow.com/a/21923233.
-func SieveRangeOfEratosthenes(begin, n int) []int {
-	if begin > n {
-		return nil
-	}
-
+func SieveOfEratosthenes(n int) []int {
 	var primes []int
 	b := make([]bool, n)
-	for i := begin; i < n; i++ {
+	for i := 2; i < n; i++ {
 		if b[i] == true {
 			continue
 		}
+
 		primes = append(primes, i)
 		for k := i * i; k < n; k += i {
 			b[k] = true
@@ -175,26 +179,41 @@ func SieveRangeOfEratosthenes(begin, n int) []int {
 	return primes
 }
 
-// SieveOfEratosthenes returns primes less than n
-func SieveOfEratosthenes(n int) []int {
-	return SieveRangeOfEratosthenes(2, n)
-}
-
-// SieveRangeOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
-// []int. It does not support finding primes > max_int.
-func SieveRangeOfEratosthenesFmp(begin, n int) []*fmp.Fmpz {
-	ps := SieveRangeOfEratosthenes(begin, n)
-	var res []*fmp.Fmpz
-	for _, p := range ps {
-		res = append(res, fmp.NewFmpz(int64(p)))
-	}
-	return res
-}
-
 // SieveOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
 // []int. It does not support finding primes > max_int.
 func SieveOfEratosthenesFmp(n int) []*fmp.Fmpz {
-	return SieveRangeOfEratosthenesFmp(2, n)
+	return FmpFromIntSlice(SieveOfEratosthenes(n))
+}
+
+// SieveRangeOfAtkin finds primes from begin to the limit n using a SieveOfAtkin from primegen package.
+func SieveRangeOfAtkin(begin, n int) []int {
+	var primes []int
+
+	pg := primegen.New()
+	pg.SkipTo(uint64(begin))
+	for i := begin; i < n; i++ {
+		primes = append(primes, int(pg.Next()))
+	}
+	return primes
+}
+
+// SieveOfAtkin finds primes from 0 to n using a SieveOfAtkin from primegen package.
+func SieveOfAtkin(n int) []int {
+	return SieveRangeOfAtkin(2, n)
+}
+
+// SieveOfAtkinFmp finds primes from 0 to n using a SieveOfAtkin from primegen package.
+func SieveOfAtkinFmp(n int) []*fmp.Fmpz {
+	return FmpFromIntSlice(SieveRangeOfAtkin(2, n))
+}
+
+// FmpFromIntSlice returns a slice of Fmpz from a slice of int.
+func FmpFromIntSlice(is []int) []*fmp.Fmpz {
+	var res []*fmp.Fmpz
+	for _, i := range is {
+		res = append(res, fmp.NewFmpz(int64(i)))
+	}
+	return res
 }
 
 // FmpString returns a base 10 fmp.Fmpz integer from a string. It returns BigZero on error.
