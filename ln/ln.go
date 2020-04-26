@@ -154,12 +154,16 @@ func ConvergantsFromContfract(frac []int) [][2]*fmp.Fmpz {
 	return convs
 }
 
-// SieveOfEratosthenes returns primes less than n and this implementation comes from:
-// https://stackoverflow.com/a/21923233
-func SieveOfEratosthenes(n int) []int {
+// SieveRangeOfEratosthenes returns primes from begin to n and this implementation comes from:
+// https://stackoverflow.com/a/21923233.
+func SieveRangeOfEratosthenes(begin, n int) []int {
+	if begin > n {
+		return nil
+	}
+
 	var primes []int
 	b := make([]bool, n)
-	for i := 2; i < n; i++ {
+	for i := begin; i < n; i++ {
 		if b[i] == true {
 			continue
 		}
@@ -171,15 +175,26 @@ func SieveOfEratosthenes(n int) []int {
 	return primes
 }
 
-// SieveOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
+// SieveOfEratosthenes returns primes less than n
+func SieveOfEratosthenes(n int) []int {
+	return SieveRangeOfEratosthenes(2, n)
+}
+
+// SieveRangeOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
 // []int. It does not support finding primes > max_int.
-func SieveOfEratosthenesFmp(n int) []*fmp.Fmpz {
-	ps := SieveOfEratosthenes(n)
+func SieveRangeOfEratosthenesFmp(begin, n int) []*fmp.Fmpz {
+	ps := SieveRangeOfEratosthenes(begin, n)
 	var res []*fmp.Fmpz
 	for _, p := range ps {
 		res = append(res, fmp.NewFmpz(int64(p)))
 	}
 	return res
+}
+
+// SieveOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
+// []int. It does not support finding primes > max_int.
+func SieveOfEratosthenesFmp(n int) []*fmp.Fmpz {
+	return SieveRangeOfEratosthenesFmp(2, n)
 }
 
 // FmpString returns a base 10 fmp.Fmpz integer from a string. It returns BigZero on error.
