@@ -13,6 +13,7 @@ Attacks supported in this go version:
 * fermat factorization for close p & q
 * low public exponent attack (requires ciphertext)
 * wiener's attack for large public exponents
+* pollards p-1 attack
 
 ## Installation
  * Requires go 1.9
@@ -39,3 +40,6 @@ Attacks supported in this go version:
 
 ### Attack a public key with a specific attack:
 `./gorsatool -key ./key.pub -attacks wiener`
+
+### Attack the example pollards p-1 key with the pollards p-1 attack:
+`./gorsatool -key examples/pollardsp1.pub -attacks pollardsp1`
