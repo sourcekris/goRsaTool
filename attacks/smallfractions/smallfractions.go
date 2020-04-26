@@ -15,7 +15,7 @@ func Attack(t *keys.RSA) error {
 		return nil
 	}
 
-	// TODO(sewid): Does this stuff even work?
+	// TODO(sewid): This currently doesn't work and I can't remember where this challenge came from.
 	depth := 50
 	//t := t.Key.N.BitLen()
 

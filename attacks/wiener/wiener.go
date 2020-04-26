@@ -7,7 +7,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// Attack attack based on the python implementation of the algorithm by Pablo Celayes:
+// Attack implements the Wiener attack on an RSA public key and this implementation is based on the
+// python implementation of the algorithm by Pablo Celayes:
 // https://github.com/pablocelayes/rsa-wiener-attack
 func Attack(t *keys.RSA) error {
 	if t.Key.D != nil {

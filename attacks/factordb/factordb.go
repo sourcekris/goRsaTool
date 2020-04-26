@@ -61,7 +61,6 @@ func getHTMLAttr(r io.Reader, attr, prefix string, match int) (string, error) {
 						}
 						count++
 					}
-
 				}
 
 				if k == nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
-	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
+	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/keys"
@@ -20,15 +20,16 @@ var SupportedAttacks *Attacks
 
 func init() {
 	SupportedAttacks = NewAttacks()
-	// TODO(sewid): Move attacks to their own packages and register them in each package init function.
+	// TODO(sewid): Register them in each package init function.
 	SupportedAttacks.RegisterAttack("factordb", false, true, factordb.Attack)
 	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
 	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
-	SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
+	// SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
 	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
+	SupportedAttacks.RegisterAttack("pollardsp1", false, true, pollardsp1.Attack)
 }
 
 type attackFunc func(*keys.RSA) error

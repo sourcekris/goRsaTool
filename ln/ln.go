@@ -153,3 +153,41 @@ func ConvergantsFromContfract(frac []int) [][2]*fmp.Fmpz {
 	}
 	return convs
 }
+
+// SieveOfEratosthenes returns primes less than n and this implementation comes from:
+// https://stackoverflow.com/a/21923233
+func SieveOfEratosthenes(n int) []int {
+	var primes []int
+	b := make([]bool, n)
+	for i := 2; i < n; i++ {
+		if b[i] == true {
+			continue
+		}
+		primes = append(primes, i)
+		for k := i * i; k < n; k += i {
+			b[k] = true
+		}
+	}
+	return primes
+}
+
+// SieveOfEratosthenesFmp is a convenience function that simply returns []*fmp.Fmpz instead of
+// []int. It does not support finding primes > max_int.
+func SieveOfEratosthenesFmp(n int) []*fmp.Fmpz {
+	ps := SieveOfEratosthenes(n)
+	var res []*fmp.Fmpz
+	for _, p := range ps {
+		res = append(res, fmp.NewFmpz(int64(p)))
+	}
+	return res
+}
+
+// FmpString returns a base 10 fmp.Fmpz integer from a string. It returns BigZero on error.
+func FmpString(s string) *fmp.Fmpz {
+	res, ok := new(fmp.Fmpz).SetString(s, 10)
+	if !ok {
+		return BigZero
+	}
+
+	return res
+}
