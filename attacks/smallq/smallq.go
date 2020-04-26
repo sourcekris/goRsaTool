@@ -1,8 +1,6 @@
 package smallq
 
 import (
-	"github.com/kavehmz/prime"
-
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
@@ -18,13 +16,13 @@ func Attack(t *keys.RSA) error {
 		return nil
 	}
 
-	primes := prime.Primes(maxprimeint)
+	primes := ln.SieveOfEratosthenesFmp(maxprimeint)
 	modp := new(fmp.Fmpz)
 
 	for _, p := range primes {
-		modp = modp.Mod(t.Key.N, fmp.NewFmpz(int64(p)))
+		modp = modp.Mod(t.Key.N, p)
 		if modp.Cmp(ln.BigZero) == 0 {
-			t.PackGivenP(fmp.NewFmpz(int64(p)))
+			t.PackGivenP(p)
 			return nil
 		}
 	}

@@ -2,6 +2,7 @@ package ln
 
 import (
 	"github.com/jbarham/primegen"
+	"github.com/kavehmz/prime"
 
 	fmp "github.com/sourcekris/goflint"
 )
@@ -207,11 +208,25 @@ func SieveOfAtkinFmp(n int) []*fmp.Fmpz {
 	return FmpFromIntSlice(SieveRangeOfAtkin(2, n))
 }
 
+// SegmentedSieveFmp is another prime sieve.
+func SegmentedSieveFmp(n int) []*fmp.Fmpz {
+	return FmpFromUInt64Slice(prime.Primes(uint64(n)))
+}
+
 // FmpFromIntSlice returns a slice of Fmpz from a slice of int.
 func FmpFromIntSlice(is []int) []*fmp.Fmpz {
 	var res []*fmp.Fmpz
 	for _, i := range is {
 		res = append(res, fmp.NewFmpz(int64(i)))
+	}
+	return res
+}
+
+// FmpFromUInt64Slice returns a slice of Fmpz from a slice of int.
+func FmpFromUInt64Slice(is []uint64) []*fmp.Fmpz {
+	var res []*fmp.Fmpz
+	for _, i := range is {
+		res = append(res, new(fmp.Fmpz).SetUint64(i))
 	}
 	return res
 }

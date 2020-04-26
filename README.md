@@ -18,7 +18,7 @@ Attacks supported in this go version:
 ## Installation
  * Requires go 1.9
  * Get dependencies:
- * `go get github.com/kavehmz/prime` 
+ * `go get github.com/jbarham/primegen` 
  * `go get github.com/sourcekris/goflint`
  * `go get github.com/sourcekris/x509big` 
  * You'll need the Fast Library for Number Theory (FLINT2) installed, on Debian this works:
