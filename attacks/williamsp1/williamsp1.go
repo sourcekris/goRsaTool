@@ -1,12 +1,41 @@
 package williamsp1
 
 import (
+	"github.com/jbarham/primegen"
 	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
+// Attack performs williams P+1 factorization.
 func Attack(k *keys.RSA) error {
+	p := primegen.New()
+	v := fmp.NewFmpz(0)
+	for {
+		v.Add(v, ln.BigOne)
+		for {
+			pcursor := fmp.NewFmpz(int64(p.Next()))
+			e := ln.ILog(new(fmp.Fmpz).Set(k.Key.N).Root(k.Key.N, 2), pcursor)
+			if e.Cmp(ln.BigZero) == 0 {
+				break
+			}
+			count := fmp.NewFmpz(0)
+			for count.Cmp(e) != 0 {
+				v = ln.MLucas(v, pcursor, k.Key.N)
+				count.Add(count, ln.BigOne)
+			}
 
-	// N := ln.FmpString("149767527975084886970446073530848114556615616489502613024958495602726912268566044330103850191720149622479290535294679429142532379851252608925587476670908668848275349192719279981470382501117310509432417895412013324758865071052169170753552224766744798369054498758364258656141800253652826603727552918575175830897")
+			g := ln.FindGcd(new(fmp.Fmpz).Set(v).Sub(v, ln.BigTwo), k.Key.N)
+			if g.Cmp(ln.BigOne) > 0 && g.Cmp(k.Key.N) < 0 {
+				// Found P.
+				k.PackGivenP(g)
+				return nil
+			}
 
-	return nil
+			if g.Cmp(k.Key.N) == 0 {
+				break
+			}
+		}
+	}
 }

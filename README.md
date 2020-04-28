@@ -14,6 +14,7 @@ Attacks supported in this go version:
 * low public exponent attack (requires ciphertext)
 * wiener's attack for large public exponents
 * pollards p-1 attack
+* williams p+1 attack
 
 ## Installation
  * Requires go 1.9

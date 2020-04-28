@@ -260,3 +260,35 @@ func MLucas(v, a, n *fmp.Fmpz) *fmp.Fmpz {
 
 	return v1
 }
+
+// ILog returns the greatest integer l such that b**l <= x.
+func ILog(x, b *fmp.Fmpz) *fmp.Fmpz {
+	l := fmp.NewFmpz(0)
+	for x.Cmp(b) >= 0 {
+		x.Div(x, b)
+		l.Add(l, BigOne)
+	}
+	return l
+}
+
+// IsPower returns the largest integer that, when squared/cubed/etc, yields n, or 0 if
+// no such integer exists.
+func IsPower(n *fmp.Fmpz) *fmp.Fmpz {
+	p := primegen.New()
+	for {
+		cursor := p.Next()
+		r := new(fmp.Fmpz).Root(n, int32(cursor))
+		if r.Cmp(BigZero) == 0 {
+			continue
+		}
+
+		rxp := new(fmp.Fmpz).Mul(r, fmp.NewFmpz(int64(cursor)))
+		if rxp.Cmp(n) == 0 {
+			return r
+		}
+
+		if r.Cmp(BigOne) == 0 {
+			return fmp.NewFmpz(0)
+		}
+	}
+}

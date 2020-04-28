@@ -14,7 +14,7 @@ func TestFindGcd(t *testing.T) {
 	d := new(fmp.Fmpz).Set(FindGcd(a, b))
 
 	if c.Cmp(d) != 0 {
-		t.Errorf("got %d; want %d for a = %d and b = %d\n", d, c, a, b)
+		t.Errorf("got %v; want %v for a = %v and b = %v", d, c, a, b)
 	}
 }
 
@@ -25,7 +25,7 @@ func TestNthRoot(t *testing.T) {
 	d := new(fmp.Fmpz).Root(a, c)
 
 	if b.Cmp(d) != 0 {
-		t.Errorf("got %d; want %d for a = %d and c = %d\n", d, b, a, c)
+		t.Errorf("got %v; want %v for a = %v and c = %v", d, b, a, c)
 	}
 }
 
@@ -36,13 +36,13 @@ func TestContfractToRational(t *testing.T) {
 	e, n := ContfractToRational(frac)
 
 	if e.Cmp(expectedE) != 0 || n.Cmp(expectedN) != 0 {
-		t.Errorf("got %d %d; want %d %d\n", e, n, expectedE, expectedN)
+		t.Errorf("got %v %v; want %v %v", e, n, expectedE, expectedN)
 	}
 }
 
 func TestIsPerfectSquare(t *testing.T) {
 	if IsPerfectSquare(fmp.NewFmpz(64)).Sign() < 0 || IsPerfectSquare(fmp.NewFmpz(65)).Sign() > 0 {
-		t.Error("IsPerfectSquare Failed\n")
+		t.Error("IsPerfectSquare Failed")
 	}
 }
 
@@ -53,9 +53,9 @@ func TestRationalToContfract(t *testing.T) {
 
 	testfrac := RationalToContfract(e, n)
 
-	for i, _ := range testfrac {
+	for i := range testfrac {
 		if testfrac[i] != frac[i] {
-			t.Errorf("Index %d of the result was %d wanted %d\n", i, testfrac[i], frac[i])
+			t.Errorf("Index %d of the result was %d wanted %d", i, testfrac[i], frac[i])
 		}
 	}
 }
@@ -63,13 +63,13 @@ func TestRationalToContfract(t *testing.T) {
 func TestSolveforD(t *testing.T) {
 	p := fmp.NewFmpz(54311)
 	e := fmp.NewFmpz(65537)
-	q, _ := new(fmp.Fmpz).SetString("158304142767773473275973624083670689370769915077762416888835511454118432478825486829242855992134819928313346652550326171670356302948444602468194484069516892927291240140200374848857608566129161693687407393820501709299228594296583862100570595789385365606706350802643746830710894411204232176703046334374939501731", 10)
-	d, _ := new(fmp.Fmpz).SetString("3202366961024225437401042327051546624286493666159185825709910141194793831730434297613156506897776947041469725191935860984079125187288357316861055577066775317547410806245642105103224133266085961352228593400306599829530729406090559213905092312407885703344866519615905603338057992843115227254119045112779823038562373", 10)
+	q := FmpString("158304142767773473275973624083670689370769915077762416888835511454118432478825486829242855992134819928313346652550326171670356302948444602468194484069516892927291240140200374848857608566129161693687407393820501709299228594296583862100570595789385365606706350802643746830710894411204232176703046334374939501731")
+	d := FmpString("3202366961024225437401042327051546624286493666159185825709910141194793831730434297613156506897776947041469725191935860984079125187288357316861055577066775317547410806245642105103224133266085961352228593400306599829530729406090559213905092312407885703344866519615905603338057992843115227254119045112779823038562373")
 
 	testD := SolveforD(p, q, e)
 
 	if testD.Cmp(d) != 0 {
-		t.Errorf("SolveforD resolves a different d. Got %d want %d\n", testD, d)
+		t.Errorf("SolveforD resolves a different d. Got %v want %v\n", testD, d)
 	}
 }
 
@@ -142,13 +142,70 @@ func TestMLucas(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		v, _ := new(fmp.Fmpz).SetString(tc.v, 10)
-		a, _ := new(fmp.Fmpz).SetString(tc.a, 10)
-		n, _ := new(fmp.Fmpz).SetString(tc.n, 10)
-		wantV1, _ := new(fmp.Fmpz).SetString(tc.want, 10)
+		v := FmpString(tc.v)
+		a := FmpString(tc.a)
+		n := FmpString(tc.n)
+		wantV1 := FmpString(tc.want)
 		gotV1 := MLucas(v, a, n)
 		if gotV1.Cmp(wantV1) != 0 {
 			t.Errorf("%s: failed: wanted %v got %v", tc.name, wantV1, gotV1)
+		}
+	}
+}
+
+func TestILog(t *testing.T) {
+	tt := []struct {
+		name string
+		x    string
+		b    int64
+		want int64
+	}{
+		{
+			name: "expected output for b of 2",
+			x:    "12237954403211546815378395288982323792658847476975159864079409416017555658438108790372593413062659460128601746248785192337852121411303913956673952150976477",
+			b:    2,
+			want: 511,
+		},
+		{
+			name: "expected output for b of 3",
+			x:    "12237954403211546815378395288982323792658847476975159864079409416017555658438108790372593413062659460128601746248785192337852121411303913956673952150976477",
+			b:    3,
+			want: 322,
+		},
+	}
+
+	for _, tc := range tt {
+		x := FmpString(tc.x)
+		want := fmp.NewFmpz(tc.want)
+
+		got := ILog(x, fmp.NewFmpz(tc.b))
+		if got.Cmp(want) != 0 {
+			t.Errorf("ILog() failed wanted %v got %v", want, got)
+		}
+	}
+
+}
+
+func TestIsPower(t *testing.T) {
+	tt := []struct {
+		name string
+		n    string
+		want int64
+	}{
+		{
+			name: "the only test case i have",
+			n:    "149767527975084886970446073530848114556615616489502613024958495602726912268566044330103850191720149622479290535294679429142532379851252608925587476670908668848275349192719279981470382501117310509432417895412013324758865071052169170753552224766744798369054498758364258656141800253652826603727552918575175830897",
+			want: 0,
+		},
+	}
+
+	for _, tc := range tt {
+		n := FmpString(tc.n)
+		want := fmp.NewFmpz(tc.want)
+
+		got := IsPower(n)
+		if got.Cmp(want) != 0 {
+			t.Errorf("IsPower() failed wanted %v got %v", want, got)
 		}
 	}
 }
