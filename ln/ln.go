@@ -240,3 +240,23 @@ func FmpString(s string) *fmp.Fmpz {
 
 	return res
 }
+
+// MLucas multiplies along a Lucas sequence modulo n.
+func MLucas(v, a, n *fmp.Fmpz) *fmp.Fmpz {
+	v1 := new(fmp.Fmpz).Set(v)
+	v2 := new(fmp.Fmpz).Mul(v, v)
+	v2.Sub(v2, BigTwo).Mod(v2, n)
+
+	for i := a.Bits(); i > 1; i-- {
+		if a.TstBit(i) == 0 {
+			tmpv1 := new(fmp.Fmpz).Set(v1)
+			v1.Mul(v1, v1).Sub(v1, BigTwo).Mod(v1, n)
+			v2.Mul(tmpv1, v2).Sub(v2, v).Mod(v2, n)
+		} else {
+			v1.Mul(v1, v2).Sub(v1, v).Mod(v1, n)
+			v2.Mul(v2, v2).Sub(v2, BigTwo).Mod(v2, n)
+		}
+	}
+
+	return v1
+}

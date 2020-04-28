@@ -8,7 +8,7 @@ import (
 )
 
 // go seems so fast making small primes we can probably make this much larger
-const maxprimeint = 1000000
+const maxprimeint = 100000000
 
 // Attack iterate small primes < maxprimeint and test them as factors of N at a memory cost.
 func Attack(t *keys.RSA) error {
