@@ -292,3 +292,11 @@ func IsPower(n *fmp.Fmpz) *fmp.Fmpz {
 		}
 	}
 }
+
+// FmpzMin returns the min(x,y)
+func FmpzMin(x, y *fmp.Fmpz) *fmp.Fmpz {
+	if x.Cmp(y) < 0 {
+		return x
+	}
+	return y
+}

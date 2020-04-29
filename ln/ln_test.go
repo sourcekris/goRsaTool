@@ -209,3 +209,38 @@ func TestIsPower(t *testing.T) {
 		}
 	}
 }
+
+func TestFmpzMin(t *testing.T) {
+	tt := []struct {
+		name string
+		x    int64
+		y    int64
+		want int64
+	}{
+		{
+			name: "x < y",
+			x:    1,
+			y:    2,
+			want: 1,
+		},
+		{
+			name: "x > y",
+			x:    2,
+			y:    1,
+			want: 1,
+		},
+		{
+			name: "x == y",
+			x:    2,
+			y:    2,
+			want: 2,
+		},
+	}
+
+	for _, tc := range tt {
+		got := FmpzMin(fmp.NewFmpz(tc.x), fmp.NewFmpz(tc.y))
+		if got.Cmp(fmp.NewFmpz(tc.want)) != 0 {
+			t.Errorf("FmpzMin() %s failed wanted %v got %v", tc.name, tc.want, got)
+		}
+	}
+}
