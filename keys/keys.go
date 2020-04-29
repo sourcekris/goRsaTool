@@ -180,6 +180,15 @@ func FMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
 	return privateKey
 }
 
+// FMPtoBigPublicKey takes a FMPPublicKey and returns an x509big.PublicKey using native go
+// big Int types.
+func FMPtoBigPublicKey(key *FMPPublicKey) *x509big.BigPublicKey {
+	return &x509big.BigPublicKey{
+		N: new(big.Int).SetBytes(key.N.Bytes()),
+		E: new(big.Int).SetBytes(key.E.Bytes()),
+	}
+}
+
 func encodeDerToPem(der []byte, t string) string {
 	p := pem.EncodeToMemory(
 		&pem.Block{
@@ -207,9 +216,14 @@ func EncodePrivateKey(priv *rsa.PrivateKey) string {
 	return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }
 
-// EncodeFMPPrivateKey marshalls an RSA private key using FMP types into a string or returns an
-// error.
+// EncodeFMPPrivateKey marshalls an RSA private key using FMP types into a string.
 func EncodeFMPPrivateKey(priv *FMPPrivateKey) string {
 	privder := x509big.MarshalPKCS1BigPrivateKey(FMPtoBigPrivateKey(priv))
 	return encodeDerToPem(privder, "RSA PRIVATE KEY")
+}
+
+// EncodeFMPPublicKey marshalls an RSA public key using FMP types into a string.
+func EncodeFMPPublicKey(pub *FMPPublicKey) string {
+	privder := x509big.MarshalPKCS1BigPublicKey(FMPtoBigPublicKey(pub))
+	return encodeDerToPem(privder, "RSA PUBLIC KEY")
 }

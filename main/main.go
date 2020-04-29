@@ -1,17 +1,16 @@
 package main
 
 import (
-	"crypto/rsa"
 	"flag"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
-	"strconv"
 
 	"github.com/sourcekris/goRsaTool/attacks"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
 var (
@@ -136,16 +135,17 @@ func main() {
 	} else {
 		if *createKeyMode {
 			if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
-				n, _ := new(big.Int).SetString(*modulusArg, 10)
-
-				// TODO(sewid): Support big integers here.
-				e, err := strconv.Atoi(*exponentArg)
-				if err != nil {
-					// TODO(sewid): Support big integers here.
-					logger.Fatalf("failed converting exponent to integer (too large?): %v", *exponentArg)
+				n, ok := new(fmp.Fmpz).SetString(*modulusArg, 10)
+				if !ok {
+					logger.Fatalf("failed converting modulus to integer: %q", *modulusArg)
 				}
 
-				pubStr, _ := keys.EncodePublicKey(&rsa.PublicKey{N: n, E: e})
+				e, ok := new(fmp.Fmpz).SetString(*exponentArg, 10)
+				if !ok {
+					logger.Fatalf("failed converting exponent to integer: %q", *exponentArg)
+				}
+
+				pubStr := keys.EncodeFMPPublicKey(&keys.FMPPublicKey{N: n, E: e})
 				fmt.Println(pubStr)
 				return
 			}
