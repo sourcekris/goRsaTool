@@ -15,6 +15,8 @@ Attacks supported in this go version:
 * wiener's attack for large public exponents
 * pollards p-1 attack
 * williams p+1 attack
+* pollards rho factorization - original Pollard's Monte Carlo factorization method
+* pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo factorization
 
 ## Installation
  * Requires go 1.9
