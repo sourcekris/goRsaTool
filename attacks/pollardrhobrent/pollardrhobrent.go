@@ -1,26 +1,11 @@
 package pollardrhobrent
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
 	fmp "github.com/sourcekris/goflint"
 )
-
-// getRand takes a seed from the environment and iterates the state
-// n random times to get a less deterministic random number from Flint.
-func getRand(state *fmp.FlintRandT, n *fmp.Fmpz) *fmp.Fmpz {
-	res := new(fmp.Fmpz)
-	rand.Seed(time.Now().UTC().UnixNano())
-	for i := 0; i < rand.Intn(65535); i++ {
-		res.Randm(state, n)
-	}
-
-	return res.Add(res, ln.BigOne)
-}
 
 // Attack conducts Pollard's Rho method Richard Brent variant for factoring
 // large composites. See: https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
@@ -34,9 +19,9 @@ func Attack(kk *keys.RSA) error {
 	)
 
 	for g.Cmp(kk.Key.N) == 0 {
-		y := getRand(state, kk.Key.N)
-		c := getRand(state, kk.Key.N)
-		m := getRand(state, kk.Key.N)
+		y := ln.GetRand(state, kk.Key.N)
+		c := ln.GetRand(state, kk.Key.N)
+		m := ln.GetRand(state, kk.Key.N)
 		r := fmp.NewFmpz(1)
 		q := fmp.NewFmpz(1)
 		g.SetInt64(1)

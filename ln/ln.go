@@ -1,6 +1,9 @@
 package ln
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/jbarham/primegen"
 	"github.com/kavehmz/prime"
 
@@ -299,4 +302,16 @@ func FmpzMin(x, y *fmp.Fmpz) *fmp.Fmpz {
 		return x
 	}
 	return y
+}
+
+// GetRand takes a seed from the environment and iterates the state a random
+// number of times to get a less deterministic random number from Flint.
+func GetRand(state *fmp.FlintRandT, n *fmp.Fmpz) *fmp.Fmpz {
+	res := new(fmp.Fmpz)
+	rand.Seed(time.Now().UTC().UnixNano())
+	for i := 0; i < rand.Intn(65535); i++ {
+		res.Randm(state, n)
+	}
+
+	return res.Add(res, BigOne)
 }

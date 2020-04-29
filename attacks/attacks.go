@@ -11,6 +11,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
+	"github.com/sourcekris/goRsaTool/attacks/pollardsrho"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/attacks/williamsp1"
@@ -32,6 +33,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
 	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
 	SupportedAttacks.RegisterAttack("pollardsp1", false, true, pollardsp1.Attack)
+	SupportedAttacks.RegisterAttack("pollardsrho", false, true, pollardsrho.Attack)
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 }
