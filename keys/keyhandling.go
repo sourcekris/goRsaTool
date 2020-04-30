@@ -7,36 +7,52 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/sourcekris/x509big"
-
 	fmp "github.com/sourcekris/goflint"
+	"github.com/sourcekris/x509big"
 )
 
-// Use local variant of the standard x509 library to yield a gmp Public Key
+type pkParser func([]byte) (*x509big.BigPublicKey, error)
+
+// parsePublicRsaKey attempts to try parsing the given public key yielding a FMPPublicKey or
+// an error using multiple methods.
 func parsePublicRsaKey(keyBytes []byte) (*FMPPublicKey, error) {
-	key, err := x509big.ParseBigPKIXPublicKey(keyBytes)
-	if err != nil {
-		return nil, errors.New("failed to parse the DER key after decoding")
+	var (
+		parsers = []pkParser{
+			x509big.ParseBigPKCS1PublicKey,
+			x509big.ParseBigPKIXPublicKey,
+		}
+		errs []error
+	)
+
+	for _, p := range parsers {
+		if key, err := p(keyBytes); err != nil {
+			errs = append(errs, err)
+		} else {
+			return &FMPPublicKey{
+				N: new(fmp.Fmpz).SetBytes(key.N.Bytes()),
+				E: new(fmp.Fmpz).SetBytes(key.E.Bytes()),
+			}, nil
+		}
 	}
 
-	switch key := key.(type) {
-	case *x509big.BigPublicKey:
-		k := &FMPPublicKey{
-			N: new(fmp.Fmpz).SetBytes(key.N.Bytes()),
-			E: new(fmp.Fmpz).SetBytes(key.E.Bytes()),
-		}
-		return k, nil
-	default:
-		return nil, errors.New("given key is not an RSA Key")
-	}
+	return nil, fmt.Errorf("parsePublicRsaKey failed: %v", errs)
 }
 
 func parsePrivateRsaKey(keyBytes []byte) (*FMPPrivateKey, error) {
 	key, err := x509.ParsePKCS1PrivateKey(keyBytes)
 	if err != nil {
-		return nil, errors.New("failed to parse the DER key after decoding")
+		return nil, fmt.Errorf("parsePrivateRsaKey: failed to parse the DER key after decoding: %v", err)
 	}
 	k := RSAtoFMPPrivateKey(key)
+	return &k, nil
+}
+
+func parseBigPrivateRsaKey(keyBytes []byte) (*FMPPrivateKey, error) {
+	key, err := x509big.ParseBigPKCS1PrivateKey(keyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("parseBigPrivateRsaKey: failed to parse the DER key after decoding: %v", err)
+	}
+	k := BigtoFMPPrivateKey(key)
 	return &k, nil
 }
 
@@ -48,13 +64,12 @@ func PrivateFromPublic(key *FMPPublicKey) *FMPPrivateKey {
 	}
 }
 
-// ImportKey imports a PEM key file and returns a rsa.PrivateKey object or error.
+// ImportKey imports a PEM key file and returns a FMPPrivateKey object or error.
 func ImportKey(keyFile string) (*FMPPrivateKey, error) {
 	// read the key from the disk
 	keyStr, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		fmt.Printf("[-] Failed to open/read file %s\n", keyFile)
-		return nil, err
+		return nil, fmt.Errorf("failed to open key file %q: %v", keyFile, err)
 	}
 
 	// decode the PEM data to extract the DER format key
@@ -66,13 +81,16 @@ func ImportKey(keyFile string) (*FMPPrivateKey, error) {
 	// extract a FMPPublicKey from the DER decoded data and pack a private key struct
 	key, err := parsePublicRsaKey(block.Bytes)
 	if err == nil {
-		return PrivateFromPublic(key), err
+		return PrivateFromPublic(key), nil
+	}
+	if err != nil {
+		fmt.Printf("failed decoding public key: %v\n\n", err)
 	}
 
-	priv, err := parsePrivateRsaKey(block.Bytes)
+	priv, err := parseBigPrivateRsaKey(block.Bytes)
 	if err != nil {
-		return nil, errors.New("failed to parse the key as either a public or private key")
+		return nil, fmt.Errorf("ImportKey: failed to parse the key as either a public or private key: %v", err)
 	}
-	return priv, err
+	return priv, nil
 
 }

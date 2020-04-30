@@ -86,7 +86,7 @@ func main() {
 		var err error
 		key, err := keys.ImportKey(*keyFile)
 		if err != nil {
-			return
+			logger.Fatalf("failed reading key file: %v", err)
 		}
 
 		var c []byte

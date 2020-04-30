@@ -120,6 +120,30 @@ func RSAtoFMPPrivateKey(key *rsa.PrivateKey) FMPPrivateKey {
 	return *fmpPrivateKey
 }
 
+// BigtoFMPPrivateKey takes a x509big.BigPrivateKey and returns a FMPPrivateKey that uses fmp.Fmpz types
+func BigtoFMPPrivateKey(key *x509big.BigPrivateKey) FMPPrivateKey {
+	fmpPubKey := &FMPPublicKey{
+		N: new(fmp.Fmpz).SetBytes(key.PublicKey.N.Bytes()),
+		E: new(fmp.Fmpz).SetBytes(key.PublicKey.E.Bytes()),
+	}
+
+	var fmpPrivateKey *FMPPrivateKey
+	if key.D != nil {
+		fmpPrivateKey = &FMPPrivateKey{
+			PublicKey: fmpPubKey,
+			D:         new(fmp.Fmpz).SetBytes(key.D.Bytes()),
+			Primes: []*fmp.Fmpz{
+				new(fmp.Fmpz).SetBytes(key.Primes[0].Bytes()),
+				new(fmp.Fmpz).SetBytes(key.Primes[1].Bytes()),
+			},
+		}
+	} else {
+		fmpPrivateKey = PrivateFromPublic(fmpPubKey)
+	}
+
+	return *fmpPrivateKey
+}
+
 // FMPtoRSAPrivateKey takes a FMPPRivateKey and returns an rsa.PrivateKey if the exponent fits
 // within the int type.
 func FMPtoRSAPrivateKey(key *FMPPrivateKey) *rsa.PrivateKey {
