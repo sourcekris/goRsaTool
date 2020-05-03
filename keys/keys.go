@@ -60,18 +60,18 @@ func (t *RSA) PackGivenP(p *fmp.Fmpz) {
 // String returns the key components in a string format.
 func (t *RSA) String() string {
 	var res string
-	res = fmt.Sprintf("[*] n = %s\n", t.Key.PublicKey.N)
-	res = fmt.Sprintf("%s[*] e = %s\n", res, t.Key.PublicKey.E)
+	res = fmt.Sprintf("n = %s\n", t.Key.PublicKey.N)
+	res = fmt.Sprintf("%se = %s\n", res, t.Key.PublicKey.E)
 
 	// TODO(sewid): Support RSA multiprime [where len(key.Primes) > 2]
 	if t.Key.D != nil {
-		res = fmt.Sprintf("%s[*] d = %s\n", res, t.Key.D)
-		res = fmt.Sprintf("%s[*] p = %s\n", res, t.Key.Primes[0])
-		res = fmt.Sprintf("%s[*] q = %s\n", res, t.Key.Primes[1])
+		res = fmt.Sprintf("%sd = %s\n", res, t.Key.D)
+		res = fmt.Sprintf("%sp = %s\n", res, t.Key.Primes[0])
+		res = fmt.Sprintf("%sq = %s\n", res, t.Key.Primes[1])
 	}
 
 	if len(t.CipherText) > 0 {
-		res = fmt.Sprintf("%s[*] c = %s\n", res, ln.BytesToNumber(t.CipherText))
+		res = fmt.Sprintf("%sc = %s\n", res, ln.BytesToNumber(t.CipherText))
 	}
 
 	return res

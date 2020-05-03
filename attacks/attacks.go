@@ -12,6 +12,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsrho"
+	"github.com/sourcekris/goRsaTool/attacks/qicheng"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/attacks/williamsp1"
@@ -36,6 +37,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardsrho", false, true, pollardsrho.Attack)
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
+	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
 }
 
 type attackFunc func(*keys.RSA) error

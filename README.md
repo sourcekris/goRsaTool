@@ -17,6 +17,7 @@ Attacks supported in this go version:
 * williams p+1 attack
 * pollards rho factorization - original Pollard's Monte Carlo factorization method
 * pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo factorization
+* Qi Cheng factorization from "A New Class of Unsafe Primes"
 
 ## Installation
  * Requires go 1.9
