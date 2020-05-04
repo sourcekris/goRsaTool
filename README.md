@@ -35,12 +35,36 @@ Attacks supported in this go version:
    go get github.com/sourcekris/goflint
    go get github.com/sourcekris/x509big
    ```
- * Clone this repo and build:
+ * Download and build this tool using go install repo and build:
    ```
-   git clone https://github.com/sourcekris/goRsaTool.git
-   cd goRsaTool
-   go build rsatool.go
-   ./rsatool -h
+   $ go get github.com/sourcekris/goRsaTool
+   $ go install github.com/sourcekris/goRsaTool
+   $ $HOME/go/bin/goRsaTool -h
+    Usage of /home/sewid/go/bin/goRsaTool:
+      -attack string
+          Specific attack to try. Specify "all" for everything that works unnatended. (default "all")
+      -ciphertext string
+          An RSA encrypted binary file to decrypt, necessary for certain attacks.
+      -createkey
+          Create a public key given an E and N.
+      -ctlist string
+          Comma seperated list of keys for multi-key attacks.
+      -dumpkey
+          Just dump the RSA integers from a key - n,e,d,p,q.
+      -e string
+          The exponent value - for use with createkey flag.
+      -key string
+          The filename of the RSA key to attack or dump
+      -keylist string
+          Comma seperated list of keys for multi-key attacks.
+      -list
+          List the attacks supported by the attack flag.
+      -n string
+          The modulus value - for use with createkey flag.
+      -pastprimes string
+          The filename of a file containing past CTF prime numbers. (default "../pastctfprimes.txt")
+      -verbose
+          Enable verbose output.
    ```
  
 
