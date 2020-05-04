@@ -92,7 +92,7 @@ func Attack(t *keys.RSA) error {
 		return fmt.Errorf("failed to lookup modulus - unexpected http code: %d", resp.StatusCode)
 	}
 
-	// read and response into []byte
+	// Parse the response Body looking for links and the respective attributes.
 	id, err := getHTMLAttr(resp.Body, "href", linkPrefix, 0)
 	if err != nil {
 		return err
@@ -133,8 +133,14 @@ func Attack(t *keys.RSA) error {
 		return nil
 	}
 
-	// convert them to fmpz
-	keyP, _ := new(fmp.Fmpz).SetString(p, 10)
+	keyP, ok := new(fmp.Fmpz).SetString(p, 10)
+	if !ok {
+		return err
+	}
+
+	if keyP.Cmp(t.Key.N) == 0 {
+		return fmt.Errorf("factordb does not know the factors for %v", t.Key.N)
+	}
 	t.PackGivenP(keyP)
 	return nil
 }
