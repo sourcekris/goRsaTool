@@ -4,6 +4,7 @@
 *.so
 *.dylib
 main
+rsatool
 
 # sublime project files
 *.sublime-project

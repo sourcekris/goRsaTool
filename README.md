@@ -20,13 +20,29 @@ Attacks supported in this go version:
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 
 ## Installation
- * Requires go 1.9
- * Get dependencies:
- * `go get github.com/jbarham/primegen` 
- * `go get github.com/sourcekris/goflint`
- * `go get github.com/sourcekris/x509big` 
- * You'll need the Fast Library for Number Theory (FLINT2) installed, on Debian this works:
-  * `sudo apt-get install libflint-dev`
+ * Requires go 1.9 +
+ * Get dependencies, you will need:
+    * Golang
+    * Git
+    * FLINT2 (Fast Library for Number Theory)
+    * This works on Debian and Ubuntu (tested 20.04 LTS)
+    ```
+    sudo apt install git golang libflint-dev
+    ```
+ * Get Golang libraries this uses:
+   ```
+   go get github.com/jbarham/primegen
+   go get github.com/sourcekris/goflint
+   go get github.com/sourcekris/x509big
+   ```
+ * Clone this repo and build:
+   ```
+   git clone https://github.com/sourcekris/goRsaTool.git
+   cd goRsaTool
+   go build rsatool.go
+   ./rsatool -h
+   ```
+ 
 
 ## Usage:
 
