@@ -1,10 +1,13 @@
 # goRsaTool
 
-A golang port of [RsaCtfTool](https://github.com/sourcekris/RsaCtfTool) for the express purposes of learning go.
+A golang port of [RsaCtfTool](https://github.com/sourcekris/RsaCtfTool) originally for the purpose
+of learning golang. Now just for fun.
 
-RsaCtfTool is an RSA tool for CTF challenges, it attempts multiple attacks against a public key in an effort to recover either the private key, the plain text of the message or both.
+goRsaTool is an RSA tool for CTF challenges, it attempts multiple attacks against a public key 
+and/or an RSA encrypted ciphertext binary in an effort to recover either the private key, the plain
+text of the message or both.
 
-Attacks supported in this go version:
+Attacks supported in this version:
 
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
@@ -16,7 +19,8 @@ Attacks supported in this go version:
 * pollards p-1 attack
 * williams p+1 attack
 * pollards rho factorization - original Pollard's Monte Carlo factorization method
-* pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo factorization
+* pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo 
+  factorization
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 
 ## Installation
@@ -40,15 +44,16 @@ Attacks supported in this go version:
    $ go get github.com/sourcekris/goRsaTool
    $ go install github.com/sourcekris/goRsaTool
    $ $HOME/go/bin/goRsaTool -h
-    Usage of /home/sewid/go/bin/goRsaTool:
+    Usage of /home/username/go/bin/goRsaTool:
       -attack string
-          Specific attack to try. Specify "all" for everything that works unnatended. (default "all")
+          Specific attack to try. Specify "all" for everything that works unnatended. (default 
+          "all")
       -ciphertext string
           An RSA encrypted binary file to decrypt, necessary for certain attacks.
       -createkey
           Create a public key given an E and N.
       -ctlist string
-          Comma seperated list of keys for multi-key attacks.
+          Comma seperated list of ciphertext binaries for multi-key attacks.
       -dumpkey
           Just dump the RSA integers from a key - n,e,d,p,q.
       -e string
@@ -66,7 +71,6 @@ Attacks supported in this go version:
       -verbose
           Enable verbose output.
    ```
- 
 
 ## Usage:
 

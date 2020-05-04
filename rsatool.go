@@ -23,7 +23,7 @@ var (
 	modulusArg     = flag.String("n", "", "The modulus value - for use with createkey flag.")
 	cipherText     = flag.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	keyList        = flag.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
-	ctList         = flag.String("ctlist", "", "Comma seperated list of keys for multi-key attacks.")
+	ctList         = flag.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
 	attack         = flag.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = flag.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
