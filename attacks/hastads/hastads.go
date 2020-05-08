@@ -1,6 +1,8 @@
 package hastads
 
 import (
+	"errors"
+
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
@@ -9,12 +11,15 @@ import (
 
 // Attack implements the Hastads attack.
 func Attack(t *keys.RSA) error {
-	if t.Key.D != nil || t.Key.PublicKey.E.Cmp(ln.BigEleven) > 0 || len(t.CipherText) == 0 {
+	if t.Key.D != nil || t.Key.PublicKey.E.Cmp(ln.BigEleven) > 0 {
 		return nil
 	}
 
-	c := ln.BytesToNumber(t.CipherText)
+	if t.CipherText == nil {
+		return errors.New("ciphertext needs to be provided for hastads attack")
+	}
 
+	c := ln.BytesToNumber(t.CipherText)
 	m := new(fmp.Fmpz)
 	pow := new(fmp.Fmpz)
 
@@ -30,6 +35,4 @@ func Attack(t *keys.RSA) error {
 		}
 		c.Add(c, t.Key.N)
 	}
-
-	return nil
 }

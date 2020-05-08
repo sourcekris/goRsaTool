@@ -5,6 +5,7 @@
 *.dylib
 main
 rsatool
+goRsaTool
 
 # sublime project files
 *.sublime-project
