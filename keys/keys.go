@@ -26,8 +26,8 @@ type RSA struct {
 
 // NewRSA constructs an RSA object or returns an error.
 func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string, v bool) (*RSA, error) {
-	if key.PublicKey.N == nil {
-		return nil, errors.New("Key had no modulus or exponent")
+	if key.PublicKey.N == nil || key.PublicKey.E == nil {
+		return nil, errors.New("key had no modulus or exponent")
 	}
 
 	var pastPrimesFile string

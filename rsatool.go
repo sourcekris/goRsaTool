@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -83,10 +84,26 @@ func main() {
 
 	// Did we get a public key file to read
 	if len(*keyFile) > 0 {
-		var err error
-		key, err := keys.ImportKey(*keyFile)
+		var (
+			err       error
+			targetRSA *keys.RSA
+		)
+
+		kb, err := ioutil.ReadFile(*keyFile)
 		if err != nil {
-			logger.Fatalf("failed reading key file: %v", err)
+			log.Fatalf("failed to open key file %q: %v", keyFile, err)
+		}
+
+		key, err := keys.ImportKey(kb)
+		if err != nil {
+			// Failed to read a valid PEM key. Maybe it is an integer list type key?
+			targetRSA, err = keys.ImportIntegerList(kb)
+			if err != nil {
+				logger.Fatalf("failed reading key file: %v", err)
+			}
+
+			targetRSA.PastPrimesFile = *pastPrimesFile
+			targetRSA.Verbose = *verboseMode
 		}
 
 		var c []byte
@@ -97,7 +114,12 @@ func main() {
 			}
 		}
 
-		targetRSA, _ := keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
+		if targetRSA == nil {
+			targetRSA, err = keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
+			if err != nil {
+				log.Fatalf("failed to create a RSA key from given key data: %v", err)
+			}
+		}
 
 		if *dumpKeyMode {
 			targetRSA.DumpKey()
