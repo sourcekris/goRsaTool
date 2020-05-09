@@ -83,10 +83,11 @@ func main() {
 	}
 
 	// Did we get a public key file to read
-	if len(*keyFile) > 0 {
+	if *keyFile != "" {
 		var (
 			err       error
 			targetRSA *keys.RSA
+			nonPemKey bool
 		)
 
 		kb, err := ioutil.ReadFile(*keyFile)
@@ -102,6 +103,7 @@ func main() {
 				logger.Fatalf("failed reading key file: %v", err)
 			}
 
+			nonPemKey = true
 			targetRSA.PastPrimesFile = *pastPrimesFile
 			targetRSA.Verbose = *verboseMode
 		}
@@ -123,6 +125,12 @@ func main() {
 
 		if *dumpKeyMode {
 			targetRSA.DumpKey()
+
+			if nonPemKey {
+				// The input was an integer list key so the user might actually want a PEM dump.
+				fmt.Println(keys.EncodeFMPPublicKey(targetRSA.Key.PublicKey))
+			}
+
 			return
 		}
 
@@ -144,8 +152,7 @@ func main() {
 
 		// were we able to solve for the private key?
 		if targetRSA.Key.D != nil {
-			privStr := keys.EncodeFMPPrivateKey(&targetRSA.Key)
-			fmt.Println(privStr)
+			fmt.Println(keys.EncodeFMPPrivateKey(&targetRSA.Key))
 			return
 		}
 

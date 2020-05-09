@@ -30,7 +30,6 @@ func init() {
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
 	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
-	// SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
 	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
 	SupportedAttacks.RegisterAttack("pollardsp1", false, true, pollardsp1.Attack)
@@ -38,6 +37,11 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
+
+	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
+	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
+	// This attack is not finished.
+	// SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
 }
 
 type attackFunc func(*keys.RSA) error

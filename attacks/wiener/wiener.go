@@ -1,6 +1,7 @@
 package wiener
 
 import (
+	"github.com/sourcekris/goRsaTool/attacks/wiener2"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
@@ -34,10 +35,12 @@ func Attack(t *keys.RSA) error {
 				if ts.Cmp(ln.BigNOne) != 0 && z.Add(s, ts).Mod(z, ln.BigTwo).Cmp(ln.BigZero) == 0 {
 					// We found d, pack the private key.
 					t.PackGivenP(ln.FindPGivenD(d, t.Key.PublicKey.E, t.Key.N))
+					return nil
 				}
 			}
 		}
 	}
 
-	return nil
+	// Try the variant approach.
+	return wiener2.Attack(t)
 }
