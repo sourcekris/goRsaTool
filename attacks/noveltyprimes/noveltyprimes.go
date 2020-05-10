@@ -1,6 +1,7 @@
 package noveltyprimes
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/sourcekris/goRsaTool/keys"
@@ -10,6 +11,9 @@ import (
 )
 
 const maxnoveltylen = 25
+
+// name is the name of this attack.
+const name = "novelty primes"
 
 // Attack implements the NoveltyPrimes attack.
 func Attack(ts []*keys.RSA) error {
@@ -30,5 +34,5 @@ func Attack(ts []*keys.RSA) error {
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%s attack failed", name)
 }

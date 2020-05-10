@@ -9,7 +9,7 @@ import (
 )
 
 // name is the name of this attack.
-const name = "wieners"
+const name = "wiener's"
 
 func squareAndMultiply(base, exponent, n *fmp.Fmpz) *fmp.Fmpz {
 	var be []int

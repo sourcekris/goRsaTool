@@ -8,6 +8,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "qicheng factorization"
+
 var (
 	state = new(fmp.FlintRandT)
 	nTwo  = fmp.NewFmpz(-2)
@@ -219,5 +222,5 @@ func Attack(ks []*keys.RSA) error {
 		}
 	}
 
-	return fmt.Errorf("no factors found")
+	return fmt.Errorf("%s attack failed - no factors found", name)
 }

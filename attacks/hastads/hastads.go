@@ -1,13 +1,16 @@
 package hastads
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
 	fmp "github.com/sourcekris/goflint"
 )
+
+// name is the name of this attack.
+const name = "hastads"
 
 // Attack implements the Hastads attack.
 func Attack(ts []*keys.RSA) error {
@@ -17,7 +20,7 @@ func Attack(ts []*keys.RSA) error {
 	}
 
 	if t.CipherText == nil {
-		return errors.New("ciphertext needs to be provided for hastads attack")
+		return fmt.Errorf("%s failed - ciphertext needs to be provided for this attack", name)
 	}
 
 	c := ln.BytesToNumber(t.CipherText)

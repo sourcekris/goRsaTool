@@ -8,6 +8,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "william's p+1"
+
 // Attack performs williams P+1 factorization.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]

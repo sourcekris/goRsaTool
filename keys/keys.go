@@ -20,6 +20,7 @@ type RSA struct {
 	Key            FMPPrivateKey
 	CipherText     []byte
 	PlainText      []byte
+	KeyFilename    string
 	PastPrimesFile string
 	Verbose        bool
 }
@@ -60,7 +61,7 @@ func (t *RSA) PackGivenP(p *fmp.Fmpz) {
 // String returns the key components in a string format.
 func (t *RSA) String() string {
 	var res string
-	res = fmt.Sprintf("n = %s\n", t.Key.PublicKey.N)
+	res = fmt.Sprintf("%s:\nn = %s\n", t.KeyFilename, t.Key.PublicKey.N)
 	res = fmt.Sprintf("%se = %s\n", res, t.Key.PublicKey.E)
 
 	// TODO(sewid): Support RSA multiprime [where len(key.Primes) > 2]

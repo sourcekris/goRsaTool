@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/sourcekris/goRsaTool/attacks"
 	"github.com/sourcekris/goRsaTool/keys"
@@ -31,18 +32,20 @@ var (
 )
 
 // unnatended will run all supported attacks against t that are listed as working in unnatended mode.
-func unnatended(t *keys.RSA) []error {
+func unnatended(t []*keys.RSA) []error {
 	var errs []error
 	for _, a := range attacks.SupportedAttacks.Supported {
 		if a.Unnatended {
 			if err := attacks.SupportedAttacks.Execute(a.Name, t); err != nil {
 				errs = append(errs, err)
 			}
-			if t.Key.D != nil {
-				if t.Verbose {
-					logger.Printf("key factored with attack: %v\n", a.Name)
+			for _, k := range t {
+				if k.Key.D != nil {
+					if k.Verbose {
+						logger.Printf("key factored with attack: %v\n", a.Name)
+					}
+					return nil
 				}
-				return nil
 			}
 		}
 	}
@@ -82,64 +85,84 @@ func main() {
 		// TODO(sewid): hastads broadcast attack.
 	}
 
-	// Did we get a public key file to read
-	if *keyFile != "" {
-		var (
-			err       error
-			targetRSA *keys.RSA
-			nonPemKey bool
-		)
+	// Get a list of either 1 or more public key files to read.
+	var klist []string
+	if *keyFile != "" && *keyList == "" {
+		klist = append(klist, *keyFile)
+	}
 
-		kb, err := ioutil.ReadFile(*keyFile)
-		if err != nil {
-			log.Fatalf("failed to open key file %q: %v", keyFile, err)
+	if *keyList != "" {
+		for _, k := range strings.Split(*keyList, ",") {
+			klist = append(klist, strings.Trim(k, "\t\n "))
 		}
+	}
 
-		key, err := keys.ImportKey(kb)
-		if err != nil {
-			// Failed to read a valid PEM key. Maybe it is an integer list type key?
-			targetRSA, err = keys.ImportIntegerList(kb)
+	// We got a list of keys to work on, so lets do that.
+	if len(klist) > 0 {
+		var rsaKeys []*keys.RSA
+		for _, kf := range klist {
+			var (
+				targetRSA *keys.RSA
+				nonPemKey bool
+			)
+			kb, err := ioutil.ReadFile(kf)
 			if err != nil {
-				logger.Fatalf("failed reading key file: %v", err)
+				log.Fatal(err)
 			}
 
-			nonPemKey = true
-			targetRSA.PastPrimesFile = *pastPrimesFile
-			targetRSA.Verbose = *verboseMode
-		}
-
-		var c []byte
-		if len(*cipherText) > 0 {
-			c, err = utils.ReadCipherText(*cipherText)
+			key, err := keys.ImportKey(kb)
 			if err != nil {
-				logger.Fatalf("failed reading ciphertext file: %v", err)
-			}
-		}
+				// Failed to read a valid PEM key. Maybe it is an integer list type key?
+				targetRSA, err = keys.ImportIntegerList(kb)
+				if err != nil {
+					logger.Fatalf("failed reading key file: %v", err)
+				}
 
-		if targetRSA == nil {
-			targetRSA, err = keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
-			if err != nil {
-				log.Fatalf("failed to create a RSA key from given key data: %v", err)
+				nonPemKey = true
+				targetRSA.PastPrimesFile = *pastPrimesFile
+				targetRSA.Verbose = *verboseMode
 			}
+
+			var c []byte
+			if len(*cipherText) > 0 {
+				c, err = utils.ReadCipherText(*cipherText)
+				if err != nil {
+					logger.Fatalf("failed reading ciphertext file: %v", err)
+				}
+			}
+
+			if targetRSA == nil {
+				targetRSA, err = keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
+				if err != nil {
+					log.Fatalf("failed to create a RSA key from given key data: %v", err)
+				}
+			}
+
+			// Add the keyfilename in, helpful later during dumpkey for example.
+			targetRSA.KeyFilename = kf
+			if *dumpKeyMode {
+				targetRSA.DumpKey()
+
+				if nonPemKey {
+					// The input was an integer list key so the user might actually want a PEM dump.
+					fmt.Println(keys.EncodeFMPPublicKey(targetRSA.Key.PublicKey))
+				}
+			}
+
+			rsaKeys = append(rsaKeys, targetRSA)
 		}
 
 		if *dumpKeyMode {
-			targetRSA.DumpKey()
-
-			if nonPemKey {
-				// The input was an integer list key so the user might actually want a PEM dump.
-				fmt.Println(keys.EncodeFMPPublicKey(targetRSA.Key.PublicKey))
-			}
-
+			// Job done.
 			return
 		}
 
 		var errs []error
 		switch {
 		case *attack == "all":
-			errs = unnatended(targetRSA)
+			errs = unnatended(rsaKeys)
 		case attacks.SupportedAttacks.IsSupported(*attack):
-			errs = append(errs, attacks.SupportedAttacks.Execute(*attack, targetRSA))
+			errs = append(errs, attacks.SupportedAttacks.Execute(*attack, rsaKeys))
 		default:
 			errs = []error{fmt.Errorf("unsupported attack: %v. Use -list to see a list of supported attacks", *attack)}
 		}
@@ -150,15 +173,17 @@ func main() {
 			}
 		}
 
-		// were we able to solve for the private key?
-		if targetRSA.Key.D != nil {
-			fmt.Println(keys.EncodeFMPPrivateKey(&targetRSA.Key))
-			return
-		}
+		// Were we able to solve for any of the private keys or ciphertexts?
+		for _, k := range rsaKeys {
+			if k.Key.D != nil {
+				fmt.Println(keys.EncodeFMPPrivateKey(&k.Key))
+				return
+			}
 
-		if len(targetRSA.PlainText) > 0 {
-			fmt.Println("Recovered plaintext: ")
-			fmt.Println(string(targetRSA.PlainText))
+			if len(k.PlainText) > 0 {
+				fmt.Println("Recovered plaintext: ")
+				fmt.Println(string(k.PlainText))
+			}
 		}
 
 	} else {

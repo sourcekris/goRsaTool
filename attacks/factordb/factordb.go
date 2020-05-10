@@ -16,6 +16,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "factordb factorization"
+
 var (
 	base       = "http://www.factordb.com/"
 	query      = "index.php?query="
@@ -140,7 +143,7 @@ func Attack(ts []*keys.RSA) error {
 	}
 
 	if keyP.Cmp(t.Key.N) == 0 {
-		return fmt.Errorf("factordb does not know the factors for %v", t.Key.N)
+		return fmt.Errorf("%s failed - factordb does not know the factors for %v", name, t.Key.N)
 	}
 	t.PackGivenP(keyP)
 	return nil

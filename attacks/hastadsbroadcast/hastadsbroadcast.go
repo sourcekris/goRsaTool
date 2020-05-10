@@ -16,16 +16,16 @@ const name = "hastads broadcast"
 func Attack(ks []*keys.RSA) error {
 	// Check key parameters are compatible with the attack.
 	if len(ks) < 2 {
-		return fmt.Errorf("hastads broadcast attack requires 2+ public keys, got: %d", len(ks))
+		return fmt.Errorf("%s attack requires 2+ public keys, got: %d", name, len(ks))
 	}
 	for _, k := range ks {
 		if k.CipherText == nil {
-			return fmt.Errorf("supply ciphertext for each key")
+			return fmt.Errorf("%s failed - supply ciphertext for each key", name)
 		}
 
-		// Its possible this works for other small primes though.
+		// It's possible this works for other small primes though.
 		if k.Key.PublicKey.E.Cmp(ln.BigThree) > 0 {
-			return fmt.Errorf("exponents should be 3 but key exponent is: %v", k.Key.PublicKey.E)
+			return fmt.Errorf("%s failed - exponents should be 3 but key exponent is: %v", name, k.Key.PublicKey.E)
 		}
 	}
 

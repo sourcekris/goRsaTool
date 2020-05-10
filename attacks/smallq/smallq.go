@@ -1,11 +1,16 @@
 package smallq
 
 import (
+	"fmt"
+
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
 	fmp "github.com/sourcekris/goflint"
 )
+
+// name is the name of this attack.
+const name = "small q"
 
 // go seems so fast making small primes we can probably make this much larger
 const maxprimeint = 100000000
@@ -28,5 +33,5 @@ func Attack(ts []*keys.RSA) error {
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%s failed - no factors found", name)
 }

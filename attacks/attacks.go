@@ -87,7 +87,7 @@ func (a *Attacks) IsSupported(name string) bool {
 }
 
 // Execute executes the named attack against t.
-func (a *Attacks) Execute(name string, t *keys.RSA) error {
+func (a *Attacks) Execute(name string, t []*keys.RSA) error {
 	if SupportedAttacks == nil {
 		return errors.New("no attacks registered")
 	}
@@ -98,7 +98,7 @@ func (a *Attacks) Execute(name string, t *keys.RSA) error {
 
 	for _, a := range SupportedAttacks.Supported {
 		if a.Name == name {
-			return a.F([]*keys.RSA{t})
+			return a.F(t)
 		}
 	}
 

@@ -7,6 +7,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "pollard's rho"
+
 // Attack uses Pollard's Rho factorization method.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]

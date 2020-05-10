@@ -2,6 +2,7 @@ package pastctfprimes
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
@@ -10,6 +11,9 @@ import (
 
 	fmp "github.com/sourcekris/goflint"
 )
+
+// name is the name of this attack.
+const name = "past ctf primes"
 
 // Attack implements the PastCTFPrimes attack.
 func Attack(ts []*keys.RSA) error {
@@ -47,5 +51,5 @@ func Attack(ts []*keys.RSA) error {
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%s attack failed", name)
 }

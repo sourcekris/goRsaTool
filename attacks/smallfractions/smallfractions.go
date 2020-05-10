@@ -9,6 +9,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "small fractions"
+
 // Attack implements SmallFractions attack.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]

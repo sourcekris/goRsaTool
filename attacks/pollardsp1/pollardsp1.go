@@ -9,6 +9,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "pollard's p-1 factorization"
+
 const (
 	startA = 7
 	startB = 65536
@@ -39,7 +42,7 @@ func Attack(ks []*keys.RSA) error {
 	}
 	d := ln.FindGcd(a.Sub(a, ln.BigOne), n)
 	if d.Cmp(n) == 0 {
-		return fmt.Errorf("unable to factor key with a of: %d (try another a?)", startA)
+		return fmt.Errorf("%s failed - unable to factor key with a of: %d (try another a?)", name, startA)
 	}
 
 	if d.Cmp(ln.BigOne) > 0 {
@@ -48,5 +51,5 @@ func Attack(ks []*keys.RSA) error {
 		return nil
 	}
 
-	return fmt.Errorf("unable to factor key with b of: %d", startB)
+	return fmt.Errorf("%s attack failed - unable to factor key with b of: %d", name, startB)
 }

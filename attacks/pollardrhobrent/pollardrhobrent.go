@@ -7,6 +7,9 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// name is the name of this attack.
+const name = "brents variant of pollard rho factorization"
+
 // Attack conducts Pollard's Rho method Richard Brent variant for factoring
 // large composites. See: https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
 func Attack(kks []*keys.RSA) error {
