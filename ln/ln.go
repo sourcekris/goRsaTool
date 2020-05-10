@@ -1,6 +1,7 @@
 package ln
 
 import (
+	"math/bits"
 	"math/rand"
 	"time"
 
@@ -314,4 +315,78 @@ func GetRand(state *fmp.FlintRandT, n *fmp.Fmpz) *fmp.Fmpz {
 	}
 
 	return res.Add(res, BigOne)
+}
+
+// Combinations returns combinations of n elements for a given Fmpz array.
+func Combinations(set []*fmp.Fmpz, n int) (subsets [][]*fmp.Fmpz) {
+	length := uint(len(set))
+
+	if n > len(set) {
+		n = len(set)
+	}
+
+	// Go through all possible combinations of objects
+	// from 1 (only first object in subset) to 2^length (all objects in subset)
+	for subsetBits := 1; subsetBits < (1 << length); subsetBits++ {
+		if n > 0 && bits.OnesCount(uint(subsetBits)) != n {
+			continue
+		}
+
+		var subset []*fmp.Fmpz
+
+		for object := uint(0); object < length; object++ {
+			// checks if object is contained in subset
+			// by checking if bit 'object' is set in subsetBits
+			if (subsetBits>>object)&1 == 1 {
+				// add object to subset
+				subset = append(subset, set[object])
+			}
+		}
+		// add subset to subsets
+		subsets = append(subsets, subset)
+	}
+	return subsets
+}
+
+// SolveCRT solves the Chinese Remainder Theorem for sets of residues and moduli.
+func SolveCRT(mrs [][]*fmp.Fmpz) *fmp.Fmpz {
+	var (
+		residues []*fmp.Fmpz
+		moduli   []*fmp.Fmpz
+		nxs      []*fmp.Fmpz
+		ds       []*fmp.Fmpz
+		mults    []*fmp.Fmpz
+	)
+
+	for _, m := range mrs {
+		residues = append(residues, m[0])
+		moduli = append(moduli, m[1])
+	}
+
+	// Multiply the moduli together.
+	bigN := new(fmp.Fmpz).Set(BigOne)
+	for _, n := range moduli {
+		bigN.MulZ(n)
+	}
+
+	// Compute the ratios and the modular inverses.
+	for _, n := range moduli {
+		nn := new(fmp.Fmpz).Div(bigN, n)
+		nxs = append(nxs, nn)
+		d := new(fmp.Fmpz).ModInverse(nn, n)
+		ds = append(ds, d)
+	}
+
+	// Compute the multiples.
+	for i := 0; i < len(residues); i++ {
+		mults = append(mults, new(fmp.Fmpz).Mul(residues[i], nxs[i]).MulZ(ds[i]))
+	}
+
+	// Reduce modulo bigN.
+	res := fmp.NewFmpz(0)
+	for _, mult := range mults {
+		res.AddZ(mult)
+	}
+
+	return res.ModZ(bigN)
 }

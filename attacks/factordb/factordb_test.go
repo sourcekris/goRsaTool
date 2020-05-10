@@ -19,7 +19,7 @@ func TestFactorDB(t *testing.T) {
 	}
 
 	targetRSA, _ := keys.NewRSA(keys.PrivateFromPublic(fmpPubKey), nil, nil, "", false)
-	if err := Attack(targetRSA); err != nil {
+	if err := Attack([]*keys.RSA{targetRSA}); err != nil {
 		t.Fatalf("got unexpected error: %v", err)
 	}
 

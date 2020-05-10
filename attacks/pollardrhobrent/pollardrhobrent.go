@@ -9,7 +9,8 @@ import (
 
 // Attack conducts Pollard's Rho method Richard Brent variant for factoring
 // large composites. See: https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
-func Attack(kk *keys.RSA) error {
+func Attack(kks []*keys.RSA) error {
+	kk := kks[0]
 
 	var (
 		x     = new(fmp.Fmpz)

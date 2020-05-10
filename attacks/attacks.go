@@ -7,6 +7,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
+	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
 	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
@@ -28,6 +29,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("factordb", false, true, factordb.Attack)
 	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
+	SupportedAttacks.RegisterAttack("hastadsbroadcast", true, true, hastadsbroadcast.Attack)
 	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
@@ -44,7 +46,7 @@ func init() {
 	// SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
 }
 
-type attackFunc func(*keys.RSA) error
+type attackFunc func([]*keys.RSA) error
 
 // Attack encodes a single attack and what features it supports.
 type Attack struct {
@@ -96,7 +98,7 @@ func (a *Attacks) Execute(name string, t *keys.RSA) error {
 
 	for _, a := range SupportedAttacks.Supported {
 		if a.Name == name {
-			return a.F(t)
+			return a.F([]*keys.RSA{t})
 		}
 	}
 

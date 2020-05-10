@@ -180,7 +180,8 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 }
 
 // Attack implements the Qi Cheng attack.
-func Attack(k *keys.RSA) error {
+func Attack(ks []*keys.RSA) error {
+	k := ks[0]
 	js := []*fmp.Fmpz{
 		fmp.NewFmpz(0),
 		fmp.NewFmpz(-32768),              // (-2^5)^3

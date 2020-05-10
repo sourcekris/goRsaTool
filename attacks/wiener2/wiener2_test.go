@@ -43,7 +43,7 @@ func TestAttack(t *testing.T) {
 		}
 
 		k, _ := keys.NewRSA(keys.PrivateFromPublic(fmpPubKey), ln.NumberToBytes(tc.c), nil, "", false)
-		err := Attack(k)
+		err := Attack([]*keys.RSA{k})
 		if err != nil && !tc.wantErr {
 			t.Errorf("Attack() failed: %s expected no error got error: %v", tc.name, err)
 		}

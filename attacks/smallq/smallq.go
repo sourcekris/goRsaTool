@@ -11,7 +11,8 @@ import (
 const maxprimeint = 100000000
 
 // Attack iterate small primes < maxprimeint and test them as factors of N at a memory cost.
-func Attack(t *keys.RSA) error {
+func Attack(ts []*keys.RSA) error {
+	t := ts[0]
 	if t.Key.D != nil {
 		return nil
 	}

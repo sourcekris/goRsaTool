@@ -72,7 +72,8 @@ func getHTMLAttr(r io.Reader, attr, prefix string, match int) (string, error) {
 }
 
 // Attack factors an RSA Public Key using FactorDB.
-func Attack(t *keys.RSA) error {
+func Attack(ts []*keys.RSA) error {
+	t := ts[0]
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil

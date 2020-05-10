@@ -11,7 +11,8 @@ import (
 // Attack implements the Wiener attack on an RSA public key and this implementation is based on the
 // python implementation of the algorithm by Pablo Celayes:
 // https://github.com/pablocelayes/rsa-wiener-attack
-func Attack(t *keys.RSA) error {
+func Attack(ts []*keys.RSA) error {
+	t := ts[0]
 	if t.Key.D != nil {
 		// Key already factored.
 		return nil
@@ -42,5 +43,5 @@ func Attack(t *keys.RSA) error {
 	}
 
 	// Try the variant approach.
-	return wiener2.Attack(t)
+	return wiener2.Attack(ts)
 }

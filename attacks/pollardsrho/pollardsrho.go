@@ -8,8 +8,8 @@ import (
 )
 
 // Attack uses Pollard's Rho factorization method.
-func Attack(k *keys.RSA) error {
-
+func Attack(ks []*keys.RSA) error {
+	k := ks[0]
 	var (
 		state = new(fmp.FlintRandT)
 		x     = ln.GetRand(state, k.Key.N)

@@ -9,7 +9,8 @@ import (
 )
 
 // Attack performs williams P+1 factorization.
-func Attack(k *keys.RSA) error {
+func Attack(ks []*keys.RSA) error {
+	k := ks[0]
 	p := primegen.New()
 	v := fmp.NewFmpz(0)
 	for {

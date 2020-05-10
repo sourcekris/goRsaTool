@@ -1,10 +1,15 @@
 package wiener2
 
 import (
+	"fmt"
+
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 	fmp "github.com/sourcekris/goflint"
 )
+
+// name is the name of this attack.
+const name = "wieners"
 
 func squareAndMultiply(base, exponent, n *fmp.Fmpz) *fmp.Fmpz {
 	var be []int
@@ -61,7 +66,8 @@ func fullReverse(n, e *fmp.Fmpz, c [2]*fmp.Fmpz) *fmp.Fmpz {
 
 // Attack performs a variant of the wiener attack ported from the python version here:
 // https://github.com/MxRy/rsa-attacks/blob/master/wiener-attack.py
-func Attack(k *keys.RSA) error {
+func Attack(ks []*keys.RSA) error {
+	k := ks[0]
 	if k.Key.D != nil {
 		return nil
 	}
@@ -81,5 +87,5 @@ func Attack(k *keys.RSA) error {
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%s attack failed", name)
 }

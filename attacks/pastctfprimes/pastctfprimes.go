@@ -12,7 +12,8 @@ import (
 )
 
 // Attack implements the PastCTFPrimes attack.
-func Attack(t *keys.RSA) error {
+func Attack(ts []*keys.RSA) error {
+	t := ts[0]
 	if t.Key.D != nil {
 		return nil
 	}
