@@ -15,13 +15,14 @@ Attacks supported in this version:
 * past CTF primes attack
 * fermat factorization for close p & q
 * low public exponent attack (requires ciphertext)
-* wiener's attack for large public exponents
+* wiener's attack for large public exponents (2 variants)
 * pollards p-1 attack
 * williams p+1 attack
 * pollards rho factorization - original Pollard's Monte Carlo factorization method
 * pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo 
   factorization
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
+* hastads broadcast attack
 
 ## Installation
  * Requires go 1.9 +
@@ -91,3 +92,6 @@ Attacks supported in this version:
 
 ### Attack the example pollards p-1 key with the pollards p-1 attack:
 `./gorsatool -key examples/pollardsp1.pub -attacks pollardsp1`
+
+### Attack multiple keys with a hastads broadcast attack
+`./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
