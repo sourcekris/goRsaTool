@@ -23,6 +23,7 @@ Attacks supported in this version:
   factorization
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 * hastads broadcast attack
+* solve for plaintext with CRT components provided (Dp, Dq, p, q, c)
 
 ## Installation
  * Requires go 1.9 +

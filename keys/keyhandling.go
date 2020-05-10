@@ -17,13 +17,19 @@ import (
 
 var (
 	// lineRE is a regexp that should match interesting integers on lines.
-	lineRE = regexp.MustCompile(`(?i)^([n|e|c])\s*[:|=]\s*((?:0x)?[0-9a-f]+)$`)
+	lineRE = regexp.MustCompile(`(?i)^([necpqd][pq]?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
 	// numRE matches numbers in base 10 or hex.
 	numRE = regexp.MustCompile(`[0-9a-f]+`)
 	// modRE, expRE, ctRE matches 'n', 'e', 'c' case insensitively.
-	modRE = regexp.MustCompile(`(?i)n`)
-	expRE = regexp.MustCompile(`(?i)e`)
-	ctRE  = regexp.MustCompile(`(?i)c`)
+	modRE = regexp.MustCompile(`(?i)^n`)
+	expRE = regexp.MustCompile(`(?i)^e`)
+	ctRE  = regexp.MustCompile(`(?i)^c`)
+
+	// CRT components regexps.
+	pRE  = regexp.MustCompile(`(?i)^p`)
+	qRE  = regexp.MustCompile(`(?i)^q`)
+	dpRE = regexp.MustCompile(`(?i)^dp`)
+	dqRE = regexp.MustCompile(`(?i)^dq`)
 )
 
 type pkParser func([]byte) (*x509big.BigPublicKey, error)
@@ -91,8 +97,9 @@ func getBase(s string) (string, int) {
 // ImportIntegerList attempts to parse the key (and optionally ciphertext) data as if it was a list of integers N, and e and c.
 func ImportIntegerList(kb []byte) (*RSA, error) {
 	var (
-		n, e, c string
-		ct      []byte
+		n, e, c, p, q, dp, dq string
+		ct                    []byte
+		crt                   bool
 	)
 
 	s := bufio.NewScanner(bytes.NewReader(kb))
@@ -110,18 +117,88 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 					e = sm[2]
 				case ctRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					c = sm[2]
+				case pRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					p = sm[2]
+				case qRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					q = sm[2]
+				case dpRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					dp = sm[2]
+				case dqRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					dq = sm[2]
 				}
 			}
 		}
 	}
 
-	if n == "" || e == "" {
+	// Do we have enough for CRT solution?
+	if dp != "" && dq != "" {
+		switch {
+		case n == "" && (p == "" || q == ""):
+		case n == "" && p != "" && q != "":
+			fP, ok1 := new(fmp.Fmpz).SetString(getBase(p))
+			fQ, ok2 := new(fmp.Fmpz).SetString(getBase(q))
+			if !ok1 || !ok2 {
+				crt = false
+				break
+			}
+			n = new(fmp.Fmpz).Mul(fP, fQ).String()
+			crt = true
+		case n != "" && p != "":
+			fN, ok1 := new(fmp.Fmpz).SetString(getBase(n))
+			fP, ok2 := new(fmp.Fmpz).SetString(getBase(p))
+			if !ok1 || !ok2 {
+				crt = false
+				break
+			}
+			q = new(fmp.Fmpz).Div(fN, fP).String()
+			crt = true
+		case n != "" && q != "":
+			fN, ok1 := new(fmp.Fmpz).SetString(getBase(n))
+			fQ, ok2 := new(fmp.Fmpz).SetString(getBase(q))
+			if !ok1 || !ok2 {
+				crt = false
+				break
+			}
+			p = new(fmp.Fmpz).Div(fN, fQ).String()
+			crt = true
+		}
+	}
+
+	if (n == "" || e == "") && !crt {
 		return nil, fmt.Errorf("failed to decode key, missing a modulus or an exponent")
 	}
 
 	fN, ok := new(fmp.Fmpz).SetString(getBase(n))
 	if !ok {
 		return nil, fmt.Errorf("failed decoding modulus from keyfile: %v", n)
+	}
+
+	if crt {
+		k, err := NewRSA(PrivateFromPublic(&FMPPublicKey{N: fN}), ct, nil, "", false)
+		if err != nil {
+			fmt.Printf("trying crt n: %v\n", n)
+			return nil, err
+		}
+		fQ, ok1 := new(fmp.Fmpz).SetString(getBase(q))
+		fP, ok2 := new(fmp.Fmpz).SetString(getBase(p))
+		fdP, ok3 := new(fmp.Fmpz).SetString(getBase(dp))
+		fdQ, ok4 := new(fmp.Fmpz).SetString(getBase(dq))
+		if !ok1 || !ok2 || !ok3 || !ok4 {
+			return nil, errors.New("failed to decode crt components")
+		}
+		k.Key.Primes = []*fmp.Fmpz{fP, fQ}
+		k.Key.Precomputed = &PrecomputedValues{Dp: fdP, Dq: fdQ}
+
+		if c != "" {
+			fC, ok := new(fmp.Fmpz).SetString(getBase(c))
+			if !ok {
+				return nil, errors.New("failed converting ciphertext integer to binary")
+			}
+
+			k.CipherText = ln.NumberToBytes(fC)
+		}
+
+		return k, nil
 	}
 
 	fE, ok := new(fmp.Fmpz).SetString(getBase(e))

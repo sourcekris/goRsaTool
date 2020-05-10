@@ -4,7 +4,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"math"
 	"math/big"
@@ -27,10 +26,6 @@ type RSA struct {
 
 // NewRSA constructs an RSA object or returns an error.
 func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string, v bool) (*RSA, error) {
-	if key.PublicKey.N == nil || key.PublicKey.E == nil {
-		return nil, errors.New("key had no modulus or exponent")
-	}
-
 	var pastPrimesFile string
 	if len(pf) > 0 {
 		pastPrimesFile = pf
@@ -89,12 +84,34 @@ type FMPPublicKey struct {
 	E *fmp.Fmpz
 }
 
+// CRTValue contains the precomputed Chinese remainder theorem values.
+type CRTValue struct {
+	Exp   *fmp.Fmpz // D mod (prime-1).
+	Coeff *fmp.Fmpz // R·Coeff ≡ 1 mod Prime.
+	R     *fmp.Fmpz // product of primes prior to this (inc p and q).
+}
+
+// PrecomputedValues contains precomputed values that speed up private
+// operations, if available.
+type PrecomputedValues struct {
+	Dp, Dq *fmp.Fmpz // D mod (P-1) (or mod Q-1)
+	Qinv   *fmp.Fmpz // Q^-1 mod P
+
+	// CRTValues is used for the 3rd and subsequent primes. Due to a
+	// historical accident, the CRT for the first two primes is handled
+	// differently in PKCS#1 and interoperability is sufficiently
+	// important that we mirror this.
+	CRTValues []CRTValue
+}
+
 // FMPPrivateKey represents a RSA private key using FMP data structures.
 type FMPPrivateKey struct {
 	PublicKey *FMPPublicKey
 	D         *fmp.Fmpz
 	Primes    []*fmp.Fmpz
 	N         *fmp.Fmpz
+
+	Precomputed *PrecomputedValues
 }
 
 // RSAtoFMPPrivateKey takes a rsa.PrivateKey and returns a FMPPrivateKey that uses fmp.Fmpz types

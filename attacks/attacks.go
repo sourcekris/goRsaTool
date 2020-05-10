@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sourcekris/goRsaTool/attacks/crt"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
@@ -26,6 +27,7 @@ var SupportedAttacks *Attacks
 func init() {
 	SupportedAttacks = NewAttacks()
 	// TODO(sewid): Register them in each package init function.
+	SupportedAttacks.RegisterAttack("crtsolver", false, true, crt.Attack)
 	SupportedAttacks.RegisterAttack("factordb", false, true, factordb.Attack)
 	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)

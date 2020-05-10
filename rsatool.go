@@ -143,7 +143,7 @@ func main() {
 			if *dumpKeyMode {
 				targetRSA.DumpKey()
 
-				if nonPemKey {
+				if nonPemKey && targetRSA.Key.PublicKey.E != nil {
 					// The input was an integer list key so the user might actually want a PEM dump.
 					fmt.Println(keys.EncodeFMPPublicKey(targetRSA.Key.PublicKey))
 				}

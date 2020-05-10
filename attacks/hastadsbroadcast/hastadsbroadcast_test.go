@@ -5,6 +5,7 @@ import (
 
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
