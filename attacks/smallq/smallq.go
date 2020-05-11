@@ -25,8 +25,7 @@ func smallq(ch chan bool, n, pc *fmp.Fmpz) {
 	modp := new(fmp.Fmpz)
 	for {
 		pc.SetUint64(p.Next())
-		modp.Mod(n, pc)
-		if modp.Cmp(ln.BigZero) == 0 {
+		if modp.Mod(n, pc).Cmp(ln.BigZero) == 0 {
 			ch <- true
 			return
 		}
