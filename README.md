@@ -7,7 +7,7 @@ goRsaTool is an RSA tool for CTF challenges, it attempts multiple attacks agains
 and/or an RSA encrypted ciphertext binary in an effort to recover either the private key, the plain
 text of the message or both.
 
-Attacks supported in this version:
+## Attacks supported in this version:
 
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
@@ -31,7 +31,7 @@ Attacks supported in this version:
     * Golang
     * Git
     * FLINT2 (Fast Library for Number Theory)
-    * This works on Debian and Ubuntu (tested 20.04 LTS)
+    * This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
     ```
     sudo apt install git golang libflint-dev
     ```
@@ -83,16 +83,16 @@ Attacks supported in this version:
 `./gorsatool -dumpkey -key ./key.pub`
 
 ### Attack a public key:
-`./gorsatool -key ./key.pub -attacks all`
+`./gorsatool -key ./key.pub -attack all`
 
 ### List available attacks:
 `./gorsatool -list`
 
 ### Attack a public key with a specific attack:
-`./gorsatool -key ./key.pub -attacks wiener`
+`./gorsatool -key ./key.pub -attack wiener`
 
 ### Attack the example pollards p-1 key with the pollards p-1 attack:
-`./gorsatool -key examples/pollardsp1.pub -attacks pollardsp1`
+`./gorsatool -key examples/pollardsp1.pub -attack pollardsp1`
 
 ### Attack multiple keys with a hastads broadcast attack
 `./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
