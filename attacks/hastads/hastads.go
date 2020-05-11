@@ -12,7 +12,7 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// timeout puts a limit on how long fermat should attempt to find a solution.
+// timeout puts a limit on how long we should attempt to find a solution.
 var timeout = time.Minute * 5
 
 // name is the name of this attack.
@@ -30,6 +30,7 @@ func hastads(ch chan bool, n, e, c, pt *fmp.Fmpz) {
 		if pow.Cmp(original) == 0 {
 			pt.Set(m)
 			ch <- true
+			return
 		}
 		c.Add(c, n)
 	}

@@ -1,37 +1,62 @@
 package smallq
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"time"
 
+	"github.com/jbarham/primegen"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
 	fmp "github.com/sourcekris/goflint"
 )
 
+// timeout puts a limit on how long we should attempt to find a factor.
+var timeout = time.Minute * 3
+
 // name is the name of this attack.
 const name = "small q"
 
-// go seems so fast making small primes we can probably make this much larger
-const maxprimeint = 100000000
+func smallq(ch chan bool, n, pc *fmp.Fmpz) {
 
-// Attack iterate small primes < maxprimeint and test them as factors of N at a memory cost.
+	p := primegen.New()
+	modp := new(fmp.Fmpz)
+	for {
+		pc.SetUint64(p.Next())
+		modp.Mod(n, pc)
+		if modp.Cmp(ln.BigZero) == 0 {
+			ch <- true
+			return
+		}
+	}
+}
+
+// Attack iterate small primes until we timeout and test them as factors of N.
 func Attack(ts []*keys.RSA) error {
 	t := ts[0]
 	if t.Key.D != nil {
 		return nil
 	}
 
-	primes := ln.SieveOfEratosthenesFmp(maxprimeint)
-	modp := new(fmp.Fmpz)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
-	for _, p := range primes {
-		modp = modp.Mod(t.Key.N, p)
-		if modp.Cmp(ln.BigZero) == 0 {
-			t.PackGivenP(p)
-			return nil
-		}
+	p := new(fmp.Fmpz)
+	ch := make(chan bool)
+
+	if t.Verbose {
+		log.Printf("%s attempt beginning with timeout %v", name, timeout)
 	}
+	go smallq(ch, t.Key.N, p)
 
-	return fmt.Errorf("%s failed - no factors found", name)
+	select {
+	case <-ch:
+		t.PackGivenP(p)
+		return nil
+	case <-ctx.Done():
+		return fmt.Errorf("%s failed - no factors found - last prime tried %v", name, p)
+	}
 }
