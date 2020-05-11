@@ -9,15 +9,6 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-func foundP(p *fmp.Fmpz, ps []*fmp.Fmpz) bool {
-	for _, prime := range ps {
-		if p.Cmp(prime) == 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func TestAttack(t *testing.T) {
 	tt := []struct {
 		name string

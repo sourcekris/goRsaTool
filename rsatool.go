@@ -69,7 +69,7 @@ func main() {
 	logger = log.New(os.Stderr, "rsatool: ", log.Lshortfile)
 
 	if *verboseMode {
-		logger.Println("staring up...")
+		logger.Println("starting up...")
 	}
 
 	if *list {
@@ -77,12 +77,8 @@ func main() {
 		return
 	}
 
-	// Handle multi key scenarios.
-	switch {
-	case len(*keyList) > 0 && len(*ctList) == 0:
-		// TODO(sewid): Loop around the key list and also do multi key attacks.
-	case len(*keyList) > 0 && len(*ctList) > 0:
-		// TODO(sewid): hastads broadcast attack.
+	if len(*ctList) > 0 {
+		// TODO(kris): Add the support for multiple ciphertext binaries from this flag.
 	}
 
 	// Get a list of either 1 or more public key files to read.
@@ -186,25 +182,24 @@ func main() {
 			}
 		}
 
-	} else {
-		if *createKeyMode {
-			if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
-				n, ok := new(fmp.Fmpz).SetString(*modulusArg, 10)
-				if !ok {
-					logger.Fatalf("failed converting modulus to integer: %q", *modulusArg)
-				}
+	}
 
-				e, ok := new(fmp.Fmpz).SetString(*exponentArg, 10)
-				if !ok {
-					logger.Fatalf("failed converting exponent to integer: %q", *exponentArg)
-				}
-
-				pubStr := keys.EncodeFMPPublicKey(&keys.FMPPublicKey{N: n, E: e})
-				fmt.Println(pubStr)
-				return
+	if *createKeyMode {
+		if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
+			n, ok := new(fmp.Fmpz).SetString(*modulusArg, 10)
+			if !ok {
+				logger.Fatalf("failed converting modulus to integer: %q", *modulusArg)
 			}
-			logger.Fatal("no exponent or modulus specified - use -n and -e")
+
+			e, ok := new(fmp.Fmpz).SetString(*exponentArg, 10)
+			if !ok {
+				logger.Fatalf("failed converting exponent to integer: %q", *exponentArg)
+			}
+
+			pubStr := keys.EncodeFMPPublicKey(&keys.FMPPublicKey{N: n, E: e})
+			fmt.Println(pubStr)
+			return
 		}
-		logger.Fatal("no key file specified - use the -key flag to provide a public or private key file")
+		logger.Fatal("no exponent or modulus specified - use -n and -e")
 	}
 }

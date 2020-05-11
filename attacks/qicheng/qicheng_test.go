@@ -5,6 +5,8 @@ import (
 
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
+	"github.com/sourcekris/goRsaTool/utils"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -133,15 +135,6 @@ func TestPoly(t *testing.T) {
 
 }
 
-func foundP(p *fmp.Fmpz, ps []*fmp.Fmpz) bool {
-	for _, prime := range ps {
-		if p.Cmp(prime) == 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func TestAttack(t *testing.T) {
 
 	tt := []struct {
@@ -173,7 +166,7 @@ func TestAttack(t *testing.T) {
 			t.Errorf("Attack() failed: %s d not found", tc.name)
 		}
 
-		if !foundP(tc.wantP, k.Key.Primes) {
+		if !utils.FoundP(tc.wantP, k.Key.Primes) {
 			t.Errorf("Attack() failed: %s expected primes not found - got %v wanted %v", tc.name, k.Key.Primes, tc.wantP)
 		}
 	}
