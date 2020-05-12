@@ -3,7 +3,6 @@ package keys
 import (
 	"bufio"
 	"bytes"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -57,15 +56,6 @@ func parsePublicRsaKey(keyBytes []byte) (*FMPPublicKey, error) {
 	}
 
 	return nil, fmt.Errorf("parsePublicRsaKey failed: %v", errs)
-}
-
-func parsePrivateRsaKey(keyBytes []byte) (*FMPPrivateKey, error) {
-	key, err := x509.ParsePKCS1PrivateKey(keyBytes)
-	if err != nil {
-		return nil, fmt.Errorf("parsePrivateRsaKey: failed to parse the DER key after decoding: %v", err)
-	}
-	k := RSAtoFMPPrivateKey(key)
-	return &k, nil
 }
 
 func parseBigPrivateRsaKey(keyBytes []byte) (*FMPPrivateKey, error) {

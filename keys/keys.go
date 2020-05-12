@@ -1,11 +1,8 @@
 package keys
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"math"
 	"math/big"
 
 	"github.com/sourcekris/goRsaTool/ln"
@@ -114,30 +111,6 @@ type FMPPrivateKey struct {
 	Precomputed *PrecomputedValues
 }
 
-// RSAtoFMPPrivateKey takes a rsa.PrivateKey and returns a FMPPrivateKey that uses fmp.Fmpz types
-func RSAtoFMPPrivateKey(key *rsa.PrivateKey) FMPPrivateKey {
-	fmpPubKey := &FMPPublicKey{
-		N: new(fmp.Fmpz).SetBytes(key.N.Bytes()),
-		E: fmp.NewFmpz(int64(key.E)),
-	}
-
-	var fmpPrivateKey *FMPPrivateKey
-	if key.D != nil {
-		fmpPrivateKey = &FMPPrivateKey{
-			PublicKey: fmpPubKey,
-			D:         new(fmp.Fmpz).SetBytes(key.D.Bytes()),
-			Primes: []*fmp.Fmpz{
-				new(fmp.Fmpz).SetBytes(key.Primes[0].Bytes()),
-				new(fmp.Fmpz).SetBytes(key.Primes[1].Bytes()),
-			},
-		}
-	} else {
-		fmpPrivateKey = PrivateFromPublic(fmpPubKey)
-	}
-
-	return *fmpPrivateKey
-}
-
 // BigtoFMPPrivateKey takes a x509big.BigPrivateKey and returns a FMPPrivateKey that uses fmp.Fmpz types
 func BigtoFMPPrivateKey(key *x509big.BigPrivateKey) FMPPrivateKey {
 	fmpPubKey := &FMPPublicKey{
@@ -160,39 +133,6 @@ func BigtoFMPPrivateKey(key *x509big.BigPrivateKey) FMPPrivateKey {
 	}
 
 	return *fmpPrivateKey
-}
-
-// FMPtoRSAPrivateKey takes a FMPPRivateKey and returns an rsa.PrivateKey if the exponent fits
-// within the int type.
-func FMPtoRSAPrivateKey(key *FMPPrivateKey) *rsa.PrivateKey {
-	if key.PublicKey.E.Cmp(fmp.NewFmpz(math.MaxInt64)) > 0 {
-		// TODO(sewid): Deprecate rsa.PrivateKey types
-		panic("[-] Exponent is too large for the private key to be converted to type rsa.PrivateKey")
-
-	}
-
-	pubKey := &rsa.PublicKey{
-		N: new(big.Int).SetBytes(key.N.Bytes()),
-		E: int(key.PublicKey.E.Int64()),
-	}
-
-	var privateKey *rsa.PrivateKey
-	if key.D != nil {
-		privateKey = &rsa.PrivateKey{
-			PublicKey: *pubKey,
-			D:         new(big.Int).SetBytes(key.D.Bytes()),
-			Primes: []*big.Int{
-				new(big.Int).SetBytes(key.Primes[0].Bytes()),
-				new(big.Int).SetBytes(key.Primes[1].Bytes()),
-			},
-		}
-	} else {
-		privateKey = &rsa.PrivateKey{
-			PublicKey: *pubKey,
-		}
-	}
-
-	return privateKey
 }
 
 // FMPtoBigPrivateKey takes a FMPPrivateKey and returns an x509big.PrivateKey using native go
@@ -240,22 +180,6 @@ func encodeDerToPem(der []byte, t string) string {
 	)
 
 	return string(p)
-}
-
-// EncodePublicKey marshalls an RSA public key into a string or returns an error.
-func EncodePublicKey(pub *rsa.PublicKey) (string, error) {
-	pubder, err := x509.MarshalPKIXPublicKey(pub)
-	if err != nil {
-		return "", err
-	}
-
-	return encodeDerToPem(pubder, "RSA PUBLIC KEY"), nil
-}
-
-// EncodePrivateKey marshalls an RSA private key into a string or returns an error.
-func EncodePrivateKey(priv *rsa.PrivateKey) string {
-	privder := x509.MarshalPKCS1PrivateKey(priv)
-	return encodeDerToPem(privder, "RSA PRIVATE KEY")
 }
 
 // EncodeFMPPrivateKey marshalls an RSA private key using FMP types into a string.
