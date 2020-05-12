@@ -24,6 +24,7 @@ text of the message or both.
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 * hastads broadcast attack
 * solve for plaintext with CRT components provided (Dp, Dq, p, q, c)
+* ecm (Lenstra elliptic curve method) - Not as good as other implementations at the moment though.
 
 ## Installation
  * Requires go 1.9 +
