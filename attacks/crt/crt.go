@@ -16,7 +16,7 @@ const name = "crt solver"
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]
 
-	// We need values in the precomputer portion of the key for this attack.
+	// We need values in the precomputed portion of the key for this attack.
 	if k.Key.Precomputed == nil {
 		return fmt.Errorf("%s failed - Precomputed values (Dp, Dq, etc) is not in key %s", name, k.KeyFilename)
 	}
