@@ -29,6 +29,19 @@ type factorDB struct {
 	Factors [][]interface{} `json:"factors"`
 }
 
+// asker can be replaced with another function returning a mock http.Response.
+var asker = askFactorDB
+
+// askFactorDB abstracts out the HTTP get so we can mock factordb in unit tests.
+func askFactorDB(hc *http.Client, url string) (*http.Response, error) {
+	resp, err := hc.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 // Attack factors an RSA Public Key using FactorDB API.
 func Attack(ts []*keys.RSA) error {
 	t := ts[0]
@@ -37,21 +50,21 @@ func Attack(ts []*keys.RSA) error {
 		return nil
 	}
 
-	var httpClient = &http.Client{
+	hc := &http.Client{
 		Timeout: 15 * time.Second,
 	}
 
-	resp, err := httpClient.Get(base + t.Key.N.String())
+	r, err := asker(hc, base+t.Key.N.String())
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer r.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("%s failed to lookup modulus - unexpected http code: %d", name, resp.StatusCode)
+	if r.StatusCode != 200 {
+		return fmt.Errorf("%s failed to lookup modulus - unexpected http code: %d", name, r.StatusCode)
 	}
 
-	js, err := ioutil.ReadAll(resp.Body)
+	js, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
