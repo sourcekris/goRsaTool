@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sourcekris/goRsaTool/attacks/crt"
+	"github.com/sourcekris/goRsaTool/attacks/ecm"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
@@ -41,6 +42,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
+	SupportedAttacks.RegisterAttack("ecm", false, true, ecm.Attack)
 
 	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
 	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
