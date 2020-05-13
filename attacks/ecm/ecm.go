@@ -178,6 +178,6 @@ func Attack(ks []*keys.RSA) error {
 		k.PackGivenP(res)
 		return nil
 	case <-ctx.Done():
-		return fmt.Errorf("%s failed - no factors foundv", name)
+		return fmt.Errorf("%s failed - no factors found", name)
 	}
 }
