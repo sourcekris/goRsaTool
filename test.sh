@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Testing commonfactors..."
+go run rsatool.go -attack commonfactors -keylist examples/cf1.pub,examples/cf2.pub
 echo "Testing crtsolve..."
 go run rsatool.go -attack crtsolver -key examples/crtsolve.key
 echo "Testing factordb..."

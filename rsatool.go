@@ -178,6 +178,9 @@ func main() {
 		case *attack == "all":
 			errs = unnatended(rsaKeys)
 		case attacks.SupportedAttacks.IsSupported(*attack):
+			if *keyList != "" && !attacks.SupportedAttacks.SupportsMulti(*attack) {
+				logger.Println("-keylist flag used for attack that does not support multikeys - only the first key will be attacked.")
+			}
 			errs = append(errs, attacks.SupportedAttacks.Execute(*attack, rsaKeys))
 		default:
 			errs = []error{fmt.Errorf("unsupported attack: %v. Use -list to see a list of supported attacks", *attack)}

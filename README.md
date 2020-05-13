@@ -9,6 +9,7 @@ text of the message or both.
 
 ## Attacks supported in this version:
 
+### Single Key Attacks
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
 * novelty primes attack
@@ -22,9 +23,12 @@ text of the message or both.
 * pollard rho brent factorization - Richard Brents improved version of Pollard's monte carlo 
   factorization
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
-* hastads broadcast attack
 * solve for plaintext with CRT components provided (Dp, Dq, p, q, c)
 * ecm (Lenstra elliptic curve method) - Not as good as other implementations at the moment though.
+
+### Multi-Key Attacks
+* hastads broadcast attack
+* common factors attack (share p among multiple moduli)
 
 ## Installation
  * Requires go 1.9 +

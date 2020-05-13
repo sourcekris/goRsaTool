@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
 	"github.com/sourcekris/goRsaTool/attacks/ecm"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
@@ -43,6 +44,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
 	SupportedAttacks.RegisterAttack("ecm", false, true, ecm.Attack)
+	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
 
 	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
 	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
@@ -84,6 +86,17 @@ func (a *Attacks) IsSupported(name string) bool {
 	for _, a := range a.Supported {
 		if a.Name == name {
 			return true
+		}
+	}
+
+	return false
+}
+
+// SupportsMulti returns true if the attack supports multi-key attacks.
+func (a *Attacks) SupportsMulti(name string) bool {
+	for _, a := range a.Supported {
+		if a.Name == name {
+			return a.SupportsMulti
 		}
 	}
 
