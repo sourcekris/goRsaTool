@@ -30,6 +30,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 ### Multi-Key Attacks
 * hastads broadcast attack
 * common factors attack (share p among multiple moduli)
+* common modulus attack (2 keys share n but have different e)
 
 ## Installation
  * Requires go 1.9 +

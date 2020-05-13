@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
+	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
 	"github.com/sourcekris/goRsaTool/attacks/ecm"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
@@ -45,6 +46,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
 	SupportedAttacks.RegisterAttack("ecm", false, true, ecm.Attack)
 	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
+	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
 
 	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
 	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
