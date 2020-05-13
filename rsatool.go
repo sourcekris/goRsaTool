@@ -77,8 +77,12 @@ func main() {
 		return
 	}
 
-	if len(*ctList) > 0 {
-		// TODO(kris): Add the support for multiple ciphertext binaries from this flag.
+	// Keep a list of ct files for later if the flag was provided.
+	var clist []string
+	if *ctList != "" {
+		for _, k := range strings.Split(*ctList, ",") {
+			clist = append(clist, strings.Trim(k, "\t\n "))
+		}
 	}
 
 	// Get a list of either 1 or more public key files to read.
@@ -93,10 +97,15 @@ func main() {
 		}
 	}
 
+	// We need klist and clist to be the same length for now.
+	if len(klist) > 0 && len(clist) > 0 && len(klist) != len(clist) {
+		log.Fatalf("when using -keylist and -ctlist there should be the same number of files in each list")
+	}
+
 	// We got a list of keys to work on, so lets do that.
 	if len(klist) > 0 {
 		var rsaKeys []*keys.RSA
-		for _, kf := range klist {
+		for i, kf := range klist {
 			var (
 				targetRSA *keys.RSA
 				nonPemKey bool
@@ -119,9 +128,20 @@ func main() {
 				targetRSA.Verbose = *verboseMode
 			}
 
-			var c []byte
-			if len(*cipherText) > 0 {
-				c, err = utils.ReadCipherText(*cipherText)
+			var (
+				c  []byte
+				cf string
+			)
+
+			switch {
+			case *cipherText != "":
+				cf = *cipherText
+			case clist != nil:
+				cf = clist[i]
+			}
+
+			if cf != "" {
+				c, err = utils.ReadCipherText(cf)
 				if err != nil {
 					logger.Fatalf("failed reading ciphertext file: %v", err)
 				}
