@@ -1,13 +1,14 @@
 # goRsaTool
 
-A golang port of [RsaCtfTool](https://github.com/sourcekris/RsaCtfTool) originally for the purpose
-of learning golang. Now just for fun.
-
 goRsaTool is an RSA tool for CTF challenges, it attempts multiple attacks against a public key 
 and/or an RSA encrypted ciphertext binary in an effort to recover either the private key, the plain
 text of the message or both.
 
-## Attacks supported in this version:
+Inspired by my time spent contributing to [RsaCtfTool](https://github.com/Ganapati/RsaCtfTool) and
+originally for the purpose of learning golang. Now I maintain this tool as a side project with the
+goal of support as wide a range of factorization methods and RSA attacks as possible.
+
+## Attacks supported in this version
 
 ### Single Key Attacks
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
@@ -81,7 +82,7 @@ text of the message or both.
 
 ## Usage:
 
-### Generate a public key:
+### Generate a public key
 ```
 $ ./gorsatool -createkey -n 115367564564210182766242534110944507919869313713243756429 -e 3
 -----BEGIN RSA PUBLIC KEY-----
@@ -89,14 +90,14 @@ MB0CGAS0flryFxnpDN8t2jlPVnTt6YdoEyEXjQIBAw==
 -----END RSA PUBLIC KEY-----
 ```
 
-### Dump the parameters from a key:
+### Dump the parameters from a key
 ```
 $ ./gorsatool -dumpkey -key ./key.pub
 key.pub:
 n = 115367564564210182766242534110944507919869313713243756429
 e = 3
 ```
-### Attack a public key:
+### Attack a public key
 ```
 $ ./gorsatool -key ./key.pub -attack all -verbose
 rsatool: rsatool.go:72: starting up...
@@ -109,7 +110,7 @@ Ec7+LmR48UUVuXtlKE1fhdMCAQACAQACAxw+pw==
 -----END RSA PRIVATE KEY-----
 ```
 
-### Attack a public key thats a list of numbers:
+### Attack a public key thats a list of numbers
 ```
 $ cat numbers.txt
 n = 115367564564210182766242534110944507919869313713243756429
@@ -123,7 +124,7 @@ Ec7+LmR48UUVuXtlKE1fhdMCAQACAQACAxw+pw==
 -----END RSA PRIVATE KEY-----
 ```
 
-### List available attacks:
+### List available attacks
 ```
 $ ./gorsatool -list
 crtsolver
@@ -154,3 +155,7 @@ commonfactors
 
 ### Attack multiple keys with a hastads broadcast attack
 `./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
+
+## Author
+
+* Kris Hunt (@ctfkris)
