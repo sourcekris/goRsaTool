@@ -1,10 +1,10 @@
 package wiener2
 
 import (
-	"fmt"
-
+	"github.com/sourcekris/goRsaTool/attacks/wienervariant"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -87,5 +87,6 @@ func Attack(ks []*keys.RSA) error {
 		}
 	}
 
-	return fmt.Errorf("%s attack failed", name)
+	// Try the next variant approach.
+	return wienervariant.Attack(ks)
 }
