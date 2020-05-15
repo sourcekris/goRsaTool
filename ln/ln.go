@@ -297,6 +297,12 @@ func IsPower(n *fmp.Fmpz) *fmp.Fmpz {
 	}
 }
 
+// FracPow raises x to the fractional power m/n and returns it.
+func FracPow(x *fmp.Fmpz, m, n int) *fmp.Fmpz {
+	res := new(fmp.Fmpz)
+	return res.ExpXI(x, m).Root(res, int32(n))
+}
+
 // FmpzMin returns the min(x,y)
 func FmpzMin(x, y *fmp.Fmpz) *fmp.Fmpz {
 	if x.Cmp(y) < 0 {

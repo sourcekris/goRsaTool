@@ -31,18 +31,22 @@ func Attack(ks []*keys.RSA) error {
 			if g.Cmp(ln.BigOne) == 0 {
 				phint := new(fmp.Fmpz).Mul(k.Key.N, fmp.NewFmpz(num))
 				phint.Mul(phint, fmp.NewFmpz(den)).Root(phint, 2)
-				// fmt.Printf("phint: %s\n", phint)
+				X := ln.FracPow(k.Key.N, 3, 16)
+				X.Div(X, ln.BigTwo)
+
+				fmt.Printf("phint: %s\n", phint)
+				fmt.Printf("X: %s\n", X)
 
 				// // need to find the small roots of phint
 				// //fmt.Printf("phint: %s\n", phint)
-				dMaybe := new(fmp.Fmpz).ModInverse(k.Key.PublicKey.E, phint)
-				pMaybe := ln.FindPGivenD(dMaybe, k.Key.PublicKey.E, k.Key.N)
+				// dMaybe := new(fmp.Fmpz).ModInverse(k.Key.PublicKey.E, phint)
+				// pMaybe := ln.FindPGivenD(dMaybe, k.Key.PublicKey.E, k.Key.N)
 
-				fmt.Printf("pmaybe:%s\n", pMaybe)
-				if pMaybe.Cmp(ln.BigZero) > 0 {
-					fmt.Printf("p: %s\n", pMaybe)
-					return nil
-				}
+				// fmt.Printf("pmaybe:%s\n", pMaybe)
+				// if pMaybe.Cmp(ln.BigZero) > 0 {
+				// 	fmt.Printf("p: %s\n", pMaybe)
+				// 	return nil
+				// }
 			}
 		}
 	}
