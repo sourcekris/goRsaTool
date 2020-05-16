@@ -36,3 +36,5 @@ echo "Testing qicheng..."
 go run rsatool.go -attack qicheng -key examples/qicheng.pub
 echo "Testing ecm..."
 go run rsatool.go -attack ecm -key examples/ecm.pub
+echo "Testing franklin reiter related message attack..."
+go run rsatool.go -keylist examples/franklinreiter1.key,examples/franklinreiter2.key -attack franklinreiter

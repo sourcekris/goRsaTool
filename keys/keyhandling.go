@@ -16,13 +16,16 @@ import (
 
 var (
 	// lineRE is a regexp that should match interesting integers on lines.
-	lineRE = regexp.MustCompile(`(?i)^([necpqd][pq]?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
+	lineRE = regexp.MustCompile(`(?i)^([necpqdk][pq]?t?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
 	// numRE matches numbers in base 10 or hex.
 	numRE = regexp.MustCompile(`[0-9a-f]+`)
 	// modRE, expRE, ctRE matches 'n', 'e', 'c' case insensitively.
 	modRE = regexp.MustCompile(`(?i)^n`)
 	expRE = regexp.MustCompile(`(?i)^e`)
 	ctRE  = regexp.MustCompile(`(?i)^c`)
+
+	// kptRE is a known plaintext regexp.
+	kptRE = regexp.MustCompile(`(?i)^kpt`)
 
 	// CRT components regexps.
 	pRE  = regexp.MustCompile(`(?i)^p`)
@@ -88,7 +91,7 @@ func getBase(s string) (string, int) {
 func ImportIntegerList(kb []byte) (*RSA, error) {
 	var (
 		n, e, c, p, q, dp, dq string
-		ct                    []byte
+		ct, kpt               []byte
 		crt                   bool
 	)
 
@@ -115,6 +118,10 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 					dp = sm[2]
 				case dqRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					dq = sm[2]
+				case kptRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					if kn, ok := new(fmp.Fmpz).SetString(getBase(sm[2])); ok {
+						kpt = ln.NumberToBytes(kn)
+					}
 				}
 			}
 		}
@@ -208,6 +215,10 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 	k, err := NewRSA(PrivateFromPublic(&FMPPublicKey{N: fN, E: fE}), ct, nil, "", false)
 	if err != nil {
 		return nil, err
+	}
+
+	if kpt != nil {
+		k.KnownPlainText = kpt
 	}
 
 	return k, nil

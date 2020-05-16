@@ -26,6 +26,8 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 * solve for plaintext with CRT components provided (Dp, Dq, p, q, c)
 * ecm (Lenstra elliptic curve method) - Not as good as other implementations at the moment though.
+* Franklin Reiter related message attack - Requires 1 key, 2 ciphertexts which are related with some
+  minor different suffix. See the example keys in the examples/ subdirectory.
 
 ### Multi-Key Attacks
 * hastads broadcast attack
@@ -144,6 +146,8 @@ williamsp1
 qicheng
 ecm
 commonfactors
+commonmodulus
+franklinreiter
 ```
 
 ## More Example Usage 

@@ -11,11 +11,12 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// RSA wraps FMPPrivateKey and adds a field for cipher and plaintexts
+// RSA wraps FMPPrivateKey and adds a field for cipher and plaintexts.
 type RSA struct {
 	Key            FMPPrivateKey
 	CipherText     []byte
 	PlainText      []byte
+	KnownPlainText []byte
 	KeyFilename    string
 	PastPrimesFile string
 	Verbose        bool

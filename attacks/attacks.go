@@ -10,6 +10,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/ecm"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
+	"github.com/sourcekris/goRsaTool/attacks/franklinreiter"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
 	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
@@ -47,6 +48,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("ecm", false, true, ecm.Attack)
 	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
 	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
+	SupportedAttacks.RegisterAttack("franklinreiter", true, true, franklinreiter.Attack)
 
 	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
 	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
