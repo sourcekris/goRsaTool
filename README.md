@@ -28,6 +28,8 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * ecm (Lenstra elliptic curve method) - Not as good as other implementations at the moment though.
 * Franklin Reiter related message attack - Requires 1 key, 2 ciphertexts which are related with some
   minor different suffix. See the example keys in the examples/ subdirectory.
+* small fraction factorization - finding factors of n when p and q are close to a small fraction 
+  (e.g. 37/32).
 
 ### Multi-Key Attacks
 * hastads broadcast attack
@@ -148,6 +150,7 @@ ecm
 commonfactors
 commonmodulus
 franklinreiter
+smallfractions
 ```
 
 ## More Example Usage 
