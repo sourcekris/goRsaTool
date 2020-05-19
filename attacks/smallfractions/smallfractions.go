@@ -12,6 +12,9 @@ import (
 // name is the name of this attack.
 const name = "small fractions"
 
+// depth is the max size of the numerator and denominator to test to.
+const depth int64 = 50
+
 // Attack implements SmallFractions attack.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]
@@ -19,37 +22,103 @@ func Attack(ks []*keys.RSA) error {
 		return nil
 	}
 
-	var (
-		depth    int64 = 50
-		num, den int64
-	)
+	var num, den int64
 
 	for den = 2; den < depth+1; den++ {
 		for num = 1; num < den; num++ {
 			g := new(fmp.Fmpz).GCD(fmp.NewFmpz(num), fmp.NewFmpz(den))
 
 			if g.Cmp(ln.BigOne) == 0 {
-				phint := new(fmp.Fmpz).Mul(k.Key.N, fmp.NewFmpz(num))
-				phint.Mul(phint, fmp.NewFmpz(den)).Root(phint, 2)
+				phint := new(fmp.Fmpz).Mul(k.Key.N, fmp.NewFmpz(den))
+				phint.Div(phint, fmp.NewFmpz(num)).Root(phint, 2)
+
 				X := ln.FracPow(k.Key.N, 3, 16)
 				X.Div(X, ln.BigTwo)
 
-				fmt.Printf("phint: %s\n", phint)
-				fmt.Printf("X: %s\n", X)
+				// f = x - phint
+				f := fmp.NewFmpzModPoly(k.Key.N).SetCoeffUI(1, 1)
+				f.Sub(f, fmp.NewFmpzModPoly(k.Key.N).SetCoeff(0, phint))
 
-				// // need to find the small roots of phint
-				// //fmt.Printf("phint: %s\n", phint)
-				// dMaybe := new(fmp.Fmpz).ModInverse(k.Key.PublicKey.E, phint)
-				// pMaybe := ln.FindPGivenD(dMaybe, k.Key.PublicKey.E, k.Key.N)
+				// Copy f to type FmpzPoly.
+				fp := fmp.NewFmpzPoly()
+				fcs := f.GetCoeffs()
+				for i, c := range fcs {
+					fp.SetCoeff(i, c)
+				}
 
-				// fmt.Printf("pmaybe:%s\n", pMaybe)
-				// if pMaybe.Cmp(ln.BigZero) > 0 {
-				// 	fmt.Printf("p: %s\n", pMaybe)
-				// 	return nil
-				// }
+				// x
+				x := fmp.NewFmpzPoly().SetCoeffUI(1, 1)
+				//  Construct an array of polys.
+				var g []*fmp.FmpzPoly
+				for i := 0; i < 4; i++ {
+					// np = x * N^(4-i)
+					np := fmp.NewFmpzPoly().MulScalar(x, new(fmp.Fmpz).ExpXI(k.Key.N, 4-i))
+					// np * f^i
+					np.Mul(np, fmp.NewFmpzPoly().Pow(fp, i))
+					g = append(g, np)
+
+				}
+
+				//  Extend the array of polys.
+				for i := 0; i < 4; i++ {
+					// np = x**i * f**4
+					np := fmp.NewFmpzPoly().Pow(x, i)
+					np.Mul(np, fmp.NewFmpzPoly().Pow(fp, 4))
+					g = append(g, np)
+				}
+
+				// Construct an empty 8*8 matrix and set the values.
+				B := fmp.NewFmpzMat(8, 8)
+				for i := 0; i < 8; i++ {
+					for j := 0; j < g[i].Len(); j++ {
+						B.SetVal(g[i].GetCoeff(j).MulZ(new(fmp.Fmpz).ExpXI(X, j)), j, i)
+					}
+				}
+
+				// Peform lattice reduction.
+				B.LLL()
+
+				ff := fmp.NewFmpzPoly()
+				for i := 0; i < 8; i++ {
+					a := new(fmp.Fmpz).Div(B.Entry(i, 0), new(fmp.Fmpz).ExpXI(X, i))
+					b := new(fmp.FmpzPoly).Pow(x, i)
+					b.MulScalar(b, a)
+					ff.Add(ff, b)
+				}
+
+				// Find the roots of the resulting polynomial via factorization.
+				fac := ff.Factor()
+				for i := 0; i < fac.Len(); i++ {
+
+					// One of the coefficients of the factors could be related to p.
+					p := fac.GetPoly(i)
+					for j := 0; j < p.Len(); j++ {
+						coeff := new(fmp.Fmpz).Mod(p.GetCoeff(j), k.Key.N)
+						if coeff.Equals(ln.BigZero) {
+							continue
+						}
+
+						// Due to the FLINT LLL implementation I think we often get sign problems in the factors
+						// of the polynomials. So try both +/- versions.
+						pps := []*fmp.Fmpz{
+							new(fmp.Fmpz).Sub(phint, coeff),
+							new(fmp.Fmpz).Sub(phint, new(fmp.Fmpz).Mul(coeff, ln.BigNOne)),
+						}
+
+						for _, pp := range pps {
+							if pp.Equals(ln.BigZero) || pp.Equals(k.Key.N) {
+								continue
+							}
+							if new(fmp.Fmpz).Mod(k.Key.N, pp).Cmp(ln.BigZero) == 0 {
+								k.PackGivenP(pp)
+								return nil
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%s did not find the factors", name)
 }

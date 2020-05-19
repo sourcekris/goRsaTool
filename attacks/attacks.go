@@ -19,6 +19,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsrho"
 	"github.com/sourcekris/goRsaTool/attacks/qicheng"
+	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/attacks/williamsp1"
@@ -49,11 +50,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
 	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
 	SupportedAttacks.RegisterAttack("franklinreiter", true, true, franklinreiter.Attack)
-
-	// This attack is not directly registered, it is called automatically if the "wiener" attack fails,
-	// SupportedAttacks.RegisterAttack("wiener2", false, true, wiener2.Attack)
-	// This attack is not finished.
-	// SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
+	SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
 }
 
 type attackFunc func([]*keys.RSA) error
