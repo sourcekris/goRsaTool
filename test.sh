@@ -24,6 +24,8 @@ echo "Testing wiener..."
 go run rsatool.go -attack wiener -key examples/wiener.pub
 echo "Testing wiener2..."
 go run rsatool.go -attack wiener -key examples/wiener2-numberlist.txt
+echo "Testing wiener variant..."
+go run rsatool.go -attack wiener -key examples/wienervariant.key
 echo "Testing pollardsp1..."
 go run rsatool.go -attack pollardsp1 -key examples/pollardsp1.pub
 echo "Testing pollardsrho..."
@@ -38,3 +40,5 @@ echo "Testing ecm..."
 go run rsatool.go -attack ecm -key examples/ecm.pub
 echo "Testing franklin reiter related message attack..."
 go run rsatool.go -keylist examples/franklinreiter1.key,examples/franklinreiter2.key -attack franklinreiter
+echo "Testing smallfractions attack..."
+go run rsatool.go -key examples/smallfraction.pub -attack smallfractions
