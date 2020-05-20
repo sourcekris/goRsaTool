@@ -10,6 +10,8 @@ import (
 
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
 // name is the name of this attack.
@@ -78,12 +80,26 @@ func Attack(ts []*keys.RSA) error {
 		if len(fdb.Factors) < 1 {
 			return fmt.Errorf("%s failed due to an unknown error - modulus status is FF but primes were not found", name)
 		}
-		p, ok := fdb.Factors[0][0].(string)
-		if !ok {
-			return fmt.Errorf("%s failed asserting type of factor to be a string: %v", name, fdb.Factors[0][0])
+
+		var primes []*fmp.Fmpz
+		for _, f := range fdb.Factors {
+			prime, ok := f[0].(string)
+			if !ok {
+				return fmt.Errorf("%s failed asserting that the factor is a string: %v", name, f)
+			}
+			primes = append(primes, ln.FmpString(prime))
 		}
 
-		t.PackGivenP(ln.FmpString(p))
+		// RSA normally has 2 primes but can have more. Handle the simple case first.
+		if len(primes) == 2 {
+			t.PackGivenP(primes[0])
+			return nil
+		}
+
+		if err := t.PackMultiPrime(primes); err != nil {
+			return err
+		}
+
 		return nil
 	}
 

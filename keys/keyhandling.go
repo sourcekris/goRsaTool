@@ -232,17 +232,18 @@ func ImportKey(kb []byte) (*FMPPrivateKey, error) {
 		return nil, errors.New("failed to decode PEM key")
 	}
 
-	// Extract a FMPPublicKey from the DER decoded data and pack a private key struct.
-	key, err := parsePublicRsaKey(block.Bytes)
+	// Try as a private key first.
+	priv, err := parseBigPrivateRsaKey(block.Bytes)
 	if err == nil {
 		// If there was an error, try to parse it an alternative way below.
-		return PrivateFromPublic(key), nil
+		return priv, nil
 	}
 
-	priv, err := parseBigPrivateRsaKey(block.Bytes)
+	// Extract a FMPPublicKey from the DER decoded data and pack a private key struct.
+	key, err := parsePublicRsaKey(block.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("ImportKey: failed to parse the key as either a public or private key: %v", err)
 	}
 
-	return priv, nil
+	return PrivateFromPublic(key), nil
 }

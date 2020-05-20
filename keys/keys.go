@@ -51,17 +51,45 @@ func (t *RSA) PackGivenP(p *fmp.Fmpz) {
 	t.Key.D = ln.SolveforD(p, q, t.Key.PublicKey.E)
 }
 
+// PackMultiPrime takes many primes and packs the RSA struct with the private
+// key values, []*Primes & d.
+func (t *RSA) PackMultiPrime(primes []*fmp.Fmpz) error {
+	var (
+		n  = fmp.NewFmpz(1)
+		cp = fmp.NewFmpz(1)
+	)
+
+	for _, p := range primes {
+		n.MulZ(p)
+		cp.MulZ(new(fmp.Fmpz).Sub(p, ln.BigOne))
+	}
+
+	if !n.Equals(t.Key.N) {
+		return fmt.Errorf("product of primes does not equal N")
+	}
+
+	t.Key.Primes = primes
+	t.Key.D = new(fmp.Fmpz).ModInverse(t.Key.PublicKey.E, cp)
+
+	return nil
+}
+
 // String returns the key components in a string format.
 func (t *RSA) String() string {
 	var res string
 	res = fmt.Sprintf("%s:\nn = %s\n", t.KeyFilename, t.Key.PublicKey.N)
 	res = fmt.Sprintf("%se = %s\n", res, t.Key.PublicKey.E)
 
-	// TODO(sewid): Support RSA multiprime [where len(key.Primes) > 2]
 	if t.Key.D != nil {
 		res = fmt.Sprintf("%sd = %s\n", res, t.Key.D)
-		res = fmt.Sprintf("%sp = %s\n", res, t.Key.Primes[0])
-		res = fmt.Sprintf("%sq = %s\n", res, t.Key.Primes[1])
+		if len(t.Key.Primes) == 2 {
+			res = fmt.Sprintf("%sp = %s\n", res, t.Key.Primes[0])
+			res = fmt.Sprintf("%sq = %s\n", res, t.Key.Primes[1])
+		} else {
+			for i, p := range t.Key.Primes {
+				res = fmt.Sprintf("%sprime[%d] = %s\n", res, i, p)
+			}
+		}
 	}
 
 	if len(t.CipherText) > 0 {
@@ -124,11 +152,12 @@ func BigtoFMPPrivateKey(key *x509big.BigPrivateKey) FMPPrivateKey {
 		fmpPrivateKey = &FMPPrivateKey{
 			PublicKey: fmpPubKey,
 			D:         new(fmp.Fmpz).SetBytes(key.D.Bytes()),
-			Primes: []*fmp.Fmpz{
-				new(fmp.Fmpz).SetBytes(key.Primes[0].Bytes()),
-				new(fmp.Fmpz).SetBytes(key.Primes[1].Bytes()),
-			},
 		}
+
+		for _, p := range key.Primes {
+			fmpPrivateKey.Primes = append(fmpPrivateKey.Primes, new(fmp.Fmpz).SetBytes(p.Bytes()))
+		}
+
 	} else {
 		fmpPrivateKey = PrivateFromPublic(fmpPubKey)
 	}
@@ -149,11 +178,12 @@ func FMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
 		privateKey = &x509big.BigPrivateKey{
 			PublicKey: *pubKey,
 			D:         new(big.Int).SetBytes(key.D.Bytes()),
-			Primes: []*big.Int{
-				new(big.Int).SetBytes(key.Primes[0].Bytes()),
-				new(big.Int).SetBytes(key.Primes[1].Bytes()),
-			},
 		}
+
+		for _, p := range key.Primes {
+			privateKey.Primes = append(privateKey.Primes, new(big.Int).SetBytes(p.Bytes()))
+		}
+
 	} else {
 		privateKey = &x509big.BigPrivateKey{
 			PublicKey: *pubKey,
