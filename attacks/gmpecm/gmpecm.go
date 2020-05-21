@@ -19,7 +19,7 @@ var timeout = time.Minute * 5
 // name is the name of this attack.
 const name = "gmp-ecm elliptic curve factorization"
 
-// Attack implements the common factors method against moduli in multiple keys.
+// Attack implements the elliptic curve factorization attack against public keys.
 func Attack(ks []*keys.RSA) error {
 	var (
 		k   = ks[0]

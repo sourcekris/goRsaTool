@@ -13,6 +13,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/gmpecm"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
+	"github.com/sourcekris/goRsaTool/attacks/mersenne"
 	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
@@ -38,6 +39,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
 	SupportedAttacks.RegisterAttack("hastadsbroadcast", true, true, hastadsbroadcast.Attack)
 	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
+	SupportedAttacks.RegisterAttack("mersenne", false, true, mersenne.Attack)
 	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
 	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
