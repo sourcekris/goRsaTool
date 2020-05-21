@@ -45,10 +45,11 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   * Golang
   * Git
   * FLINT2 (Fast Library for Number Theory)
+  * GMP-ECM (GMP Elliptic Curve Method factorization)
   * This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
 
   ```shell
-  sudo apt install git golang libflint-dev
+  sudo apt install git golang libflint-dev libecm-dev
   ```
 
   * For Mac OSX (tested on Mojave) you just need Golang and [Homebrew](https://brew.sh/)
@@ -62,13 +63,6 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
     ```
 
   * Get Golang libraries this uses:
-
-   ```shell
-   go get github.com/jbarham/primegen
-   go get github.com/sourcekris/goflint
-   go get github.com/sourcekris/x509big
-   ```
-
   * Download and build this tool using go install repo and build:
 
     ```shell
