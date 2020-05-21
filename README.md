@@ -11,6 +11,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 ## Attacks supported in this version
 
 ### Single Key Attacks
+
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
 * novelty primes attack
@@ -32,31 +33,48 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   (e.g. 37/32).
 
 ### Multi-Key Attacks
+
 * hastads broadcast attack
 * common factors attack (share p among multiple moduli)
 * common modulus attack (2 keys share n but have different e)
 
 ## Installation
- * Requires go 1.9 +
- * Get dependencies, you will need:
-    * Golang
-    * Git
-    * FLINT2 (Fast Library for Number Theory)
-    * This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
+
+* Requires go 1.9 +
+* Get dependencies, you will need:
+  * Golang
+  * Git
+  * FLINT2 (Fast Library for Number Theory)
+  * This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
+
+  ```shell
+  sudo apt install git golang libflint-dev
+  ```
+
+  * For Mac OSX (tested on Mojave) you just need Golang and [Homebrew](https://brew.sh/)
+    installed. Installing flint with Homebrew brings the other pre-requisites like GMP and MPFR 
+    along with it
+
+    ```shell
+    $ brew install flint
+    ...
+    $ go get github.com/sourcekris/goRsaTool
     ```
-    sudo apt install git golang libflint-dev
-    ```
- * Get Golang libraries this uses:
-   ```
+
+  * Get Golang libraries this uses:
+
+   ```shell
    go get github.com/jbarham/primegen
    go get github.com/sourcekris/goflint
    go get github.com/sourcekris/x509big
    ```
- * Download and build this tool using go install repo and build:
-   ```
-   $ go get github.com/sourcekris/goRsaTool
-   $ go install github.com/sourcekris/goRsaTool
-   $ $HOME/go/bin/goRsaTool -h
+
+  * Download and build this tool using go install repo and build:
+
+    ```shell
+    $ go get github.com/sourcekris/goRsaTool
+    $ go install github.com/sourcekris/goRsaTool
+    $ $HOME/go/bin/goRsaTool -h
     Usage of /home/username/go/bin/goRsaTool:
       -attack string
           Specific attack to try. Specify "all" for everything that works unnatended. (default 
@@ -83,12 +101,13 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
           The filename of a file containing past CTF prime numbers. (default "../pastctfprimes.txt")
       -verbose
           Enable verbose output.
-   ```
+    ```
 
-## Usage:
+## Usage
 
 ### Generate a public key
-```
+
+```shell
 $ ./gorsatool -createkey -n 115367564564210182766242534110944507919869313713243756429 -e 3
 -----BEGIN RSA PUBLIC KEY-----
 MB0CGAS0flryFxnpDN8t2jlPVnTt6YdoEyEXjQIBAw==
@@ -96,14 +115,17 @@ MB0CGAS0flryFxnpDN8t2jlPVnTt6YdoEyEXjQIBAw==
 ```
 
 ### Dump the parameters from a key
-```
+
+```shell
 $ ./gorsatool -dumpkey -key ./key.pub
 key.pub:
 n = 115367564564210182766242534110944507919869313713243756429
 e = 3
 ```
+
 ### Attack a public key
-```
+
+```shell
 $ ./gorsatool -key ./key.pub -attack all -verbose
 rsatool: rsatool.go:72: starting up...
 2020/05/13 21:48:28 fermat factorization attempt beginning with timeout 5m0s
@@ -116,7 +138,8 @@ Ec7+LmR48UUVuXtlKE1fhdMCAQACAQACAxw+pw==
 ```
 
 ### Attack a public key thats a list of numbers
-```
+
+```shell
 $ cat numbers.txt
 n = 115367564564210182766242534110944507919869313713243756429
 e = 3
@@ -130,7 +153,8 @@ Ec7+LmR48UUVuXtlKE1fhdMCAQACAQACAxw+pw==
 ```
 
 ### List available attacks
-```
+
+```shell
 $ ./gorsatool -list
 crtsolver
 factordb
@@ -153,15 +177,18 @@ franklinreiter
 smallfractions
 ```
 
-## More Example Usage 
+## More Example Usage
 
-### Attack a public key with a specific attack:
+### Attack a public key with a specific attack
+
 `./gorsatool -key ./key.pub -attack wiener`
 
-### Attack the example pollards p-1 key with the pollards p-1 attack:
+### Attack the example pollards p-1 key with the pollards p-1 attack
+
 `./gorsatool -key examples/pollardsp1.pub -attack pollardsp1`
 
 ### Attack multiple keys with a hastads broadcast attack
+
 `./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
 
 ## Author
