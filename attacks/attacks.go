@@ -7,10 +7,10 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
 	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
-	"github.com/sourcekris/goRsaTool/attacks/ecm"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/franklinreiter"
+	"github.com/sourcekris/goRsaTool/attacks/gmpecm"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
 	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
@@ -46,7 +46,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
-	SupportedAttacks.RegisterAttack("ecm", false, true, ecm.Attack)
+	SupportedAttacks.RegisterAttack("ecm", false, true, gmpecm.Attack)
 	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
 	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
 	SupportedAttacks.RegisterAttack("franklinreiter", true, true, franklinreiter.Attack)
