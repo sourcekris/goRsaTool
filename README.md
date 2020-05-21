@@ -77,15 +77,17 @@ the ecm binary and does not include the headers needed. To install GMP-ECM from 
 steps.
 
 ```shell
-cd ~
-mkdir Math
-svn co svn://scm.gforge.inria.fr/svn/ecm/trunk $HOME/Math/ecm
-brew install autoconf automake libtool
-glibtoolize
-autoreconf -i
-./configure --with-gmp=/usr/local/
-make
-make install
+$ cd ~
+$ mkdir Math
+$ svn co svn://scm.gforge.inria.fr/svn/ecm/trunk $HOME/Math/ecm
+...
+$ cd ecm/Math
+$ brew install autoconf automake libtool
+$ glibtoolize
+$ autoreconf -i
+$ ./configure --with-gmp=/usr/local/
+$ make
+$ make install
 ```
 
 Finally, get the goRsaTool package
