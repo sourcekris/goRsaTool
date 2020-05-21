@@ -46,56 +46,53 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   * Git
   * FLINT2 (Fast Library for Number Theory)
   * GMP-ECM (GMP Elliptic Curve Method factorization)
-  * This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
+
+### Installation on Linux / Windows 10
+
+This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
 
   ```shell
   sudo apt install git golang libflint-dev libecm-dev
+  go get github.com/sourcekris/goRsaTool
   ```
 
-  * For Mac OSX (tested on Mojave) you just need Golang and [Homebrew](https://brew.sh/)
-    installed. Installing flint with Homebrew brings the other pre-requisites like GMP and MPFR 
-    along with it
+### Installing on OSX
 
-    ```shell
-    $ brew install flint
-    ...
-    $ go get github.com/sourcekris/goRsaTool
-    ```
+For Mac OSX (tested on Mojave) you need Golang installed. I used the official .pkg distrubution from
+the Golang homepage. To install dependencies I used [Homebrew](https://brew.sh/) to install FLINT 
+and built GMP-ECM library from source. This guide assumes Xcode is already setup / working.
 
-  * Get Golang libraries this uses:
-  * Download and build this tool using go install repo and build:
+#### Install FLINT
 
-    ```shell
-    $ go get github.com/sourcekris/goRsaTool
-    $ go install github.com/sourcekris/goRsaTool
-    $ $HOME/go/bin/goRsaTool -h
-    Usage of /home/username/go/bin/goRsaTool:
-      -attack string
-          Specific attack to try. Specify "all" for everything that works unnatended. (default 
-          "all")
-      -ciphertext string
-          An RSA encrypted binary file to decrypt, necessary for certain attacks.
-      -createkey
-          Create a public key given an E and N.
-      -ctlist string
-          Comma seperated list of ciphertext binaries for multi-key attacks.
-      -dumpkey
-          Just dump the RSA integers from a key - n,e,d,p,q.
-      -e string
-          The exponent value - for use with createkey flag.
-      -key string
-          The filename of the RSA key to attack or dump
-      -keylist string
-          Comma seperated list of keys for multi-key attacks.
-      -list
-          List the attacks supported by the attack flag.
-      -n string
-          The modulus value - for use with createkey flag.
-      -pastprimes string
-          The filename of a file containing past CTF prime numbers. (default "../pastctfprimes.txt")
-      -verbose
-          Enable verbose output.
-    ```
+Install FLINT first, it comes with GMP which is a dependancy of GMP-ECM.
+
+```shell
+$ brew install flint
+```
+
+#### Building GMP-ECM on OSX
+
+There's no prepackaged version of GMP-ECM on OSX. There is a MacPorts gmp-ecm package but it is only
+the ecm binary and does not include the headers needed. To install GMP-ECM from source follow these
+steps.
+
+```shell
+cd ~
+mkdir Math
+svn co svn://scm.gforge.inria.fr/svn/ecm/trunk $HOME/Math/ecm
+brew install autoconf automake libtool
+glibtoolize
+autoreconf -i
+./configure --with-gmp=/usr/local/
+make
+make install
+```
+
+Finally, get the goRsaTool package
+
+```shell
+$ go get github.com/sourcekris/goRsaTool
+```
 
 ## Usage
 
