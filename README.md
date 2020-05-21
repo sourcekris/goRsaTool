@@ -26,7 +26,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   factorization
 * Qi Cheng factorization from "A New Class of Unsafe Primes"
 * solve for plaintext with CRT components provided (Dp, Dq, p, q, c)
-* ecm (Lenstra elliptic curve method) - Not as good as other implementations at the moment though.
+* ecm (Lenstra elliptic curve method) using GMP-ECM library
 * Franklin Reiter related message attack - Requires 1 key, 2 ciphertexts which are related with some
   minor different suffix. See the example keys in the examples/ subdirectory.
 * small fraction factorization - finding factors of n when p and q are close to a small fraction 
