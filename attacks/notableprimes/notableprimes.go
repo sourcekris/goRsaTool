@@ -47,7 +47,7 @@ func lucasNumber(n int) *fmp.Fmpz {
 
 // TODO(kris): Add phi, GF and other notable primes.
 
-// Attack checks the key modulus to see if it factors with any mersenne primes.
+// Attack checks the key modulus to see if it factors with any notable primes.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]
 
