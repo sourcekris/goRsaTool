@@ -16,6 +16,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * small q attack
 * novelty primes attack
 * mersenne primes - factor n when p is a mersenne prime
+* lucas primes - factor n when p is a lucas prime
 * past CTF primes attack
 * fermat factorization for close p & q
 * low public exponent attack (requires ciphertext)

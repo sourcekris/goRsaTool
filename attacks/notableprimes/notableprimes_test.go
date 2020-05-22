@@ -10,6 +10,27 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+func TestLucasNumber(t *testing.T) {
+	tt := []struct {
+		name string
+		n    int
+		want *fmp.Fmpz
+	}{
+		{
+			name: "lucas 113 (which is prime btw)",
+			n:    113,
+			want: ln.FmpString("412670427844921037470771"),
+		},
+	}
+
+	for _, tc := range tt {
+		got := lucasNumber(tc.n)
+		if !got.Equals(tc.want) {
+			t.Errorf("lucasNumber() failed: %s - got %v wanted %v", tc.name, got, tc.want)
+		}
+	}
+}
+
 func TestAttack(t *testing.T) {
 	tt := []struct {
 		name string
