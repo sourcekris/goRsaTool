@@ -14,7 +14,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 * factordb attack (i.e. is the modulus already fully factored on factordb.com)
 * small q attack
-* novelty primes attack
+* novelty primes attack - 31337 and 1337 primes.
 * mersenne primes - factor n when p is a mersenne prime
 * lucas primes - factor n when p is a lucas prime
 * past CTF primes attack

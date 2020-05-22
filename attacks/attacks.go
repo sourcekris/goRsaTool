@@ -14,7 +14,6 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
 	"github.com/sourcekris/goRsaTool/attacks/notableprimes"
-	"github.com/sourcekris/goRsaTool/attacks/noveltyprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
@@ -38,7 +37,6 @@ func init() {
 	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
 	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
 	SupportedAttacks.RegisterAttack("hastadsbroadcast", true, true, hastadsbroadcast.Attack)
-	SupportedAttacks.RegisterAttack("novelty", false, true, noveltyprimes.Attack)
 	SupportedAttacks.RegisterAttack("notableprimes", false, true, notableprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
@@ -56,7 +54,8 @@ func init() {
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, true, notableprimes.Attack)
-	// SupportedAttacks.RegisterAttack("lucas", false, true, notableprimes.Attack) // NYI
+	SupportedAttacks.RegisterAttack("lucas", false, true, notableprimes.Attack)
+	SupportedAttacks.RegisterAttack("novelty", false, true, notableprimes.Attack)
 }
 
 type attackFunc func([]*keys.RSA) error

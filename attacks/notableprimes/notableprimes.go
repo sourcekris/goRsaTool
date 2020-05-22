@@ -2,6 +2,7 @@ package notableprimes
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
@@ -11,6 +12,9 @@ import (
 
 // name is the name of this attack.
 const name = "notable primes"
+
+// maxnoveltylen is the maximum number of digits to test for a 31337 prime.
+const maxnoveltylen = 2000
 
 // mersenneExponents lists the 6th to 51st mersenne prime number exponents.
 var mersenneExponents = []int{17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253,
@@ -42,12 +46,38 @@ func lucasNumber(n int) *fmp.Fmpz {
 }
 
 // TODO(kris): Add phi, GF and other notable primes.
-// TODO(kris): Roll noveltyprimes into this module.
 
 // Attack checks the key modulus to see if it factors with any mersenne primes.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]
 
+	// Test for primes of the form 313333337.
+	for i := 0; i < (maxnoveltylen - 4); i++ {
+		p, _ := new(fmp.Fmpz).SetString("3133"+strings.Repeat("3", i)+"7", 10)
+		if p.Cmp(k.Key.N) > 0 {
+			break
+		}
+
+		if new(fmp.Fmpz).Mod(k.Key.N, p).Cmp(ln.BigZero) == 0 {
+			k.PackGivenP(p)
+			return nil
+		}
+	}
+
+	// Test for primes of the form 133333337.
+	for i := 0; i < (maxnoveltylen - 4); i++ {
+		p, _ := new(fmp.Fmpz).SetString("133"+strings.Repeat("3", i)+"7", 10)
+		if p.Cmp(k.Key.N) > 0 {
+			break
+		}
+
+		if new(fmp.Fmpz).Mod(k.Key.N, p).Cmp(ln.BigZero) == 0 {
+			k.PackGivenP(p)
+			return nil
+		}
+	}
+
+	// Test for primes that are mersenne primes.
 	for _, me := range mersenneExponents {
 		// mp = 2^me - 1
 		mp := new(fmp.Fmpz).ExpXI(ln.BigTwo, me).SubZ(ln.BigOne)
@@ -61,6 +91,7 @@ func Attack(ks []*keys.RSA) error {
 		}
 	}
 
+	// Test for primes that are Lucas numbers.
 	for _, lp := range lucasPrimes {
 		lnum := lucasNumber(lp)
 		if lnum.Cmp(k.Key.N) > 0 {
