@@ -1,4 +1,4 @@
-package mersenne
+package notableprimes
 
 import (
 	"fmt"
@@ -10,13 +10,16 @@ import (
 )
 
 // name is the name of this attack.
-const name = "mersenne primes"
+const name = "notable primes"
 
 // mersenneExponents lists the 6th to 51st mersenne prime number exponents.
-var mersenneExponents = []int{82589933, 77232917, 74207281, 57885161, 43112609, 42643801, 37156667,
-	32582657, 30402457, 25964951, 24036583, 20996011, 13466917, 6972593, 3021377, 2976221, 1398269,
-	1257787, 859433, 756839, 216091, 132049, 110503, 86243, 44497, 23209, 21701, 19937, 11213,
-	9941, 9689, 4423, 4253, 3217, 2281, 2203, 1279, 607, 521, 127, 107, 89, 61, 31, 19, 17}
+var mersenneExponents = []int{17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253,
+	4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839,
+	859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951,
+	30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933}
+
+// TODO(kris): Add lucas, phi, GF and other notable primes.
+// TODO(kris): Roll noveltyprimes into this module.
 
 // Attack checks the key modulus to see if it factors with any mersenne primes.
 func Attack(ks []*keys.RSA) error {

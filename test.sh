@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Testing notableprimes..."
+go run rsatool.go -attack notableprimes -key examples/mersenne.pub
 echo "Testing commonfactors..."
 go run rsatool.go -attack commonfactors -keylist examples/cf1.pub,examples/cf2.pub
 echo "Testing crtsolve..."

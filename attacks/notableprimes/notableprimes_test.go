@@ -1,4 +1,4 @@
-package mersenne
+package notableprimes
 
 import (
 	"testing"
