@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Test recovering modulus from signatures and plaintexts..."
+go run rsatool.go -ptlist examples/plaintext1.txt,examples/plaintext2.txt -siglist examples/sig1.bin,examples/sig2.bin
 echo "Testing notableprimes..."
 go run rsatool.go -attack notableprimes -key examples/mersenne.pub
 echo "Testing commonfactors..."
