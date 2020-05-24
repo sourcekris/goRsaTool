@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/sourcekris/goRsaTool/attacks"
+	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
 
@@ -26,6 +27,8 @@ var (
 	cipherText     = flag.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	keyList        = flag.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
 	ctList         = flag.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
+	ptList         = flag.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
+	sigList        = flag.String("siglist", "", "Comma seperated list of signatures files.")
 	attack         = flag.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = flag.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
@@ -63,6 +66,18 @@ func listAttacks() string {
 	return res
 }
 
+// fileList returns a list of filenames or nil.
+func fileList(fl string) []string {
+	if fl != "" {
+		var fs []string
+		for _, k := range strings.Split(fl, ",") {
+			fs = append(fs, strings.Trim(k, "\t\n "))
+		}
+		return fs
+	}
+	return nil
+}
+
 func main() {
 	flag.Parse()
 
@@ -77,24 +92,15 @@ func main() {
 		return
 	}
 
-	// Keep a list of ct files for later if the flag was provided.
-	var clist []string
-	if *ctList != "" {
-		for _, k := range strings.Split(*ctList, ",") {
-			clist = append(clist, strings.Trim(k, "\t\n "))
-		}
-	}
+	// Keep a list of ct, sig, and pt files for later if any of those flags were provided.
+	clist := fileList(*ctList)
+	klist := fileList(*keyList)
+	ptlist := fileList(*ptList)
+	siglist := fileList(*sigList)
 
-	// Get a list of either 1 or more public key files to read.
-	var klist []string
-	if *keyFile != "" && *keyList == "" {
+	// Add the -key flag file to the list if provided.
+	if *keyFile != "" {
 		klist = append(klist, *keyFile)
-	}
-
-	if *keyList != "" {
-		for _, k := range strings.Split(*keyList, ",") {
-			klist = append(klist, strings.Trim(k, "\t\n "))
-		}
 	}
 
 	// We need klist and clist to be the same length for now.
@@ -196,7 +202,6 @@ func main() {
 		for _, k := range rsaKeys {
 			if k.Key.D != nil {
 				fmt.Println(keys.EncodeFMPPrivateKey(&k.Key))
-				return
 			}
 
 			if len(k.PlainText) > 0 {
@@ -205,6 +210,17 @@ func main() {
 			}
 		}
 
+		return
+	}
+
+	// Recover a modulus from signatures and plaintexts.
+	if siglist != nil && ptlist != nil {
+		if err := signatures.Attack(ptlist, siglist, *exponentArg); err != nil {
+			logger.Fatalf("failed recovering modulus: %v", err)
+		}
+
+		// Done.
+		return
 	}
 
 	if *createKeyMode {
@@ -225,4 +241,6 @@ func main() {
 		}
 		logger.Fatal("no exponent or modulus specified - use -n and -e")
 	}
+
+	logger.Fatal("nothing to do, specify a key with -key or use -help for usage")
 }

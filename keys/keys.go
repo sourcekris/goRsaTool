@@ -15,6 +15,7 @@ import (
 type RSA struct {
 	Key            FMPPrivateKey
 	CipherText     []byte
+	Signature      []byte
 	PlainText      []byte
 	KnownPlainText []byte
 	KeyFilename    string

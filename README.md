@@ -40,6 +40,10 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * common factors attack (share p among multiple moduli)
 * common modulus attack (2 keys share n but have different e)
 
+### Non Key Based Attacks
+
+* recover RSA modulus given signatures and plaintexts
+
 ## Installation
 
 * Requires go 1.9 +
@@ -185,6 +189,10 @@ smallfractions
 ### Attack multiple keys with a hastads broadcast attack
 
 `./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
+
+### Recover an RSA Modulus From RSA Signatures and Plaintexts
+
+`./rsatool -ptlist message1.txt,message2.txt -siglist sig1,sig2`
 
 ## Author
 

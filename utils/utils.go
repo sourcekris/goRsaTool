@@ -2,22 +2,25 @@ package utils
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"unicode"
 
 	fmp "github.com/sourcekris/goflint"
 )
 
-// ReadCiphertext imports a ciphertext binary file and returns a slice of bytes of an error.
-func ReadCipherText(cipherFile string) ([]byte, error) {
-	ct, err := ioutil.ReadFile(cipherFile)
+// ReadBinary imports a binary file and returns a slice of bytes of an error.
+func ReadBinary(bf string) ([]byte, error) {
+	ct, err := ioutil.ReadFile(bf)
 	if err != nil {
-		fmt.Printf("[-] Error opening ciphertext file: %s\n", cipherFile)
 		return nil, err
 	}
 
 	return bytes.TrimRight(ct, "\n\r"), nil
+}
+
+// ReadCipherText imports a ciphertext binary file and returns a slice of bytes of an error.
+func ReadCipherText(ct string) ([]byte, error) {
+	return ReadBinary(ct)
 }
 
 // IsInt returns true if the string s contains all unicode digit characters.
