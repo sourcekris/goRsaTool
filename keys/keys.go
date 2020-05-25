@@ -3,6 +3,7 @@ package keys
 import (
 	"encoding/pem"
 	"fmt"
+	"log"
 	"math/big"
 
 	"github.com/sourcekris/goRsaTool/ln"
@@ -15,23 +16,23 @@ import (
 type RSA struct {
 	Key            FMPPrivateKey
 	CipherText     []byte
-	Signature      []byte
 	PlainText      []byte
 	KnownPlainText []byte
 	KeyFilename    string
 	PastPrimesFile string
 	Verbose        bool
+	Log            *log.Logger
 }
 
 // NewRSA constructs an RSA object or returns an error.
 func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string, v bool) (*RSA, error) {
 	var pastPrimesFile string
-	if len(pf) > 0 {
+	if pf != "" {
 		pastPrimesFile = pf
 	}
 
 	var cipherText []byte
-	if len(c) > 0 {
+	if c != nil {
 		cipherText = c
 	}
 

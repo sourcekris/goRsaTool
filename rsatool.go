@@ -15,21 +15,22 @@ import (
 )
 
 var (
-	keyFile        = flag.String("key", "", "The filename of the RSA key to attack or dump")
-	pastPrimesFile = flag.String("pastprimes", "pastctfprimes.txt", "The filename of a file containing past CTF prime numbers.")
-	verboseMode    = flag.Bool("verbose", false, "Enable verbose output.")
-	dumpKeyMode    = flag.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
-	createKeyMode  = flag.Bool("createkey", false, "Create a public key given an E and N.")
-	exponentArg    = flag.String("e", "", "The exponent value - for use with createkey flag.")
-	modulusArg     = flag.String("n", "", "The modulus value - for use with createkey flag.")
-	dArg           = flag.String("d", "", "Give d in createkey mode to create a private key.")
-	cipherText     = flag.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
-	keyList        = flag.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
-	ctList         = flag.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
-	ptList         = flag.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
-	sigList        = flag.String("siglist", "", "Comma seperated list of signatures files.")
-	attack         = flag.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
-	list           = flag.Bool("list", false, "List the attacks supported by the attack flag.")
+	fset           = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	keyFile        = fset.String("key", "", "The filename of the RSA key to attack or dump")
+	pastPrimesFile = fset.String("pastprimes", "pastctfprimes.txt", "The filename of a file containing past CTF prime numbers.")
+	verboseMode    = fset.Bool("verbose", false, "Enable verbose output.")
+	dumpKeyMode    = fset.Bool("dumpkey", false, "Just dump the RSA integers from a key - n,e,d,p,q.")
+	createKeyMode  = fset.Bool("createkey", false, "Create a public key given an E and N.")
+	exponentArg    = fset.String("e", "", "The exponent value - for use with createkey flag.")
+	modulusArg     = fset.String("n", "", "The modulus value - for use with createkey flag.")
+	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
+	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
+	keyList        = fset.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
+	ctList         = fset.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
+	ptList         = fset.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
+	sigList        = fset.String("siglist", "", "Comma seperated list of signatures files.")
+	attack         = fset.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
+	list           = fset.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
 )
 
@@ -78,7 +79,7 @@ func fileList(fl string) []string {
 }
 
 func main() {
-	flag.Parse()
+	fset.Parse(os.Args[1:])
 
 	logger = log.New(os.Stderr, "rsatool: ", log.Lshortfile)
 
@@ -157,10 +158,13 @@ func main() {
 				if err != nil {
 					log.Fatalf("failed to create a RSA key from given key data: %v", err)
 				}
+
 			}
 
-			// Add the keyfilename in, helpful later during dumpkey for example.
+			// Add the key filename and logger to the key.
 			targetRSA.KeyFilename = kf
+			targetRSA.Log = logger
+
 			if *dumpKeyMode {
 				targetRSA.DumpKey()
 
@@ -198,16 +202,7 @@ func main() {
 		}
 
 		// Were we able to solve for any of the private keys or ciphertexts?
-		for _, k := range rsaKeys {
-			if k.Key.D != nil {
-				fmt.Println(keys.EncodeFMPPrivateKey(&k.Key))
-			}
-
-			if len(k.PlainText) > 0 {
-				fmt.Println("Recovered plaintext: ")
-				fmt.Println(string(k.PlainText))
-			}
-		}
+		utils.ReportResults(rsaKeys)
 
 		return
 	}

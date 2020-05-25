@@ -83,3 +83,17 @@ func EncodeAndPrintKey(n, e, d string) error {
 
 	return errors.New("no exponent or modulus specified - use -n and -e")
 }
+
+// ReportResults iterates a slice of keys and prints the privatekeys or plaintexts found.
+func ReportResults(ks []*keys.RSA) {
+	for _, k := range ks {
+		if k.Key.D != nil {
+			fmt.Println(keys.EncodeFMPPrivateKey(&k.Key))
+		}
+
+		if len(k.PlainText) > 0 {
+			fmt.Println("Recovered plaintext: ")
+			fmt.Println(string(k.PlainText))
+		}
+	}
+}
