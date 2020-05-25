@@ -8,14 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sourcekris/goRsaTool/ln"
-
 	"github.com/sourcekris/goRsaTool/attacks"
 	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
-
-	fmp "github.com/sourcekris/goflint"
 )
 
 var (
@@ -227,38 +223,11 @@ func main() {
 	}
 
 	if *createKeyMode {
-		if len(*exponentArg) > 0 && len(*modulusArg) > 0 {
-			n, ok := new(fmp.Fmpz).SetString(*modulusArg, 10)
-			if !ok {
-				logger.Fatalf("failed converting modulus to integer: %q", *modulusArg)
-			}
-
-			e, ok := new(fmp.Fmpz).SetString(*exponentArg, 10)
-			if !ok {
-				logger.Fatalf("failed converting exponent to integer: %q", *exponentArg)
-			}
-
-			pk := &keys.FMPPublicKey{N: n, E: e}
-			if *dArg != "" {
-				d, ok := new(fmp.Fmpz).SetString(*dArg, 10)
-				if !ok {
-					logger.Fatalf("failed converting d to integer: %q", *dArg)
-				}
-
-				priv, err := keys.NewRSA(keys.PrivateFromPublic(pk), nil, nil, "", *verboseMode)
-				if err != nil {
-					logger.Fatal(err)
-				}
-
-				priv.PackGivenP(ln.FindPGivenD(d, pk.E, pk.N))
-				fmt.Println(keys.EncodeFMPPrivateKey(&priv.Key))
-				return
-			}
-
-			fmt.Println(keys.EncodeFMPPublicKey(pk))
-			return
+		if err := utils.EncodeAndPrintKey(*modulusArg, *exponentArg, *dArg); err != nil {
+			logger.Fatal(err)
 		}
-		logger.Fatal("no exponent or modulus specified - use -n and -e")
+
+		return
 	}
 
 	logger.Fatal("nothing to do, specify a key with -key or use -help for usage")

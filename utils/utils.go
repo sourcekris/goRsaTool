@@ -2,9 +2,13 @@ package utils
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"unicode"
 
+	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -41,4 +45,41 @@ func FoundP(p *fmp.Fmpz, ps []*fmp.Fmpz) bool {
 		}
 	}
 	return false
+}
+
+// EncodeAndPrintKey is called when the -createkey flag is provided.
+func EncodeAndPrintKey(n, e, d string) error {
+	if n != "" && e != "" {
+		mod, ok := new(fmp.Fmpz).SetString(n, 10)
+		if !ok {
+			return fmt.Errorf("failed converting modulus to integer: %q", n)
+		}
+
+		exp, ok := new(fmp.Fmpz).SetString(e, 10)
+		if !ok {
+			return fmt.Errorf("failed converting exponent to integer: %q", e)
+		}
+
+		pk := &keys.FMPPublicKey{N: mod, E: exp}
+		if d != "" {
+			pexp, ok := new(fmp.Fmpz).SetString(d, 10)
+			if !ok {
+				return fmt.Errorf("failed converting d to integer: %q", d)
+			}
+
+			priv, err := keys.NewRSA(keys.PrivateFromPublic(pk), nil, nil, "", false)
+			if err != nil {
+				return err
+			}
+
+			priv.PackGivenP(ln.FindPGivenD(pexp, pk.E, pk.N))
+			fmt.Println(keys.EncodeFMPPrivateKey(&priv.Key))
+			return nil
+		}
+
+		fmt.Println(keys.EncodeFMPPublicKey(pk))
+		return nil
+	}
+
+	return errors.New("no exponent or modulus specified - use -n and -e")
 }
