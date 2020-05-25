@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sourcekris/goRsaTool/ln"
+
 	"github.com/sourcekris/goRsaTool/attacks"
 	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
@@ -24,6 +26,7 @@ var (
 	createKeyMode  = flag.Bool("createkey", false, "Create a public key given an E and N.")
 	exponentArg    = flag.String("e", "", "The exponent value - for use with createkey flag.")
 	modulusArg     = flag.String("n", "", "The modulus value - for use with createkey flag.")
+	dArg           = flag.String("d", "", "Give d in createkey mode to create a private key.")
 	cipherText     = flag.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	keyList        = flag.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
 	ctList         = flag.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
@@ -235,8 +238,24 @@ func main() {
 				logger.Fatalf("failed converting exponent to integer: %q", *exponentArg)
 			}
 
-			pubStr := keys.EncodeFMPPublicKey(&keys.FMPPublicKey{N: n, E: e})
-			fmt.Println(pubStr)
+			pk := &keys.FMPPublicKey{N: n, E: e}
+			if *dArg != "" {
+				d, ok := new(fmp.Fmpz).SetString(*dArg, 10)
+				if !ok {
+					logger.Fatalf("failed converting d to integer: %q", *dArg)
+				}
+
+				priv, err := keys.NewRSA(keys.PrivateFromPublic(pk), nil, nil, "", *verboseMode)
+				if err != nil {
+					logger.Fatal(err)
+				}
+
+				priv.PackGivenP(ln.FindPGivenD(d, pk.E, pk.N))
+				fmt.Println(keys.EncodeFMPPrivateKey(&priv.Key))
+				return
+			}
+
+			fmt.Println(keys.EncodeFMPPublicKey(pk))
 			return
 		}
 		logger.Fatal("no exponent or modulus specified - use -n and -e")
