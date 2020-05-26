@@ -9,7 +9,6 @@ import (
 	"github.com/kavehmz/prime"
 
 	fmp "github.com/sourcekris/goflint"
-	mp "github.com/sourcekris/mathparse"
 )
 
 const (
@@ -58,9 +57,12 @@ func NumberToBytes(src *fmp.Fmpz) []byte {
 
 // SolveforD given e, p and q solve for the private exponent d.
 func SolveforD(p *fmp.Fmpz, q *fmp.Fmpz, e *fmp.Fmpz) *fmp.Fmpz {
-	// invmod(e, (p-1)*(q-1))
-	res, _ := mp.Evalf("invmod(%v,(%v-1)*(%v-1))", e, p, q)
-	return res
+	return new(fmp.Fmpz).ModInverse(e,
+		new(fmp.Fmpz).Mul(
+			new(fmp.Fmpz).Sub(p, BigOne),
+			new(fmp.Fmpz).Sub(q, BigOne),
+		),
+	)
 }
 
 // FindPGivenD finds p and q given d, e, and n - uses an algorithm from pycrypto _slowmath.py [0]
@@ -72,7 +74,7 @@ func FindPGivenD(d *fmp.Fmpz, e *fmp.Fmpz, n *fmp.Fmpz) *fmp.Fmpz {
 	ktot := new(fmp.Fmpz).Set(tmp.Mul(d, e).Sub(tmp, BigOne))
 	t := new(fmp.Fmpz).Set(ktot)
 
-	for tmp.Mod(t, BigTwo).Cmp(BigZero) == 0 {
+	for tmp.Mod(t, BigTwo).Equals(BigZero) {
 		t.DivMod(t, BigTwo, m)
 	}
 
@@ -83,7 +85,7 @@ func FindPGivenD(d *fmp.Fmpz, e *fmp.Fmpz, n *fmp.Fmpz) *fmp.Fmpz {
 		for k.Cmp(ktot) < 0 {
 			cand.Exp(fmp.NewFmpz(int64(a)), k, n)
 
-			if cand.Cmp(BigOne) != 0 && cand.Cmp(tmp.Sub(n, BigOne)) != 0 && tmp.Exp(cand, BigTwo, n).Cmp(BigOne) == 0 {
+			if !cand.Equals(BigOne) && !cand.Equals(tmp.Sub(n, BigOne)) && tmp.Exp(cand, BigTwo, n).Equals(BigOne) {
 				return FindGcd(tmp.Add(cand, BigOne), n)
 			}
 
@@ -98,20 +100,18 @@ func FindPGivenD(d *fmp.Fmpz, e *fmp.Fmpz, n *fmp.Fmpz) *fmp.Fmpz {
 func IsPerfectSquare(n *fmp.Fmpz) *fmp.Fmpz {
 	h := new(fmp.Fmpz).And(n, BigSixteen)
 
-	if h.Cmp(fmp.NewFmpz(9)) > 1 {
+	if h.Cmp(BigNine) > 1 {
 		return BigNOne
 	}
 
-	if h.Cmp(BigTwo) != 0 && h.Cmp(BigThree) != 0 &&
-		h.Cmp(BigFive) != 0 && h.Cmp(BigSix) != 0 &&
-		h.Cmp(BigSeven) != 0 && h.Cmp(BigEight) != 0 {
+	if !h.Equals(BigTwo) && !h.Equals(BigThree) &&
+		!h.Equals(BigFive) && !h.Equals(BigSix) &&
+		!h.Equals(BigSeven) && !h.Equals(BigEight) {
 
 		t := new(fmp.Fmpz).Sqrt(n)
 
-		if t.Mul(t, t).Cmp(n) == 0 {
+		if t.Mul(t, t).Equals(n) {
 			return t
-		} else {
-			return BigNOne
 		}
 	}
 
@@ -126,7 +126,7 @@ func RationalToContfract(x, y *fmp.Fmpz) []int {
 
 	var pquotients []int
 
-	if b.Cmp(x) == 0 {
+	if b.Equals(x) {
 		return []int{int(a.Int64())}
 	}
 	c.Mul(y, a).Sub(x, c)
@@ -158,8 +158,7 @@ func ConvergantsFromContfract(frac []int) [][2]*fmp.Fmpz {
 
 	for i := range frac {
 		a, b := ContfractToRational(frac[0:i])
-		z := [2]*fmp.Fmpz{a, b}
-		convs = append(convs, z)
+		convs = append(convs, [2]*fmp.Fmpz{a, b})
 	}
 	return convs
 }
@@ -252,11 +251,11 @@ func MLucas(v, a, n *fmp.Fmpz) *fmp.Fmpz {
 	for i := a.Bits(); i > 1; i-- {
 		if a.TstBit(i) == 0 {
 			tmpv1 := new(fmp.Fmpz).Set(v1)
-			v1.Mul(v1, v1).Sub(v1, BigTwo).Mod(v1, n)
-			v2.Mul(tmpv1, v2).Sub(v2, v).Mod(v2, n)
+			v1.Mul(v1, v1).SubZ(BigTwo).Mod(v1, n)
+			v2.Mul(tmpv1, v2).SubZ(v).Mod(v2, n)
 		} else {
-			v1.Mul(v1, v2).Sub(v1, v).Mod(v1, n)
-			v2.Mul(v2, v2).Sub(v2, BigTwo).Mod(v2, n)
+			v1.Mul(v1, v2).SubZ(v).Mod(v1, n)
+			v2.Mul(v2, v2).SubZ(BigTwo).Mod(v2, n)
 		}
 	}
 
@@ -268,7 +267,7 @@ func ILog(x, b *fmp.Fmpz) *fmp.Fmpz {
 	l := fmp.NewFmpz(0)
 	for x.Cmp(b) >= 0 {
 		x.Div(x, b)
-		l.Add(l, BigOne)
+		l.AddZ(BigOne)
 	}
 	return l
 }
