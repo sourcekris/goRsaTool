@@ -9,6 +9,7 @@ import (
 	"github.com/kavehmz/prime"
 
 	fmp "github.com/sourcekris/goflint"
+	mp "github.com/sourcekris/mathparse"
 )
 
 const (
@@ -21,7 +22,7 @@ var (
 	BigNOne = fmp.NewFmpz(-1)
 	// BigZero is the Fmpz representation of 0
 	BigZero = fmp.NewFmpz(0)
-	//  is the Fmpz representation of 1
+	// BigOne is the Fmpz representation of 1
 	BigOne = fmp.NewFmpz(1)
 	// BigTwo is the Fmpz representation of 2
 	BigTwo = fmp.NewFmpz(2)
@@ -57,12 +58,9 @@ func NumberToBytes(src *fmp.Fmpz) []byte {
 
 // SolveforD given e, p and q solve for the private exponent d.
 func SolveforD(p *fmp.Fmpz, q *fmp.Fmpz, e *fmp.Fmpz) *fmp.Fmpz {
-	return new(fmp.Fmpz).ModInverse(e,
-		new(fmp.Fmpz).Mul(
-			new(fmp.Fmpz).Sub(p, BigOne),
-			new(fmp.Fmpz).Sub(q, BigOne),
-		),
-	)
+	// invmod(e, (p-1)*(q-1))
+	res, _ := mp.Evalf("invmod(%v,(%v-1)*(%v-1))", e, p, q)
+	return res
 }
 
 // FindPGivenD finds p and q given d, e, and n - uses an algorithm from pycrypto _slowmath.py [0]
