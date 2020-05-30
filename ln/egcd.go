@@ -10,7 +10,7 @@ func FindGcd(a, b *fmp.Fmpz) *fmp.Fmpz {
 // XGCD finds the coefficients of Bézout's identity using the Extended Euclidean
 // algorithm.
 func XGCD(a, b *fmp.Fmpz) (*fmp.Fmpz, *fmp.Fmpz, *fmp.Fmpz) {
-	if a.Cmp(BigZero) == 0 {
+	if a.Equals(BigZero) {
 		return b, fmp.NewFmpz(0), fmp.NewFmpz(1)
 	}
 

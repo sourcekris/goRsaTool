@@ -22,7 +22,7 @@ func Attack(kks []*keys.RSA) error {
 		state = new(fmp.FlintRandT)
 	)
 
-	for g.Cmp(kk.Key.N) == 0 {
+	for g.Equals(kk.Key.N) {
 		y := ln.GetRand(state, kk.Key.N)
 		c := ln.GetRand(state, kk.Key.N)
 		m := ln.GetRand(state, kk.Key.N)
@@ -30,7 +30,7 @@ func Attack(kks []*keys.RSA) error {
 		q := fmp.NewFmpz(1)
 		g.SetInt64(1)
 
-		for g.Cmp(ln.BigOne) == 0 {
+		for g.Equals(ln.BigOne) {
 			x.Set(y)
 			k := fmp.NewFmpz(0)
 			counter := fmp.NewFmpz(0)
@@ -38,7 +38,7 @@ func Attack(kks []*keys.RSA) error {
 				y.Mul(y, y).Add(y, c).Mod(y, kk.Key.N)
 				counter.Add(counter, ln.BigOne)
 			}
-			for k.Cmp(r) < 0 && g.Cmp(ln.BigOne) == 0 {
+			for k.Cmp(r) < 0 && g.Equals(ln.BigOne) {
 				ys = new(fmp.Fmpz).Set(y)
 				min := ln.FmpzMin(m, new(fmp.Fmpz).Sub(r, k))
 				counter.Set(ln.BigZero)
@@ -53,7 +53,7 @@ func Attack(kks []*keys.RSA) error {
 			r.Mul(r, ln.BigTwo)
 		}
 
-		if g.Cmp(kk.Key.N) == 0 {
+		if g.Equals(kk.Key.N) {
 			for {
 				ys.Mul(ys, ys).Add(ys, c).Mod(ys, kk.Key.N)
 				g = ln.FindGcd(new(fmp.Fmpz).Abs(new(fmp.Fmpz).Sub(x, ys)), kk.Key.N)

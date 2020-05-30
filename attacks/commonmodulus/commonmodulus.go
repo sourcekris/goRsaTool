@@ -22,7 +22,7 @@ func Attack(ks []*keys.RSA) error {
 		return fmt.Errorf("%s attack requires each key be associated with a ciphertext", name)
 	}
 
-	if ks[0].Key.N.Cmp(ks[1].Key.N) != 0 {
+	if !ks[0].Key.N.Equals(ks[1].Key.N) {
 		return fmt.Errorf("%s attack requires that both keys share the same modulus", name)
 	}
 

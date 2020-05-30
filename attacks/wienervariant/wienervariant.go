@@ -36,7 +36,7 @@ func Attack(ks []*keys.RSA) error {
 			for s := 0; s <= 30; s++ {
 				d := new(fmp.Fmpz).Set(q1).MulI(r).AddZ(new(fmp.Fmpz).Set(q0).MulI(s))
 				mMaybe := new(fmp.Fmpz).Exp(fakeC, d, k.Key.N)
-				if mMaybe.Cmp(fakeM) == 0 {
+				if mMaybe.Equals(fakeM) {
 					k.PackGivenP(ln.FindPGivenD(d, k.Key.PublicKey.E, k.Key.N))
 					return nil
 				}

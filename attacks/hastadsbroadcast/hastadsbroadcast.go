@@ -42,7 +42,7 @@ func Attack(ks []*keys.RSA) error {
 	solution := new(fmp.Fmpz).Root(crt, int32(k))
 
 	test := new(fmp.Fmpz).ExpXIM(solution, k, ks[0].Key.N)
-	if test.Cmp(ln.BytesToNumber(ks[0].CipherText)) == 0 {
+	if test.Equals(ln.BytesToNumber(ks[0].CipherText)) {
 		ks[0].PlainText = ln.NumberToBytes(solution)
 		return nil
 	}

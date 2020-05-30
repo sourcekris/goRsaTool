@@ -58,7 +58,7 @@ func Attack(ks []*keys.RSA) error {
 			break
 		}
 
-		if new(fmp.Fmpz).Mod(k.Key.N, p).Cmp(ln.BigZero) == 0 {
+		if new(fmp.Fmpz).Mod(k.Key.N, p).Equals(ln.BigZero) {
 			k.PackGivenP(p)
 			return nil
 		}
@@ -71,7 +71,7 @@ func Attack(ks []*keys.RSA) error {
 			break
 		}
 
-		if new(fmp.Fmpz).Mod(k.Key.N, p).Cmp(ln.BigZero) == 0 {
+		if new(fmp.Fmpz).Mod(k.Key.N, p).Equals(ln.BigZero) {
 			k.PackGivenP(p)
 			return nil
 		}

@@ -19,7 +19,7 @@ var timeout = time.Minute * 5
 const name = "fermat factorization"
 
 func fermat(ch chan bool, a, b, b2, c, n *fmp.Fmpz) {
-	for c.Cmp(b2) != 0 {
+	for !c.Equals(b2) {
 		a.Add(a, ln.BigOne)
 		b2.Mul(a, a).Sub(b2, n)
 		b.Sqrt(b2)

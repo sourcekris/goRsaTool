@@ -26,7 +26,7 @@ func TestXGCD(t *testing.T) {
 	v := fmp.NewFmpz(-263)
 
 	gg, uu, vv := XGCD(a, b)
-	if gg.Cmp(gg) != 0 || uu.Cmp(u) != 0 || vv.Cmp(v) != 0 {
+	if !gg.Equals(gg) || !uu.Equals(u) || !vv.Equals(v) {
 		t.Errorf("got %v, %v, %v; want %v, %v and %v", gg, uu, vv, g, u, v)
 	}
 }
@@ -37,7 +37,7 @@ func TestNthRoot(t *testing.T) {
 	c := int32(3)
 	d := new(fmp.Fmpz).Root(a, c)
 
-	if b.Cmp(d) != 0 {
+	if !b.Equals(d) {
 		t.Errorf("got %v; want %v for a = %v and c = %v", d, b, a, c)
 	}
 }
@@ -48,7 +48,7 @@ func TestContfractToRational(t *testing.T) {
 	frac := []int{0, 1, 5, 1, 3, 2, 1, 2, 2, 1, 1, 1, 154, 2, 2, 8, 1, 1, 1, 4, 3, 4, 3, 1, 1, 1, 19, 1, 1, 7, 2, 1, 3, 1, 10, 1, 14, 3, 1, 2, 2, 6, 2}
 	e, n := ContfractToRational(frac)
 
-	if e.Cmp(expectedE) != 0 || n.Cmp(expectedN) != 0 {
+	if !e.Equals(expectedE) || !n.Equals(expectedN) {
 		t.Errorf("got %v %v; want %v %v", e, n, expectedE, expectedN)
 	}
 }
@@ -81,7 +81,7 @@ func TestSolveforD(t *testing.T) {
 
 	testD := SolveforD(p, q, e)
 
-	if testD.Cmp(d) != 0 {
+	if !testD.Equals(d) {
 		t.Errorf("SolveforD resolves a different d. Got %v want %v\n", testD, d)
 	}
 }
@@ -120,11 +120,11 @@ func TestFmpString(t *testing.T) {
 
 	for _, tc := range tt {
 		got := FmpString(tc.s)
-		if tc.want != nil && got.Cmp(tc.want) != 0 && !tc.wantErr {
+		if tc.want != nil && !got.Equals(tc.want) && !tc.wantErr {
 			t.Errorf("FmpString() failed: %s got %v wanted %v", tc.name, got, tc.want)
 		}
 
-		if tc.wantErr && tc.want == nil && got.Cmp(BigZero) != 0 {
+		if tc.wantErr && tc.want == nil && !got.Equals(BigZero) {
 			t.Errorf("FmpString() failed: %s wanted error but got nonzero return value: %v", tc.name, got)
 		}
 	}
@@ -160,7 +160,7 @@ func TestMLucas(t *testing.T) {
 		n := FmpString(tc.n)
 		wantV1 := FmpString(tc.want)
 		gotV1 := MLucas(v, a, n)
-		if gotV1.Cmp(wantV1) != 0 {
+		if !gotV1.Equals(wantV1) {
 			t.Errorf("%s: failed: wanted %v got %v", tc.name, wantV1, gotV1)
 		}
 	}
@@ -192,7 +192,7 @@ func TestILog(t *testing.T) {
 		want := fmp.NewFmpz(tc.want)
 
 		got := ILog(x, fmp.NewFmpz(tc.b))
-		if got.Cmp(want) != 0 {
+		if !got.Equals(want) {
 			t.Errorf("ILog() failed wanted %v got %v", want, got)
 		}
 	}
@@ -217,7 +217,7 @@ func TestIsPower(t *testing.T) {
 		want := fmp.NewFmpz(tc.want)
 
 		got := IsPower(n)
-		if got.Cmp(want) != 0 {
+		if !got.Equals(want) {
 			t.Errorf("IsPower() failed wanted %v got %v", want, got)
 		}
 	}
@@ -252,7 +252,7 @@ func TestFmpzMin(t *testing.T) {
 
 	for _, tc := range tt {
 		got := FmpzMin(fmp.NewFmpz(tc.x), fmp.NewFmpz(tc.y))
-		if got.Cmp(fmp.NewFmpz(tc.want)) != 0 {
+		if !got.Equals(fmp.NewFmpz(tc.want)) {
 			t.Errorf("FmpzMin() %s failed wanted %v got %v", tc.name, tc.want, got)
 		}
 	}
@@ -285,7 +285,7 @@ func TestSolveCRT(t *testing.T) {
 
 		got := SolveCRT([][]*fmp.Fmpz{[]*fmp.Fmpz{r1, m1}, []*fmp.Fmpz{r2, m2}})
 
-		if got.Cmp(want) != 0 {
+		if !got.Equals(want) {
 			t.Errorf("SolveCRT() %s want / got mismatch: %v / %v", tc.name, want, got)
 		}
 	}
@@ -309,7 +309,7 @@ func TestFracPow(t *testing.T) {
 	} {
 
 		got := FracPow(tc.x, tc.m, tc.n)
-		if got.Cmp(tc.want) != 0 {
+		if !got.Equals(tc.want) {
 			t.Errorf("FracPow() %s want / got mismatch: %v / %v", tc.name, tc.want, got)
 		}
 	}

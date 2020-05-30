@@ -21,7 +21,7 @@ func Attack(ks []*keys.RSA) error {
 		g     = fmp.NewFmpz(1)
 	)
 
-	for g.Cmp(ln.BigOne) == 0 {
+	for g.Equals(ln.BigOne) {
 		x.Mul(x, x).Mod(x, k.Key.N).Add(x, c).Mod(x, k.Key.N)
 		y.Mul(y, y).Mod(y, k.Key.N).Add(y, c).Mod(y, k.Key.N)
 		y.Mul(y, y).Mod(y, k.Key.N).Add(y, c).Mod(y, k.Key.N)

@@ -277,16 +277,16 @@ func IsPower(n *fmp.Fmpz) *fmp.Fmpz {
 	for {
 		cursor := p.Next()
 		r := new(fmp.Fmpz).Root(n, int32(cursor))
-		if r.Cmp(BigZero) == 0 {
+		if r.Equals(BigZero) {
 			continue
 		}
 
 		rxp := new(fmp.Fmpz).Mul(r, fmp.NewFmpz(int64(cursor)))
-		if rxp.Cmp(n) == 0 {
+		if rxp.Equals(n) {
 			return r
 		}
 
-		if r.Cmp(BigOne) == 0 {
+		if r.Equals(BigOne) {
 			return fmp.NewFmpz(0)
 		}
 	}

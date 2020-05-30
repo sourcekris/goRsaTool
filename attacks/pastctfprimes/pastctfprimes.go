@@ -45,7 +45,7 @@ func Attack(ts []*keys.RSA) error {
 
 	for _, p := range primes {
 		modp = modp.Mod(t.Key.N, &p)
-		if modp.Cmp(ln.BigZero) == 0 {
+		if modp.Equals(ln.BigZero) {
 			t.PackGivenP(&p)
 			return nil
 		}

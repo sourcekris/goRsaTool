@@ -40,7 +40,7 @@ func IsInt(s string) bool {
 // FoundP returns true if prime p exists in slice ps.
 func FoundP(p *fmp.Fmpz, ps []*fmp.Fmpz) bool {
 	for _, prime := range ps {
-		if p.Cmp(prime) == 0 {
+		if p.Equals(prime) {
 			return true
 		}
 	}

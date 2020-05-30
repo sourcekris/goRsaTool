@@ -14,7 +14,7 @@ const name = "wiener's"
 func squareAndMultiply(base, exponent, n *fmp.Fmpz) *fmp.Fmpz {
 	var be []int
 	e := new(fmp.Fmpz).Set(exponent)
-	for e.Cmp(ln.BigZero) != 0 {
+	for !e.Equals(ln.BigZero) {
 		be = append(be, new(fmp.Fmpz).Mod(e, ln.BigTwo).GetInt())
 		e.Div(e, ln.BigTwo)
 	}
@@ -55,7 +55,7 @@ func fullReverse(n, e *fmp.Fmpz, c [2]*fmp.Fmpz) *fmp.Fmpz {
 		x2 := new(fmp.Fmpz).Set(b).MulI(-1).SubZ(new(fmp.Fmpz).Root(delta, 2))
 		x1.Div(x1, new(fmp.Fmpz).Mul(a, ln.BigTwo))
 
-		if x1.MulZ(x2).Cmp(n) == 0 {
+		if x1.MulZ(x2).Equals(n) {
 			// Recovered p.
 			return x2
 		}
@@ -77,7 +77,7 @@ func Attack(ks []*keys.RSA) error {
 	convergants := ln.ConvergantsFromContfract(ln.RationalToContfract(k.Key.PublicKey.E, k.Key.N))
 
 	for _, c := range convergants {
-		if squareAndMultiply(newc, c[1], k.Key.N).Cmp(ts) == 0 {
+		if squareAndMultiply(newc, c[1], k.Key.N).Equals(ts) {
 			if pp := fullReverse(k.Key.N, k.Key.PublicKey.E, c); pp != nil {
 				k.PackGivenP(pp)
 				return nil

@@ -27,7 +27,7 @@ func hastads(ch chan bool, n, e, c, pt *fmp.Fmpz) {
 		m.Root(c, int32(e.Int64()))
 		pow.Exp(m, e, n)
 
-		if pow.Cmp(original) == 0 {
+		if pow.Equals(original) {
 			pt.Set(m)
 			ch <- true
 			return

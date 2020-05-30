@@ -72,7 +72,7 @@ func (e *Curve) BInvariants(r *Integers) {
 
 	// a3**2 + 4*a6
 	b6 := new(fmp.Fmpz).Mul(e.a3, e.a3).AddZ(new(fmp.Fmpz).Mul(ln.BigFour, e.a6))
-	if new(fmp.Fmpz).Mod(b6, r.n).Cmp(ln.BigZero) == 0 {
+	if new(fmp.Fmpz).Mod(b6, r.n).Equals(ln.BigZero) {
 		e.b6 = new(fmp.Fmpz).Set(b6)
 	} else {
 		e.b6 = b6.ModZ(r.n)
@@ -99,14 +99,14 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 
 	switch {
 	// n == -2
-	case n.Cmp(nTwo) == 0:
+	case n.Equals(nTwo):
 		// return poly(-1)**2
 		res := new(fmp.Fmpz)
 		res.ExpXI(e.Poly(fmp.NewFmpz(-1), x, r), 2).ModZ(r.n)
 		e.cache[n.String()] = res.String()
 		return res
 	// n == -1
-	case n.Cmp(ln.BigNOne) == 0:
+	case n.Equals(ln.BigNOne):
 		// 4*x**3 + b2*x**2 + 2*b4*x + b6
 		res := new(fmp.Fmpz)
 		res.ExpXI(x, 3).MulI(4).AddZ(
@@ -118,12 +118,12 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 	case n.Cmp(nTwo) < 0:
 		return nil
 	// n == 1 || n == 2
-	case n.Cmp(ln.BigOne) == 0 || n.Cmp(ln.BigTwo) == 0:
+	case n.Equals(ln.BigOne) || n.Equals(ln.BigTwo):
 		res := fmp.NewFmpz(1)
 		e.cache[n.String()] = res.String()
 		return res
 	// n == 3
-	case n.Cmp(ln.BigThree) == 0:
+	case n.Equals(ln.BigThree):
 		// 3*x**4 + b2*x**3 + 3*b4*x**2 + 3*b6*x + b8
 		res := new(fmp.Fmpz)
 		res.ExpXI(x, 4).MulI(3).AddZ(
@@ -133,7 +133,7 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 		e.cache[n.String()] = res.String()
 		return res
 	// n == 4
-	case n.Cmp(ln.BigFour) == 0:
+	case n.Equals(ln.BigFour):
 		// -poly(-2) + (6*x**2 + b2*x + b4) * poly(3)
 		p1 := e.Poly(nTwo, x, r).MulI(-1)
 		p2 := new(fmp.Fmpz).Mul(x, x).MulI(6).AddZ(new(fmp.Fmpz).Mul(e.b2, x)).AddZ(e.b4)
@@ -142,7 +142,7 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 		e.cache[n.String()] = res.String()
 		return res
 	// n % 2 == 0
-	case new(fmp.Fmpz).Mod(n, ln.BigTwo).Cmp(ln.BigZero) == 0:
+	case new(fmp.Fmpz).Mod(n, ln.BigTwo).Equals(ln.BigZero):
 		// m = (n-2) // 2
 		m := new(fmp.Fmpz).Sub(n, fmp.NewFmpz(2))
 		m.Div(m, ln.BigTwo)
@@ -159,7 +159,7 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 		m := new(fmp.Fmpz).Sub(n, fmp.NewFmpz(1))
 		m.Div(m, ln.BigTwo)
 		// if m % 2 == 0
-		if new(fmp.Fmpz).Mod(m, ln.BigTwo).Cmp(ln.BigZero) == 0 {
+		if new(fmp.Fmpz).Mod(m, ln.BigTwo).Equals(ln.BigZero) {
 			// poly(-2) * poly(m+2) * poly(m)**3 - poly(m-1) * poly(m+1)**3
 			p1 := e.Poly(fmp.NewFmpz(-2), x, r)
 			p2 := e.Poly(new(fmp.Fmpz).Add(m, ln.BigTwo), x, r)
@@ -199,7 +199,7 @@ func Attack(ks []*keys.RSA) error {
 	for i := 0; i < attempts; i++ {
 		for _, j := range js {
 			var E *Curve
-			if j.Cmp(ln.BigZero) == 0 {
+			if j.Equals(ln.BigZero) {
 				a := R.RandomElement()
 				E = NewCurve(fmp.NewFmpz(0), a, R)
 			} else {

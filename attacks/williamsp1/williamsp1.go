@@ -21,7 +21,7 @@ func Attack(ks []*keys.RSA) error {
 		for {
 			pcursor := fmp.NewFmpz(int64(p.Next()))
 			e := ln.ILog(new(fmp.Fmpz).Set(k.Key.N).Root(k.Key.N, 2), pcursor)
-			if e.Cmp(ln.BigZero) == 0 {
+			if e.Equals(ln.BigZero) {
 				break
 			}
 			count := fmp.NewFmpz(0)
@@ -37,7 +37,7 @@ func Attack(ks []*keys.RSA) error {
 				return nil
 			}
 
-			if g.Cmp(k.Key.N) == 0 {
+			if g.Equals(k.Key.N) {
 				break
 			}
 		}

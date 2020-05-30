@@ -28,7 +28,7 @@ func Attack(ks []*keys.RSA) error {
 		for num = 1; num < den; num++ {
 			g := new(fmp.Fmpz).GCD(fmp.NewFmpz(num), fmp.NewFmpz(den))
 
-			if g.Cmp(ln.BigOne) == 0 {
+			if g.Equals(ln.BigOne) {
 				phint := new(fmp.Fmpz).Mul(k.Key.N, fmp.NewFmpz(den))
 				phint.Div(phint, fmp.NewFmpz(num)).Root(phint, 2)
 
@@ -109,7 +109,7 @@ func Attack(ks []*keys.RSA) error {
 							if pp.Equals(ln.BigZero) || pp.Equals(k.Key.N) {
 								continue
 							}
-							if new(fmp.Fmpz).Mod(k.Key.N, pp).Cmp(ln.BigZero) == 0 {
+							if new(fmp.Fmpz).Mod(k.Key.N, pp).Equals(ln.BigZero) {
 								k.PackGivenP(pp)
 								return nil
 							}

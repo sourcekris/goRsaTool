@@ -41,7 +41,7 @@ func Attack(ks []*keys.RSA) error {
 		}
 	}
 	d := ln.FindGcd(a.Sub(a, ln.BigOne), n)
-	if d.Cmp(n) == 0 {
+	if d.Equals(n) {
 		return fmt.Errorf("%s failed - unable to factor key with a of: %d (try another a?)", name, startA)
 	}
 
