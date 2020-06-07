@@ -38,6 +38,7 @@ func Attack(ks []*keys.RSA) error {
 				}
 			}
 		}
+
 		i.AddI(1)
 	}
 
