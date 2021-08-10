@@ -19,9 +19,9 @@ func TestAttack(t *testing.T) {
 	}{
 		{
 			name: "vulnerable key expected to factor",
-			n:    ln.FmpString("23449"),
+			n:    ln.FmpString("61158437"),
 			e:    ln.FmpString("3"),
-			want: ln.FmpString("179"),
+			want: ln.FmpString("7919"),
 		},
 	}
 

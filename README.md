@@ -42,7 +42,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ### Non Key Based Attacks
 
-* recover RSA modulus given signatures and plaintexts
+* recover RSA modulus given signatures and plaintexts (currently buggy)
 
 ## Installation
 

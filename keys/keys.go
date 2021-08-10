@@ -46,11 +46,16 @@ func NewRSA(key *FMPPrivateKey, c []byte, m []byte, pf string, v bool) (*RSA, er
 }
 
 // PackGivenP takes one prime p and packs the Key member of the RSA struct with the private
-// key values, p, q & d
+// key values, p, q & d as well as the Plaintext if a Ciphertext was given.
 func (t *RSA) PackGivenP(p *fmp.Fmpz) {
 	q := new(fmp.Fmpz).Div(t.Key.N, p)
 	t.Key.Primes = []*fmp.Fmpz{p, q}
 	t.Key.D = ln.SolveforD(p, q, t.Key.PublicKey.E)
+
+	// Pack the Plaintext if a Ciphertext was provided.
+	if t.CipherText != nil && t.PlainText == nil {
+		t.PlainText = ln.NumberToBytes(new(fmp.Fmpz).Exp(ln.BytesToNumber(t.CipherText), t.Key.D, t.Key.PublicKey.N))
+	}
 }
 
 // PackMultiPrime takes many primes and packs the RSA struct with the private
