@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sourcekris/goRsaTool/attacks/brokenrsa"
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
 	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
@@ -51,6 +52,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
 	SupportedAttacks.RegisterAttack("franklinreiter", true, true, franklinreiter.Attack)
 	SupportedAttacks.RegisterAttack("smallfractions", false, false, smallfractions.Attack)
+	SupportedAttacks.RegisterAttack("brokenrsa", false, false, brokenrsa.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, true, notableprimes.Attack)
