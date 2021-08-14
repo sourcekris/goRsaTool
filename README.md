@@ -33,6 +33,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   minor different suffix. See the example keys in the examples/ subdirectory.
 * small fraction factorization - finding factors of n when p and q are close to a small fraction 
   (e.g. 37/32).
+* fault rsa implementation where c = me mod n instead of ct = m^e mod n (brokenrsa module)
 
 ### Multi-Key Attacks
 
@@ -174,6 +175,7 @@ commonfactors
 commonmodulus
 franklinreiter
 smallfractions
+brokenrsa
 ```
 
 ## More Example Usage
