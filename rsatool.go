@@ -25,6 +25,7 @@ var (
 	modulusArg     = fset.String("n", "", "The modulus value - for use with createkey flag.")
 	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
 	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
+	numP           = fset.Int("numprimes", 2, "Number of primes expected to be factored.")
 	keyList        = fset.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
 	ctList         = fset.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
 	ptList         = fset.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
@@ -161,9 +162,10 @@ func main() {
 
 			}
 
-			// Add the key filename and logger to the key.
+			// Add the key filename, logger and expected number of primes to the key.
 			targetRSA.KeyFilename = kf
 			targetRSA.Log = logger
+			targetRSA.NumPrimes = *numP
 
 			if *dumpKeyMode {
 				targetRSA.DumpKey()

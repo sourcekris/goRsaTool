@@ -46,3 +46,7 @@ echo "Testing franklin reiter related message attack (is currently buggy, skippi
 # go run rsatool.go -keylist examples/franklinreiter1.key,examples/franklinreiter2.key -attack franklinreiter
 echo "Testing smallfractions attack..."
 go run rsatool.go -key examples/smallfraction.pub -attack smallfractions
+echo "Testing brokenrsa attack..."
+go run rsatool.go -key examples/brokenrsa.txt -attack brokenrsa
+echo "Testing manysmallprimes attack..."
+go run rsatool.go -numprimes 128 -key examples/manysmallprimes.txt -verbose -attack manysmallprimes

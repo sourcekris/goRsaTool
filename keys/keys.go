@@ -20,6 +20,7 @@ type RSA struct {
 	KnownPlainText []byte
 	KeyFilename    string
 	PastPrimesFile string
+	NumPrimes      int
 	Verbose        bool
 	Log            *log.Logger
 }
@@ -77,6 +78,11 @@ func (t *RSA) PackMultiPrime(primes []*fmp.Fmpz) error {
 
 	t.Key.Primes = primes
 	t.Key.D = new(fmp.Fmpz).ModInverse(t.Key.PublicKey.E, cp)
+
+	// Pack the Plaintext if a Ciphertext was provided.
+	if t.CipherText != nil && t.PlainText == nil {
+		t.PlainText = ln.NumberToBytes(new(fmp.Fmpz).Exp(ln.BytesToNumber(t.CipherText), t.Key.D, t.Key.PublicKey.N))
+	}
 
 	return nil
 }
