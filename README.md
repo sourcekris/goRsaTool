@@ -34,6 +34,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * small fraction factorization - finding factors of n when p and q are close to a small fraction 
   (e.g. 37/32).
 * faulty rsa implementation where c = me mod n instead of ct = m^e mod n (brokenrsa module)
+* Public key consisting of many small primes (corCTF 2021 4096 challenge)
 
 ### Multi-Key Attacks
 
@@ -176,6 +177,7 @@ commonmodulus
 franklinreiter
 smallfractions
 brokenrsa
+manysmallprimes
 ```
 
 ## More Example Usage
