@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Testing partiald attack..."
+go run rsatool.go -key examples/partiald.txt -verbose -attack partiald
 echo "Test recovering modulus from signatures and plaintexts..."
 go run rsatool.go -ptlist examples/plaintext1.txt,examples/plaintext2.txt -siglist examples/sig1.bin,examples/sig2.bin
 echo "Testing notableprimes..."
@@ -50,3 +52,5 @@ echo "Testing brokenrsa attack..."
 go run rsatool.go -key examples/brokenrsa.txt -attack brokenrsa
 echo "Testing manysmallprimes attack..."
 go run rsatool.go -numprimes 128 -key examples/manysmallprimes.txt -verbose -attack manysmallprimes
+echo "Testing partiald attack..."
+go run rsatool.go -key examples/partiald.txt -verbose -attack partiald

@@ -24,6 +24,7 @@ var (
 	exponentArg    = fset.String("e", "", "The exponent value - for use with createkey flag.")
 	modulusArg     = fset.String("n", "", "The modulus value - for use with createkey flag.")
 	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
+	d0Arg          = fset.String("d0", "", "Give LSBs of d, used in partiald attacks.")
 	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	numP           = fset.Int("numprimes", 2, "Number of primes expected to be factored.")
 	keyList        = fset.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")

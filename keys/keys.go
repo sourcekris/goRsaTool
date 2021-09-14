@@ -18,6 +18,7 @@ type RSA struct {
 	CipherText     []byte
 	PlainText      []byte
 	KnownPlainText []byte
+	DLSB           []byte
 	KeyFilename    string
 	PastPrimesFile string
 	NumPrimes      int

@@ -16,7 +16,7 @@ import (
 
 var (
 	// lineRE is a regexp that should match interesting integers on lines.
-	lineRE = regexp.MustCompile(`(?i)^([necpqdk][pq]?t?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
+	lineRE = regexp.MustCompile(`(?i)^([necpqdk][pq0]?t?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
 	// numRE matches numbers in base 10 or hex.
 	numRE = regexp.MustCompile(`[0-9a-f]+`)
 	// modRE, expRE, ctRE matches 'n', 'e', 'c' case insensitively.
@@ -26,6 +26,9 @@ var (
 
 	// kptRE is a known plaintext regexp.
 	kptRE = regexp.MustCompile(`(?i)^kpt`)
+
+	// d0RE is the LSB of d regexp.
+	d0RE = regexp.MustCompile(`(?i)^d0`)
 
 	// CRT components regexps.
 	pRE  = regexp.MustCompile(`(?i)^p`)
@@ -90,9 +93,9 @@ func getBase(s string) (string, int) {
 // ImportIntegerList attempts to parse the key (and optionally ciphertext) data as if it was a list of integers N, and e and c.
 func ImportIntegerList(kb []byte) (*RSA, error) {
 	var (
-		n, e, c, p, q, dp, dq string
-		ct, kpt               []byte
-		crt                   bool
+		n, e, c, p, q, dp, dq, d0 string
+		ct, kpt                   []byte
+		crt                       bool
 	)
 
 	s := bufio.NewScanner(bytes.NewReader(kb))
@@ -118,6 +121,8 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 					dp = sm[2]
 				case dqRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					dq = sm[2]
+				case d0RE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+					d0 = sm[2]
 				case kptRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					if kn, ok := new(fmp.Fmpz).SetString(getBase(sm[2])); ok {
 						kpt = ln.NumberToBytes(kn)
@@ -189,7 +194,7 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 		if c != "" {
 			fC, ok := new(fmp.Fmpz).SetString(getBase(c))
 			if !ok {
-				return nil, errors.New("failed converting ciphertext integer to binary")
+				return nil, errors.New("failed converting ciphertext integer to bytes")
 			}
 
 			k.CipherText = ln.NumberToBytes(fC)
@@ -206,7 +211,7 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 	if c != "" {
 		fC, ok := new(fmp.Fmpz).SetString(getBase(c))
 		if !ok {
-			return nil, errors.New("failed converting ciphertext integer to binary")
+			return nil, errors.New("failed converting ciphertext integer to bytes")
 		}
 
 		ct = ln.NumberToBytes(fC)
@@ -219,6 +224,16 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 
 	if kpt != nil {
 		k.KnownPlainText = kpt
+	}
+
+	// Place the LSB of D into the k.DLSB field.
+	if d0 != "" {
+		fd0, ok := new(fmp.Fmpz).SetString(getBase(d0))
+		if !ok {
+			return nil, errors.New("failed converting d0 integer to bytes")
+		}
+
+		k.DLSB = ln.NumberToBytes(fd0)
 	}
 
 	return k, nil
