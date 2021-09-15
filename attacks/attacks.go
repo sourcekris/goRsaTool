@@ -14,6 +14,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/gmpecm"
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
+	"github.com/sourcekris/goRsaTool/attacks/knownprime"
 	"github.com/sourcekris/goRsaTool/attacks/manysmallprimes"
 	"github.com/sourcekris/goRsaTool/attacks/notableprimes"
 	"github.com/sourcekris/goRsaTool/attacks/partiald"
@@ -57,6 +58,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("brokenrsa", false, false, brokenrsa.Attack)
 	SupportedAttacks.RegisterAttack("manysmallprimes", false, false, manysmallprimes.Attack)
 	SupportedAttacks.RegisterAttack("partiald", false, false, partiald.Attack)
+	SupportedAttacks.RegisterAttack("knownprime", false, false, knownprime.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, true, notableprimes.Attack)
@@ -64,6 +66,8 @@ func init() {
 	SupportedAttacks.RegisterAttack("novelty", false, true, notableprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastprimes", false, true, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctfprimes", false, true, pastctfprimes.Attack)
+	SupportedAttacks.RegisterAttack("sexyprimes", false, true, fermat.Attack)
+
 }
 
 type attackFunc func([]*keys.RSA) error

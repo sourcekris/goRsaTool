@@ -1,7 +1,15 @@
 #!/bin/bash
 
+echo "Testing knownprime attack..."
+go run rsatool.go -key examples/knownprime.txt -verbose -attack knownprime
+echo "Testing knownprime attack..."
+go run rsatool.go -key examples/knownprime2.txt -verbose -p 85413884848837835273799534222229453212517685015009235268389913012627608586153 -attack knownprime
+echo "Testing knownprime attack..."
+go run rsatool.go -key examples/knownprime2.txt -verbose -p 85413884848837835273799534222229453212517685015009235268389913012627608586153
 echo "Testing partiald attack..."
 go run rsatool.go -key examples/partiald.txt -verbose -attack partiald
+echo "Testing partiald attack..."
+go run rsatool.go -key examples/partiald2.txt -verbose -d0 0x136045a22e2c3067b0c283314e43739ec52a09fa783f6887599272ba03682b6e5258714a445084bbc857ea32ad72ffb97c71df1428b30fbf77c3ad3aa21e87619 -attack partiald
 echo "Test recovering modulus from signatures and plaintexts..."
 go run rsatool.go -ptlist examples/plaintext1.txt,examples/plaintext2.txt -siglist examples/sig1.bin,examples/sig2.bin
 echo "Testing notableprimes..."

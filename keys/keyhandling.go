@@ -236,6 +236,23 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 		k.DLSB = ln.NumberToBytes(fd0)
 	}
 
+	// Add the primes if we got any.
+	if p != "" {
+		fP, ok := new(fmp.Fmpz).SetString(getBase(p))
+		if !ok {
+			return nil, errors.New("failed decoding prime p from keyfile")
+		}
+		k.Key.Primes = append(k.Key.Primes, fP)
+	}
+
+	if q != "" {
+		fQ, ok := new(fmp.Fmpz).SetString(getBase(q))
+		if !ok {
+			return nil, errors.New("failed decoding prime q from keyfile")
+		}
+		k.Key.Primes = append(k.Key.Primes, fQ)
+	}
+
 	return k, nil
 }
 

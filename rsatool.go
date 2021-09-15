@@ -12,6 +12,8 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
 var (
@@ -23,6 +25,7 @@ var (
 	createKeyMode  = fset.Bool("createkey", false, "Create a public key given an E and N.")
 	exponentArg    = fset.String("e", "", "The exponent value - for use with createkey flag.")
 	modulusArg     = fset.String("n", "", "The modulus value - for use with createkey flag.")
+	primeArg       = fset.String("p", "", "One of the primes. If provided will shortcut the attack phase and produce a private key.")
 	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
 	d0Arg          = fset.String("d0", "", "Give LSBs of d, used in partiald attacks.")
 	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
@@ -155,12 +158,29 @@ func main() {
 				}
 			}
 
+			if *d0Arg != "" {
+				d0, ok := new(fmp.Fmpz).SetString(*d0Arg, 0)
+				if !ok {
+					logger.Fatal("failed parsing -d0 flag as an integer")
+				}
+
+				targetRSA.DLSB = d0.Bytes()
+			}
+
 			if targetRSA == nil {
 				targetRSA, err = keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
 				if err != nil {
 					log.Fatalf("failed to create a RSA key from given key data: %v", err)
 				}
+			}
 
+			if *primeArg != "" {
+				p, ok := new(fmp.Fmpz).SetString(*primeArg, 0)
+				if !ok {
+					logger.Fatal("failed parsing -p flag as an integer")
+				}
+
+				targetRSA.Key.Primes = append(targetRSA.Key.Primes, p)
 			}
 
 			// Add the key filename, logger and expected number of primes to the key.
@@ -187,6 +207,8 @@ func main() {
 
 		var errs []error
 		switch {
+		case *attack == "all" && *primeArg != "":
+			errs = append(errs, attacks.SupportedAttacks.Execute("knownprime", rsaKeys))
 		case *attack == "all":
 			errs = unnatended(rsaKeys)
 		case attacks.SupportedAttacks.IsSupported(*attack):
