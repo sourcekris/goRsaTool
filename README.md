@@ -36,6 +36,8 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * faulty rsa implementation where c = me mod n instead of ct = m^e mod n (brokenrsa module)
 * Public key consisting of many small primes (corCTF 2021 4096 challenge)
 * Private key recovery when 50+% of the LSB of D are known.
+* Sexy primes - primes seperated by 6.
+* Known prime - not really an attack but a helpful shortcut.
 
 ### Multi-Key Attacks
 
@@ -180,6 +182,8 @@ smallfractions
 brokenrsa
 manysmallprimes
 partiald
+sexyprimes
+knownprime
 ```
 
 ## More Example Usage
