@@ -37,6 +37,10 @@ func Attack(ts []*keys.RSA) error {
 	d0 := new(fmp.Fmpz).SetBytes(t.DLSB)
 	d0bits := d0.BitLen()
 
+	a := new(fmp.Fmpz).Add(t.Key.N, ln.BigOne)
+	a = a.Div(a, t.Key.PublicKey.E)
+	abits := t.Key.N.BitLen() - a.BitLen()
+
 	// Do the attack...
 	for k := fmp.NewFmpz(1); k.Cmp(t.Key.PublicKey.E) <= 0; k.Add(k, ln.BigOne) {
 		// Approximate d.
@@ -49,11 +53,17 @@ func Attack(ts []*keys.RSA) error {
 		d1 = d1.Mod(d, d1).Xor(d, d1)
 		d = d.Xor(d1, d0)
 
-		// test by encrypting and decrypting the integer 2.
-		m := new(fmp.Fmpz).Pow(new(fmp.Fmpz).Pow(ln.BigTwo, t.Key.PublicKey.E, t.Key.N), d, t.Key.N)
-		if m.Cmp(ln.BigTwo) == 0 {
-			t.PackGivenP(ln.FindPGivenD(d, t.Key.PublicKey.E, t.Key.N))
-			return nil
+		// do we have enough bits in our approximation to try?
+		for i := 0; fmp.NewFmpz(int64(i)).BitLen() <= abits; i++ {
+			// brute force uncertain bits.
+			bf := fmp.NewFmpz(int64(i)).Lsh(d0bits)
+			d = d.Xor(d, bf)
+			// test by encrypting and decrypting the integer 2.
+			m := new(fmp.Fmpz).Pow(new(fmp.Fmpz).Pow(ln.BigTwo, t.Key.PublicKey.E, t.Key.N), d, t.Key.N)
+			if m.Cmp(ln.BigTwo) == 0 {
+				t.PackGivenP(ln.FindPGivenD(d, t.Key.PublicKey.E, t.Key.N))
+				return nil
+			}
 		}
 	}
 
