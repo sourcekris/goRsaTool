@@ -87,8 +87,12 @@ func EncodeAndPrintKey(n, e, d string) error {
 // ReportResults iterates a slice of keys and prints the privatekeys or plaintexts found.
 func ReportResults(ks []*keys.RSA) {
 	for _, k := range ks {
-		if k.Key.D != nil {
+		if k.Key.D != nil && k.Key.Primes != nil {
 			fmt.Println(keys.EncodeFMPPrivateKey(&k.Key))
+		}
+
+		if k.Key.D != nil && k.Key.Primes == nil {
+			fmt.Printf("recovered d but was unable to recover all the primes\nd = %v\n", k.Key.D)
 		}
 
 		if len(k.PlainText) > 0 {

@@ -26,6 +26,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
+	"github.com/sourcekris/goRsaTool/attacks/wienermultiprime"
 	"github.com/sourcekris/goRsaTool/attacks/williamsp1"
 	"github.com/sourcekris/goRsaTool/keys"
 )
@@ -59,6 +60,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("manysmallprimes", false, false, manysmallprimes.Attack)
 	SupportedAttacks.RegisterAttack("partiald", false, false, partiald.Attack)
 	SupportedAttacks.RegisterAttack("knownprime", false, false, knownprime.Attack)
+	SupportedAttacks.RegisterAttack("wienermultiprime", false, true, wienermultiprime.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, true, notableprimes.Attack)

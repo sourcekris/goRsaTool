@@ -88,6 +88,16 @@ func (t *RSA) PackMultiPrime(primes []*fmp.Fmpz) error {
 	return nil
 }
 
+// PackGivenD takes d and packs it into the key, solving for any ciphertext on the way.
+func (t *RSA) PackGivenD(d *fmp.Fmpz) {
+	t.Key.D = new(fmp.Fmpz).Set(d)
+
+	// Pack the Plaintext if a Ciphertext was provided.
+	if t.CipherText != nil && t.PlainText == nil {
+		t.PlainText = ln.NumberToBytes(new(fmp.Fmpz).Exp(ln.BytesToNumber(t.CipherText), t.Key.D, t.Key.PublicKey.N))
+	}
+}
+
 // String returns the key components in a string format.
 func (t *RSA) String() string {
 	var res string

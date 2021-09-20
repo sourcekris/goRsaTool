@@ -1,6 +1,8 @@
 package wiener2
 
 import (
+	"log"
+
 	"github.com/sourcekris/goRsaTool/attacks/wienervariant"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
@@ -9,7 +11,7 @@ import (
 )
 
 // name is the name of this attack.
-const name = "wiener's"
+const name = "wieners2"
 
 func squareAndMultiply(base, exponent, n *fmp.Fmpz) *fmp.Fmpz {
 	var be []int
@@ -85,6 +87,10 @@ func Attack(ks []*keys.RSA) error {
 			k.PackGivenP(ln.FindPGivenD(c[1], k.Key.PublicKey.E, k.Key.N))
 			return nil
 		}
+	}
+
+	if k.Verbose {
+		log.Printf("%s attack failed, trying the final variant", name)
 	}
 
 	// Try the next variant approach.

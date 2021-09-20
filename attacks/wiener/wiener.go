@@ -1,12 +1,16 @@
 package wiener
 
 import (
+	"log"
+
 	"github.com/sourcekris/goRsaTool/attacks/wiener2"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/ln"
 
 	fmp "github.com/sourcekris/goflint"
 )
+
+const name = "wiener"
 
 // Attack implements the Wiener attack on an RSA public key and this implementation is based on the
 // python implementation of the algorithm by Pablo Celayes:
@@ -40,6 +44,10 @@ func Attack(ts []*keys.RSA) error {
 				}
 			}
 		}
+	}
+
+	if t.Verbose {
+		log.Printf("%s attack failed, trying the the next variant", name)
 	}
 
 	// Try the variant approach.
