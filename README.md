@@ -21,6 +21,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * fermat factorization for close p & q
 * low public exponent attack (requires ciphertext)
 * wiener's attack for large public exponents (3 variants)
+* wiener's attack on multiprime RSA
 * pollards p-1 attack
 * williams p+1 attack
 * pollards rho factorization - original Pollard's Monte Carlo factorization method
@@ -169,6 +170,7 @@ novelty
 pastctf
 smallq
 wiener
+wienermultiprime
 pollardsp1
 pollardsrho
 pollardrhobrent
