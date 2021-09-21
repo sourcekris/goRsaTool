@@ -26,6 +26,8 @@ echo "Testing factordb_parse..."
 go run rsatool.go -attack factordb -key examples/factordb_parse.pub
 echo "Testing fermat..."
 go run rsatool.go -attack fermat -key examples/fermat.pub
+echo "Testing londahl..."
+go run rsatool.go -attack londahl -key examples/londahl.pub
 echo "Testing hastads..."
 go run rsatool.go -attack hastads -key examples/hastads.pub -ciphertext examples/hastads.cipher
 echo "Testing hastadsbroadcast..."

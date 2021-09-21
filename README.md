@@ -19,6 +19,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * lucas primes - factor n when p is a lucas prime
 * past CTF primes attack
 * fermat factorization for close p & q
+* londahl factorization for close p & q
 * low public exponent attack (requires ciphertext)
 * wiener's attack for large public exponents (3 variants)
 * wiener's attack on multiprime RSA
@@ -48,7 +49,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ### Non Key Based Attacks
 
-* recover RSA modulus given signatures and plaintexts (currently buggy)
+* recover RSA modulus given signatures and plaintexts (currently buggy due to Flint library memory leak :( ))
 
 ## Installation
 

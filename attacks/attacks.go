@@ -15,6 +15,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/hastads"
 	"github.com/sourcekris/goRsaTool/attacks/hastadsbroadcast"
 	"github.com/sourcekris/goRsaTool/attacks/knownprime"
+	"github.com/sourcekris/goRsaTool/attacks/londahl"
 	"github.com/sourcekris/goRsaTool/attacks/manysmallprimes"
 	"github.com/sourcekris/goRsaTool/attacks/notableprimes"
 	"github.com/sourcekris/goRsaTool/attacks/partiald"
@@ -61,6 +62,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("partiald", false, false, partiald.Attack)
 	SupportedAttacks.RegisterAttack("knownprime", false, false, knownprime.Attack)
 	SupportedAttacks.RegisterAttack("wienermultiprime", false, true, wienermultiprime.Attack)
+	SupportedAttacks.RegisterAttack("londahl", false, true, londahl.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, true, notableprimes.Attack)
