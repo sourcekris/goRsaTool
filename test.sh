@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# This is deprecated by the Makefile test target but still useful to keep around if you want to
+# know how a certain attack mode should work. What flags / arguments it needs etc.
+#
+
 echo "Testing knownprime attack..."
 go run rsatool.go -key examples/knownprime.txt -verbose -attack knownprime
 echo "Testing knownprime attack..."

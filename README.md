@@ -67,7 +67,12 @@ This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested i
   ```shell
   sudo apt install git golang libflint-dev libecm-dev
   go get github.com/sourcekris/goRsaTool
+  make
+  make install
   ```
+
+If your environment GOBIN variable is not set it will not install automatically. Either set your 
+GOBIN environment variable or move the binary by hand somewhere in your path.
 
 ### Installing on OSX
 
