@@ -22,6 +22,8 @@ echo "Testing crtsolve..."
 go run rsatool.go -attack crtsolver -key examples/crtsolve.key
 echo "Testing factordb..."
 go run rsatool.go -attack factordb -key examples/factordb.pub
+echo "Testing factordb (multiprime)..."
+go run rsatool.go -attack factordb -key examples/factordb_multiprime.key
 echo "Testing factordb_parse..."
 go run rsatool.go -attack factordb -key examples/factordb_parse.pub
 echo "Testing fermat..."
@@ -41,7 +43,7 @@ go run rsatool.go -attack smallq -key examples/small_q.pub
 echo "Testing wiener..."
 go run rsatool.go -attack wiener -key examples/wiener.pub
 echo "Testing wiener2..."
-go run rsatool.go -attack wiener -key examples/wiener2-numberlist.txt
+go run rsatool.go -attack wienermultiprime -key examples/wiener2-numberlist.txt
 echo "Testing wiener variant..."
 go run rsatool.go -attack wiener -key examples/wienervariant.key
 echo "Testing pollardsp1..."
@@ -66,3 +68,4 @@ echo "Testing manysmallprimes attack..."
 go run rsatool.go -numprimes 128 -key examples/manysmallprimes.txt -verbose -attack manysmallprimes
 echo "Testing partiald attack..."
 go run rsatool.go -key examples/partiald.txt -verbose -attack partiald
+echo "Testing commonmodulus attack..."
