@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/sourcekris/goRsaTool/attacks"
+	"github.com/sourcekris/goRsaTool/attacks/jwtmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
 	"github.com/sourcekris/goRsaTool/utils"
@@ -34,6 +35,7 @@ var (
 	ctList         = fset.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
 	ptList         = fset.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
 	sigList        = fset.String("siglist", "", "Comma seperated list of signatures files.")
+	jwtList        = fset.String("jwtlist", "", "Comma seperated list of files containing JWTs.")
 	attack         = fset.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = fset.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
@@ -102,6 +104,7 @@ func main() {
 	klist := fileList(*keyList)
 	ptlist := fileList(*ptList)
 	siglist := fileList(*sigList)
+	jwtlist := fileList(*jwtList)
 
 	// Add the -key flag file to the list if provided.
 	if *keyFile != "" {
@@ -235,6 +238,16 @@ func main() {
 	// Recover a modulus from signatures and plaintexts.
 	if siglist != nil && ptlist != nil {
 		if err := signatures.Attack(ptlist, siglist, *exponentArg); err != nil {
+			logger.Fatalf("failed recovering modulus: %v", err)
+		}
+
+		// Done.
+		return
+	}
+
+	// Recover a modulus from two JWTs.
+	if jwtlist != nil {
+		if err := jwtmodulus.Attack(jwtlist, *exponentArg); err != nil {
 			logger.Fatalf("failed recovering modulus: %v", err)
 		}
 

@@ -1,0 +1,37 @@
+package jwtmodulus
+
+import (
+	"testing"
+
+	"github.com/sourcekris/goRsaTool/ln"
+	fmp "github.com/sourcekris/goflint"
+)
+
+func TestGetMagic(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		jwt     []byte
+		want    *fmp.Fmpz
+		wantErr bool
+	}{
+		{
+			name: "valid jwt expected to calculate",
+			jwt:  []byte("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhZG1pbiI6ZmFsc2UsIm5vdyI6MTYzMDk4MTgwOS4xNjQzMDF9.BV5n_9LpciesgBgO8wy7owjMIQoFj5OPP1vsN-S_V47rZFnSrDYDooxeIT6f9369tC2-NOpusU_6Xfyh_TLTdiIZU9LeS-KNZlENsj2F5St6A6jXgdfq0aS27ltMHRSwVA"),
+			want: ln.FmpString("579075879643490506301794835437272598067611020186670355769583712389152150298053134592308523273430042706583502954596512534807481583044672086912606190462313539840218387590255919326194438098841624778125564189892816924765550944417595536859165062938652518568442638670209822836448734886127161666909401607325787218189656691420604373167106649147021478844916680666738998097407815969891783817069742189671994353081148824910336445021778239219273209531958147826133595199166156025881881889452113310045809216067994092943793562787154373860846676795814859371928580780528444539922201719322096281569703849270150229711654526341300458463262546605772285849521738137117477909622310799024150814121286884674019657215878736"),
+		},
+	} {
+		e := fmp.NewFmpz(3)
+		got, err := getMagic(tc.jwt, e)
+		if err != nil && !tc.wantErr {
+			t.Errorf("%s: failed, got error when didn't want err: %v", tc.name, err)
+		}
+
+		if err == nil && tc.wantErr {
+			t.Errorf("%s: failed, got success when wanted err", tc.name)
+		}
+
+		if got.Cmp(tc.want) != 0 {
+			t.Errorf("%s: failed got/want mismatch: %v / %v", tc.name, got, tc.want)
+		}
+	}
+}

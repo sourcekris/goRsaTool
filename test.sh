@@ -74,3 +74,6 @@ go run rsatool.go -numprimes 128 -key examples/manysmallprimes.txt -verbose -att
 echo "Testing partiald attack..."
 go run rsatool.go -key examples/partiald.txt -verbose -attack partiald
 echo "Testing commonmodulus attack..."
+go run rsatool.go -keylist examples/commonmodulus1.key,examples/commonmodulus2.key -attack commonmodulus
+echo "Testing JWT modulus recovery..."
+go run rsatool.go -jwtlist examples/jwt1.txt,examples/jwt2.txt
