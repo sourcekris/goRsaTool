@@ -192,6 +192,7 @@ manysmallprimes
 partiald
 sexyprimes
 knownprime
+defectivee
 ```
 
 ## More Example Usage

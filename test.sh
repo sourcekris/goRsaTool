@@ -77,3 +77,5 @@ echo "Testing commonmodulus attack..."
 go run rsatool.go -keylist examples/commonmodulus1.key,examples/commonmodulus2.key -attack commonmodulus
 echo "Testing JWT modulus recovery..."
 go run rsatool.go -jwtlist examples/jwt1.txt,examples/jwt2.txt
+echo "Testing partiald attack..."
+go run rsatool.go -key examples/defectivee.txt -verbose -attack defectivee
