@@ -8,6 +8,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
 	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
+	"github.com/sourcekris/goRsaTool/attacks/defectivee"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/franklinreiter"
@@ -63,6 +64,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardsrho", false, true, pollardsrho.Attack)
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
+	SupportedAttacks.RegisterAttack("defectivee", false, true, defectivee.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, false, notableprimes.Attack)
