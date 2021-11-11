@@ -14,16 +14,17 @@ import (
 
 // RSA wraps FMPPrivateKey and adds a field for cipher and plaintexts.
 type RSA struct {
-	Key            FMPPrivateKey
-	CipherText     []byte
-	PlainText      []byte
-	KnownPlainText []byte
-	DLSB           []byte
-	KeyFilename    string
-	PastPrimesFile string
-	NumPrimes      int
-	Verbose        bool
-	Log            *log.Logger
+	Key               FMPPrivateKey
+	CipherText        []byte
+	PlainText         []byte
+	KnownPlainText    []byte
+	DLSB              []byte
+	OracleCiphertexts map[int]*fmp.Fmpz
+	KeyFilename       string
+	PastPrimesFile    string
+	NumPrimes         int
+	Verbose           bool
+	Log               *log.Logger
 }
 
 // NewRSA constructs an RSA object or returns an error.

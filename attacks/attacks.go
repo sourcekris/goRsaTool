@@ -19,6 +19,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/londahl"
 	"github.com/sourcekris/goRsaTool/attacks/manysmallprimes"
 	"github.com/sourcekris/goRsaTool/attacks/notableprimes"
+	"github.com/sourcekris/goRsaTool/attacks/oraclemodulus"
 	"github.com/sourcekris/goRsaTool/attacks/partiald"
 	"github.com/sourcekris/goRsaTool/attacks/pastctfprimes"
 	"github.com/sourcekris/goRsaTool/attacks/pollardrhobrent"
@@ -65,6 +66,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("defectivee", false, true, defectivee.Attack)
+	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, oraclemodulus.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, false, notableprimes.Attack)

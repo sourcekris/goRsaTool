@@ -5,6 +5,8 @@
 # know how a certain attack mode should work. What flags / arguments it needs etc.
 #
 
+echo "Testing encryption oracle modulus recovery"
+go run rsatool.go -key examples/recover_modulus_from_oracle.txt -attack oraclemodulus
 echo "Testing knownprime attack..."
 go run rsatool.go -key examples/knownprime.txt -verbose -attack knownprime
 echo "Testing knownprime attack..."

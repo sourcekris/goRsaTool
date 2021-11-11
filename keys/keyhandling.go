@@ -16,7 +16,7 @@ import (
 
 var (
 	// lineRE is a regexp that should match interesting integers on lines.
-	lineRE = regexp.MustCompile(`(?i)^([necpqdk][pq0]?t?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
+	lineRE = regexp.MustCompile(`(?i)^([necpqdk][pq02349]?t?|)\s*[:=]\s*((?:0x)?[0-9a-f]+)`)
 	// numRE matches numbers in base 10 or hex.
 	numRE = regexp.MustCompile(`[0-9a-f]+`)
 	// modRE, expRE, ctRE matches 'n', 'e', 'c' case insensitively.
@@ -35,6 +35,12 @@ var (
 	qRE  = regexp.MustCompile(`(?i)^q`)
 	dpRE = regexp.MustCompile(`(?i)^dp`)
 	dqRE = regexp.MustCompile(`(?i)^dq`)
+
+	// Oracle Ciphertext regexps.
+	e2RE = regexp.MustCompile(`(?i)^e2`)
+	e3RE = regexp.MustCompile(`(?i)^e3`)
+	e4RE = regexp.MustCompile(`(?i)^e4`)
+	e9RE = regexp.MustCompile(`(?i)^e9`)
 )
 
 type pkParser func([]byte) (*x509big.BigPublicKey, error)
@@ -81,6 +87,23 @@ func PrivateFromPublic(key *FMPPublicKey) *FMPPrivateKey {
 	}
 }
 
+func isOracleCiphertext(s string) bool {
+	return e2RE.MatchString(s) || e3RE.MatchString(s) || e4RE.MatchString(s) || e9RE.MatchString(s)
+}
+
+func whichOracleCiphertext(s string) int {
+	switch {
+	case e2RE.MatchString(s):
+		return 2
+	case e3RE.MatchString(s):
+		return 3
+	case e4RE.MatchString(s):
+		return 4
+	}
+
+	return 9
+}
+
 // getBase returns the base of a string and, if its prefixed with 0x then the remainder of the string after the prefix.
 func getBase(s string) (string, int) {
 	if strings.HasPrefix(s, "0x") {
@@ -96,7 +119,10 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 		n, e, c, p, q, dp, dq, d0 string
 		ct, kpt                   []byte
 		crt                       bool
+		os                        map[int]*fmp.Fmpz
 	)
+
+	os = make(map[int]*fmp.Fmpz)
 
 	s := bufio.NewScanner(bytes.NewReader(kb))
 	for s.Scan() {
@@ -109,7 +135,7 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 				switch {
 				case modRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					n = sm[2]
-				case expRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
+				case expRE.MatchString(sm[1]) && numRE.MatchString(sm[2]) && !isOracleCiphertext(sm[1]):
 					e = sm[2]
 				case ctRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					c = sm[2]
@@ -123,6 +149,10 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 					dq = sm[2]
 				case d0RE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					d0 = sm[2]
+				case isOracleCiphertext(sm[1]) && numRE.MatchString(sm[2]):
+					if o, ok := new(fmp.Fmpz).SetString(getBase(sm[2])); ok {
+						os[whichOracleCiphertext(sm[1])] = new(fmp.Fmpz).Set(o)
+					}
 				case kptRE.MatchString(sm[1]) && numRE.MatchString(sm[2]):
 					if kn, ok := new(fmp.Fmpz).SetString(getBase(sm[2])); ok {
 						kpt = ln.NumberToBytes(kn)
@@ -166,12 +196,12 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 		}
 	}
 
-	if (n == "" || e == "") && !crt {
+	if (n == "" || e == "") && !crt && len(os) < 4 {
 		return nil, fmt.Errorf("failed to decode key, missing a modulus or an exponent")
 	}
 
 	fN, ok := new(fmp.Fmpz).SetString(getBase(n))
-	if !ok {
+	if !ok && len(os) < 4 {
 		return nil, fmt.Errorf("failed decoding modulus from keyfile: %v", n)
 	}
 
@@ -204,7 +234,7 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 	}
 
 	fE, ok := new(fmp.Fmpz).SetString(getBase(e))
-	if !ok {
+	if !ok && len(os) < 4 {
 		return nil, errors.New("failed decoding exponent from keyfile")
 	}
 
@@ -224,6 +254,10 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 
 	if kpt != nil {
 		k.KnownPlainText = kpt
+	}
+
+	if len(os) == 4 {
+		k.OracleCiphertexts = os
 	}
 
 	// Place the LSB of D into the k.DLSB field.

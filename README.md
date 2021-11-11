@@ -34,12 +34,13 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * Franklin Reiter related message attack - Requires 1 key, 2 ciphertexts which are related with some
   minor different suffix. See the example keys in the examples/ subdirectory.
 * small fraction factorization - finding factors of n when p and q are close to a small fraction 
-  (e.g. 37/32).
-* faulty rsa implementation where c = me mod n instead of ct = m^e mod n (brokenrsa module)
-* Public key consisting of many small primes (corCTF 2021 4096 challenge)
-* Private key recovery when 50+% of the LSB of D are known.
+  (e.g. 37/32). (`smallfractions`)
+* faulty rsa implementation where c = me mod n instead of ct = m^e mod n (`brokenrsa` module)
+* Public key consisting of many small primes (corCTF 2021 4096 challenge) (`manysmallprimes`)
+* Private key recovery when 50+% of the LSB of D are known. (`partiald`)
 * Sexy primes - primes seperated by 6.
-* Known prime - not really an attack but a helpful shortcut.
+* Known prime - not really an attack but a helpful shortcut (`knownprime`)
+* Recovering plaintext when phi(n) are not coprime provided we have at least 1 prime and partial KPT (`defectivee`)
 
 ### Multi-Key Attacks
 
@@ -47,9 +48,11 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * common factors attack (share p among multiple moduli)
 * common modulus attack (2 keys share n but have different e)
 
-### Non Key Based Attacks
+### Non Key Based Tools
 
-* recover RSA modulus given signatures and plaintexts (currently buggy due to Flint library memory leak :( ))
+* recover RSA modulus given signatures and plaintexts (a bit buggy, randomly crashes sometimes)
+* recover RSA modulus given an encryption oracle (`oraclemodulus`, see `examples/recover_modulus_from_oracle.txt`)
+* recover RSA modulus given two RS256 JWT tokens (`jwtmodulus`).
 
 ## Installation
 
@@ -193,6 +196,7 @@ partiald
 sexyprimes
 knownprime
 defectivee
+oraclemodulus
 ```
 
 ## More Example Usage
