@@ -1,0 +1,12 @@
+github.com/jbarham/primegen v0.0.0-20200302115600-8ce4838491a0 h1:1icIF7p+KYk5pJ2f9kv2xZy8HxNXoWj2PkKO0EovqTE=
+github.com/jbarham/primegen v0.0.0-20200302115600-8ce4838491a0/go.mod h1:Airb7uqSrSAayrH8p4ZE/b6QfKuoWMv7WoSfMtF/3Lc=
+github.com/kavehmz/prime v1.0.0 h1:7nwQQWxmw/DYw5/fQdphqkmgWmoln6zcvYav1v29Bo0=
+github.com/kavehmz/prime v1.0.0/go.mod h1:o8keQ+3ZXNoHQHNjdjnACFJUNhN0RfHyGvkzQzbzl78=
+github.com/sourcekris/goflint v0.0.0-20210914114802-f9662cf830a9 h1:xmAtAAmeiV6GkzL9bBIiUEpB5Ja6NDSdarC6xeFUe6s=
+github.com/sourcekris/goflint v0.0.0-20210914114802-f9662cf830a9/go.mod h1:6J49YTQ8HphjsifNRSe1bSNVCE29zlu5W9bGd+1PdxU=
+github.com/sourcekris/gogmpecm v0.0.0-20200521080052-c6536ae30853 h1:C+uGt0vYiDyebSlsiHwyg9rwKzfuUR590d0GmY3jlyg=
+github.com/sourcekris/gogmpecm v0.0.0-20200521080052-c6536ae30853/go.mod h1:6KxBU6hlc+NlhzaCCps8puS3Y0PapWQY/e8+jjQRSa8=
+github.com/sourcekris/mathparse v0.0.0-20200525124717-dc40b3863ac8 h1:vfeYhwgJmWALhHOT3j46wqT+xNv1PsZ3GduwhMH0JPY=
+github.com/sourcekris/mathparse v0.0.0-20200525124717-dc40b3863ac8/go.mod h1:OxvSIIoKij5CWhx6OWRSlz4RLkvR6JRBCWtoN6lA+v0=
+github.com/sourcekris/x509big v0.0.0-20200430085652-321a26314a1d h1:RMoRDaSmcpQXKlJGyr/fkz8Xvgvf0UtvxeBRw2M6tA8=
+github.com/sourcekris/x509big v0.0.0-20200430085652-321a26314a1d/go.mod h1:uhWoPdvwBOgPkt4x8RZOJ4QNxGEzRNqQtVw7ZfIsJZk=
