@@ -35,9 +35,10 @@ func Attack(ks []*keys.RSA) error {
 				X := ln.FracPow(k.Key.N, 3, 16)
 				X.Div(X, ln.BigTwo)
 
+				ctx := fmp.NewFmpzModCtx(k.Key.N)
 				// f = x - phint
-				f := fmp.NewFmpzModPoly(k.Key.N).SetCoeffUI(1, 1)
-				f.Sub(f, fmp.NewFmpzModPoly(k.Key.N).SetCoeff(0, phint))
+				f := fmp.NewFmpzModPoly(ctx).SetCoeffUI(1, 1)
+				f.Sub(f, fmp.NewFmpzModPoly(ctx).SetCoeff(0, phint))
 
 				// Copy f to type FmpzPoly.
 				fp := fmp.NewFmpzPoly()
