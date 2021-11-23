@@ -5,6 +5,8 @@ github.com/kavehmz/prime v1.0.0/go.mod h1:o8keQ+3ZXNoHQHNjdjnACFJUNhN0RfHyGvkzQz
 github.com/sourcekris/goflint v0.0.0-20210914114802-f9662cf830a9/go.mod h1:6J49YTQ8HphjsifNRSe1bSNVCE29zlu5W9bGd+1PdxU=
 github.com/sourcekris/goflint v0.0.0-20211122062818-a50ffb3b125e h1:0/3nKJeaBdFURa/02OI1LfSyRC1E2DYkOGE+r9PBuD0=
 github.com/sourcekris/goflint v0.0.0-20211122062818-a50ffb3b125e/go.mod h1:0ZUDLmp6m/l4oMsXITQYD6gM1mivhulLBc6eAEiVs+E=
+github.com/sourcekris/goflint v0.0.0-20211123064019-a6a22ffcdebd h1:lEFwv5+DZQogQVlmOKVWVTsSyYRTtc6oisxmPitMj20=
+github.com/sourcekris/goflint v0.0.0-20211123064019-a6a22ffcdebd/go.mod h1:0ZUDLmp6m/l4oMsXITQYD6gM1mivhulLBc6eAEiVs+E=
 github.com/sourcekris/gogmpecm v0.0.0-20211122043024-f069ae059454 h1:b0pXhpE54+kWdu5rCd65saEnEeJtudyJPVfA3tY1nzY=
 github.com/sourcekris/gogmpecm v0.0.0-20211122043024-f069ae059454/go.mod h1:tXu70utapcitOP5k9+RhQOkWC4dYlu9tWpYK8Pf8pek=
 github.com/sourcekris/mathparse v0.0.0-20211122043138-232758c46ee7 h1:2sjppih/GmHB1M7PUWhHRtk3wHC8quS8iUO/i4UKJ+o=

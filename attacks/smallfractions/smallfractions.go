@@ -15,6 +15,15 @@ const name = "small fractions"
 // depth is the max size of the numerator and denominator to test to.
 const depth int64 = 50
 
+// Which fmp initializer to use so we can swap out the constructor
+// for debugging.
+var (
+	fmpz    = fmp.NewFmpz
+	poly    = fmp.NewFmpzPoly
+	modpoly = fmp.NewFmpzModPoly
+	mat     = fmp.NewFmpzMatNF
+)
+
 // Attack implements SmallFractions attack.
 func Attack(ks []*keys.RSA) error {
 	k := ks[0]
@@ -24,38 +33,39 @@ func Attack(ks []*keys.RSA) error {
 
 	var num, den int64
 
+	n := fmpz(0).Set(k.Key.N)
+	ctx := fmp.NewFmpzModCtx(n)
 	for den = 2; den < depth+1; den++ {
 		for num = 1; num < den; num++ {
-			g := new(fmp.Fmpz).GCD(fmp.NewFmpz(num), fmp.NewFmpz(den))
+			g := fmpz(0).GCD(fmpz(num), fmpz(den))
 
 			if g.Equals(ln.BigOne) {
-				phint := new(fmp.Fmpz).Mul(k.Key.N, fmp.NewFmpz(den))
-				phint.Div(phint, fmp.NewFmpz(num)).Root(phint, 2)
+				phint := fmpz(0).Mul(n, fmpz(den))
+				phint.Div(phint, fmpz(num)).Root(phint, 2)
 
-				X := ln.FracPow(k.Key.N, 3, 16)
+				X := ln.FracPow(n, 3, 16)
 				X.Div(X, ln.BigTwo)
 
-				ctx := fmp.NewFmpzModCtx(k.Key.N)
 				// f = x - phint
-				f := fmp.NewFmpzModPoly(ctx).SetCoeffUI(1, 1)
-				f.Sub(f, fmp.NewFmpzModPoly(ctx).SetCoeff(0, phint))
+				f := modpoly(ctx).SetCoeffUI(1, 1)
+				f.Sub(f, modpoly(ctx).SetCoeff(0, phint))
 
 				// Copy f to type FmpzPoly.
-				fp := fmp.NewFmpzPoly()
+				fp := poly()
 				fcs := f.GetCoeffs()
 				for i, c := range fcs {
 					fp.SetCoeff(i, c)
 				}
 
 				// x
-				x := fmp.NewFmpzPoly().SetCoeffUI(1, 1)
+				x := poly().SetCoeffUI(1, 1)
 				//  Construct an array of polys.
 				var g []*fmp.FmpzPoly
 				for i := 0; i < 4; i++ {
 					// np = x * N^(4-i)
-					np := fmp.NewFmpzPoly().MulScalar(x, new(fmp.Fmpz).ExpXI(k.Key.N, 4-i))
+					np := poly().MulScalar(x, fmpz(0).ExpXI(k.Key.N, 4-i))
 					// np * f^i
-					np.Mul(np, fmp.NewFmpzPoly().Pow(fp, i))
+					np.Mul(np, poly().Pow(fp, i))
 					g = append(g, np)
 
 				}
@@ -63,26 +73,25 @@ func Attack(ks []*keys.RSA) error {
 				//  Extend the array of polys.
 				for i := 0; i < 4; i++ {
 					// np = x**i * f**4
-					np := fmp.NewFmpzPoly().Pow(x, i)
-					np.Mul(np, fmp.NewFmpzPoly().Pow(fp, 4))
+					np := poly().Pow(x, i)
+					np.Mul(np, poly().Pow(fp, 4))
 					g = append(g, np)
 				}
 
 				// Construct an empty 8*8 matrix and set the values.
-				B := fmp.NewFmpzMat(8, 8)
+				B := mat(8, 8)
 				for i := 0; i < 8; i++ {
 					for j := 0; j < g[i].Len(); j++ {
-						B.SetVal(g[i].GetCoeff(j).MulZ(new(fmp.Fmpz).ExpXI(X, j)), j, i)
+						B.SetVal(g[i].GetCoeff(j).MulZ(fmpz(0).ExpXI(X, j)), j, i)
 					}
 				}
 
 				// Peform lattice reduction.
 				B.LLL()
-
-				ff := fmp.NewFmpzPoly()
+				ff := poly()
 				for i := 0; i < 8; i++ {
-					a := new(fmp.Fmpz).Div(B.Entry(i, 0), new(fmp.Fmpz).ExpXI(X, i))
-					b := new(fmp.FmpzPoly).Pow(x, i)
+					a := fmpz(0).Div(B.Entry(i, 0), fmpz(0).ExpXI(X, i))
+					b := poly().Pow(x, i)
 					b.MulScalar(b, a)
 					ff.Add(ff, b)
 				}
@@ -92,9 +101,9 @@ func Attack(ks []*keys.RSA) error {
 				for i := 0; i < fac.Len(); i++ {
 
 					// One of the coefficients of the factors could be related to p.
-					p := fac.GetPoly(i)
+					p := fac.GetPolyNF(i)
 					for j := 0; j < p.Len(); j++ {
-						coeff := new(fmp.Fmpz).Mod(p.GetCoeff(j), k.Key.N)
+						coeff := fmpz(0).Mod(p.GetCoeff(j), k.Key.N)
 						if coeff.Equals(ln.BigZero) {
 							continue
 						}
@@ -102,15 +111,15 @@ func Attack(ks []*keys.RSA) error {
 						// Due to the FLINT LLL implementation I think we often get sign problems in the factors
 						// of the polynomials. So try both +/- versions.
 						pps := []*fmp.Fmpz{
-							new(fmp.Fmpz).Sub(phint, coeff),
-							new(fmp.Fmpz).Sub(phint, new(fmp.Fmpz).Mul(coeff, ln.BigNOne)),
+							fmpz(0).Sub(phint, coeff),
+							fmpz(0).Sub(phint, fmpz(0).Mul(coeff, ln.BigNOne)),
 						}
 
 						for _, pp := range pps {
 							if pp.Equals(ln.BigZero) || pp.Equals(k.Key.N) {
 								continue
 							}
-							if new(fmp.Fmpz).Mod(k.Key.N, pp).Equals(ln.BigZero) {
+							if fmpz(0).Mod(k.Key.N, pp).Equals(ln.BigZero) {
 								k.PackGivenP(pp)
 								return nil
 							}
