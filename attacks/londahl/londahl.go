@@ -81,7 +81,7 @@ func Attack(ts []*keys.RSA) error {
 	p := new(fmp.Fmpz)
 
 	// Boundary for the londahl attack.
-	var b int64 = 20000000
+	var b int64 = 15000000
 
 	if t.Verbose {
 		log.Printf("%s attempt beginning with timeout %v", name, timeout)
