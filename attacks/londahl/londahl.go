@@ -6,6 +6,7 @@ package londahl
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"time"
 
@@ -35,14 +36,16 @@ func factorizeNPhi(n, phi *fmp.Fmpz) (*fmp.Fmpz, *fmp.Fmpz) {
 }
 
 func londahl(ch chan bool, n, p *fmp.Fmpz, b int64) {
-	var lookup = make(map[string]int64)
+	var lookup = make(map[uint64]int64)
 
 	phiApprox := new(fmp.Fmpz).Add(new(fmp.Fmpz).Sub(n, new(fmp.Fmpz).Mul(new(fmp.Fmpz).Root(n, 2), ln.BigTwo)), ln.BigOne)
 
-	// Generate a lookup table, store the integers in string representations so we can use fast hash lookups.
+	// Generate a lookup table, store just the fnv hash of the integer to save memory.
 	z := fmp.NewFmpz(1)
 	for i := int64(0); i <= b; i++ {
-		lookup[z.String()] = i
+		h := fnv.New64()
+		h.Write(z.Bytes())
+		lookup[h.Sum64()] = i
 		z = z.Lsh(1).ModZ(n)
 	}
 
@@ -50,7 +53,9 @@ func londahl(ch chan bool, n, p *fmp.Fmpz, b int64) {
 	fac := new(fmp.Fmpz).ExpXIM(ln.BigTwo, int(b), n)
 
 	for i := int64(0); i <= b; i++ {
-		if v, ok := lookup[mu.String()]; ok {
+		h := fnv.New64()
+		h.Write(mu.Bytes())
+		if v, ok := lookup[h.Sum64()]; ok {
 			phi := new(fmp.Fmpz).Add(phiApprox, fmp.NewFmpz(v-(i*b)))
 			r1, _ := factorizeNPhi(n, phi)
 			if r1 != nil {
