@@ -20,23 +20,28 @@ type sigAttack struct {
 	e  int
 }
 
+var (
+	modpoly = fmp.NewFmpzModPoly
+	modctx  = fmp.NewFmpzModCtx
+)
+
 // attempt runs the attack attempt itself.
 func (s *sigAttack) attempt(v bool) []byte {
 	// f = (x-s1+s2)^e - c1
-	ctx := fmp.NewFmpzModCtx(s.n)
-	f := fmp.NewFmpzModPoly(ctx).SetCoeffUI(1, 1)
-	f.Sub(f, fmp.NewFmpzModPoly(ctx).SetCoeff(0, s.ss[1])).Add(f, fmp.NewFmpzModPoly(ctx).SetCoeff(0, s.ss[0])).Pow(f, s.e)
-	f.Sub(f, fmp.NewFmpzModPoly(ctx).SetCoeff(0, s.cs[0]))
+	ctx := modctx(s.n)
+	f := modpoly(ctx).SetCoeffUI(1, 1)
+	f.Sub(f, modpoly(ctx).SetCoeff(0, s.ss[1])).Add(f, modpoly(ctx).SetCoeff(0, s.ss[0])).Pow(f, s.e)
+	f.Sub(f, modpoly(ctx).SetCoeff(0, s.cs[0]))
 
 	// g = x^e-c2
-	g := fmp.NewFmpzModPoly(ctx).SetCoeffUI(1, 1)
-	g.Pow(g, s.e).Sub(g, fmp.NewFmpzModPoly(ctx).SetCoeff(0, s.cs[1]))
+	g := modpoly(ctx).SetCoeffUI(1, 1)
+	g.Pow(g, s.e).Sub(g, modpoly(ctx).SetCoeff(0, s.cs[1]))
 
-	a := fmp.NewFmpzModPoly(fmp.NewFmpzModCtx(f.GetMod())).Set(f)
-	b := fmp.NewFmpzModPoly(fmp.NewFmpzModCtx(g.GetMod())).Set(g)
+	a := modpoly(modctx(f.GetMod())).Set(f)
+	b := modpoly(modctx(g.GetMod())).Set(g)
 
-	zero := fmp.NewFmpzModPoly(ctx).Zero()
-	rp := fmp.NewFmpzModPoly(ctx)
+	zero := modpoly(ctx).Zero()
+	rp := modpoly(ctx)
 
 	if v {
 		log.Printf("%s beginning, this can sometimes crash, try it again if it does.", name)
@@ -50,7 +55,7 @@ func (s *sigAttack) attempt(v bool) []byte {
 			co0 := rp.GetCoeff(0)
 			co1 := rp.GetCoeff(1)
 
-			q, _ := fmp.NewFmpzModPoly(ctx).SetCoeff(0, ln.BigOne).DivRem(fmp.NewFmpzModPoly(ctx).SetCoeff(0, co1))
+			q, _ := modpoly(ctx).SetCoeff(0, ln.BigOne).DivRem(modpoly(ctx).SetCoeff(0, co1))
 			q.MulScalar(q, ln.BigNOne).MulScalar(q, co0)
 			return ln.NumberToBytes(q.GetCoeff(0))
 		}
