@@ -50,7 +50,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ### Non Key Based Tools
 
-* recover RSA modulus given signatures and plaintexts (a bit buggy, randomly crashes sometimes)
+* recover RSA modulus given signatures and plaintexts (use `-siglist` flag)
 * recover RSA modulus given an encryption oracle (`oraclemodulus`, see `examples/recover_modulus_from_oracle.txt`)
 * recover RSA modulus given two RS256 JWT tokens (`jwtmodulus`).
 
@@ -172,31 +172,37 @@ Ec7+LmR48UUVuXtlKE1fhdMCAQACAQACAxw+pw==
 $ ./gorsatool -list
 crtsolver
 factordb
-fermat
 hastads
 hastadsbroadcast
-novelty
+commonfactors
+commonmodulus
+partiald
+knownprime
+brokenrsa
+notableprimes
 pastctf
 smallq
 wiener
 wienermultiprime
+qicheng
+fermat
+londahl
+smallfractions
+manysmallprimes
+ecm
+franklinreiter
 pollardsp1
 pollardsrho
 pollardrhobrent
 williamsp1
-qicheng
-ecm
-commonfactors
-commonmodulus
-franklinreiter
-smallfractions
-brokenrsa
-manysmallprimes
-partiald
-sexyprimes
-knownprime
 defectivee
 oraclemodulus
+mersenne
+lucas
+novelty
+pastprimes
+pastctfprimes
+sexyprimes
 ```
 
 ## More Example Usage
@@ -216,6 +222,8 @@ oraclemodulus
 ### Recover an RSA Modulus From RSA Signatures and Plaintexts
 
 `./rsatool -ptlist message1.txt,message2.txt -siglist sig1,sig2`
+
+Note: See the `test.sh` file for more examples using almost every attack in the list.
 
 ## Author
 
