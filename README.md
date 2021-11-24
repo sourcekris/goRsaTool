@@ -65,11 +65,13 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ### Installation on Linux / Windows 10
 
-This works on Debian, Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Debian WSL)
+This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu20.04 WSL)
+as well as Kali Linux 2021.3.
 
   ```shell
   sudo apt install git golang libflint-dev libecm-dev make
-  go get github.com/sourcekris/goRsaTool
+  git clone github.com/sourcekris/goRsaTool
+  cd goRsaTool
   make
   make install
   ```
