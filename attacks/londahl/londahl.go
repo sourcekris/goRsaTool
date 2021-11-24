@@ -35,6 +35,12 @@ func factorizeNPhi(n, phi *fmp.Fmpz) (*fmp.Fmpz, *fmp.Fmpz) {
 	return nil, nil
 }
 
+func storeInt(z, n *fmp.Fmpz, m map[uint64]int64, i int64) {
+	h := fnv.New64()
+	h.Write(z.Bytes())
+	m[h.Sum64()] = i
+}
+
 func londahl(ch chan bool, n, p *fmp.Fmpz, b int64) {
 	var lookup = make(map[uint64]int64)
 
@@ -43,9 +49,7 @@ func londahl(ch chan bool, n, p *fmp.Fmpz, b int64) {
 	// Generate a lookup table, store just the fnv hash of the integer to save memory.
 	z := fmp.NewFmpz(1)
 	for i := int64(0); i <= b; i++ {
-		h := fnv.New64()
-		h.Write(z.Bytes())
-		lookup[h.Sum64()] = i
+		storeInt(z, n, lookup, i)
 		z = z.Lsh(1).ModZ(n)
 	}
 
