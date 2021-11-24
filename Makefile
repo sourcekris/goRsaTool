@@ -11,6 +11,6 @@ test:
 	go test -v ./...
 
 install:
-	go install rsatool.go
+	go build -o /usr/local/bin/goRsaTool rsatool.go
 
-all: build
+all: install
