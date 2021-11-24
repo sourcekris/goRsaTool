@@ -10,5 +10,3 @@ require (
 	github.com/sourcekris/mathparse v0.0.0-20211122043138-232758c46ee7
 	github.com/sourcekris/x509big v0.0.0-20211122043228-e8ea46e23d32
 )
-
-replace github.com/sourcekris/goflint => ../goflint
