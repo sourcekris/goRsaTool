@@ -76,8 +76,7 @@ as well as Kali Linux 2021.3.
   make install
   ```
 
-Note: If your environment GOBIN variable is not set it will not install automatically. Either set your 
-      GOBIN environment variable or move the binary by hand somewhere in your path.
+Note: This will install `goRsaTool` binary into `/usr/local/bin`.
 
 ### Installing on OSX
 
