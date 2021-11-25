@@ -70,10 +70,10 @@ as well as Kali Linux 2021.3.
 
   ```shell
   sudo apt install git golang libflint-dev libecm-dev make
-  git clone github.com/sourcekris/goRsaTool
+  git clone https://github.com/sourcekris/goRsaTool
   cd goRsaTool
   make
-  make install
+  sudo make install
   ```
 
 Note: This will install `goRsaTool` binary into `/usr/local/bin`.
