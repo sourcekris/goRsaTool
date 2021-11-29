@@ -28,6 +28,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/qicheng"
 	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
+	"github.com/sourcekris/goRsaTool/attacks/squaren"
 	"github.com/sourcekris/goRsaTool/attacks/wiener"
 	"github.com/sourcekris/goRsaTool/attacks/wienermultiprime"
 	"github.com/sourcekris/goRsaTool/attacks/williamsp1"
@@ -67,6 +68,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
 	SupportedAttacks.RegisterAttack("defectivee", false, true, defectivee.Attack)
 	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, oraclemodulus.Attack)
+	SupportedAttacks.RegisterAttack("squaren", false, true, squaren.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, false, notableprimes.Attack)

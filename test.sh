@@ -81,3 +81,5 @@ echo "Testing JWT modulus recovery..."
 go run rsatool.go -jwtlist examples/jwt1.txt,examples/jwt2.txt
 echo "Testing partiald attack..."
 go run rsatool.go -key examples/defectivee.txt -verbose -attack defectivee
+echo "Testing squaren attack..."
+go run rsatool.go -key examples/squaren.txt -verbose -attack squaren

@@ -41,6 +41,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * Sexy primes - primes seperated by 6. (`fermat`)
 * Known prime - not really an attack but a helpful shortcut (`knownprime`)
 * Recovering plaintext when phi(n) are not coprime provided we have at least 1 prime and partial KPT (`defectivee`)
+* Recover private key and plaintext when n is a square. (`squaren`)
 
 ### Multi-Key Attacks
 
@@ -204,6 +205,7 @@ novelty
 pastprimes
 pastctfprimes
 sexyprimes
+squaren
 ```
 
 ## More Example Usage
