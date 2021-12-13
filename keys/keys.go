@@ -55,6 +55,12 @@ func (t *RSA) PackGivenP(p *fmp.Fmpz) {
 	t.Key.Primes = []*fmp.Fmpz{p, q}
 	t.Key.D = ln.SolveforD(p, q, t.Key.PublicKey.E)
 
+	if t.Verbose {
+		for i, prime := range t.Key.Primes {
+			fmt.Printf("Prime %d: %v\n", i, prime)
+		}
+	}
+
 	// Pack the Plaintext if a Ciphertext was provided.
 	if t.CipherText != nil && t.PlainText == nil {
 		t.PlainText = ln.NumberToBytes(new(fmp.Fmpz).Exp(ln.BytesToNumber(t.CipherText), t.Key.D, t.Key.PublicKey.N))
