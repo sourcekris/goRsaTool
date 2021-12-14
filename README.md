@@ -93,24 +93,24 @@ Install FLINT first, it comes with GMP which is a dependancy of GMP-ECM.
 $ brew install flint
 ```
 
-#### Building GMP-ECM on OSX
+#### Building GMP-ECM on MacOS
 
 There's no prepackaged version of GMP-ECM on OSX. There is a MacPorts gmp-ecm package but it is only
 the ecm binary and does not include the headers needed. To install GMP-ECM from source follow these
 steps.
 
+Tested on Mac OS 12.1 (Monterey, on arm64)
+
 ```shell
 $ cd ~
-$ mkdir Math
-$ svn co svn://scm.gforge.inria.fr/svn/ecm/trunk $HOME/Math/ecm
-...
-$ cd ecm/Math
+$ git clone https://gitlab.inria.fr/zimmerma/ecm.git
+$ cd ecm
 $ brew install autoconf automake libtool
 $ glibtoolize
 $ autoreconf -i
-$ ./configure --with-gmp=/usr/local/
+$ ./configure --with-gmp=/opt/homebrew/
 $ make
-$ make install
+$ sudo make install
 ```
 
 Finally, get the goRsaTool package
