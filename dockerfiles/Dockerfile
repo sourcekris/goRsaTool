@@ -28,7 +28,7 @@ RUN cd /root && wget https://www.flintlib.org/flint-${FLINT_VER}.tar.gz && \
     cd flint-${FLINT_VER} && ./configure --disable-pthread --prefix=/usr && \
     make && make install
 
-RUN cd /root && git clone https://gitlab.inria.fr/zimmerma/ecm.git && \
+RUN cd /root && git clone https://gitlab.inria.fr/zimmerma/ecm.git && cd ecm && \
     libtoolize && autoreconf -i && ./configure --prefix=/usr && \
     make && make install
 
