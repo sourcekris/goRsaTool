@@ -7,6 +7,8 @@ github.com/sourcekris/goflint v0.0.0-20211125091128-d84544c605ba h1:AVKSkk6kiDy+
 github.com/sourcekris/goflint v0.0.0-20211125091128-d84544c605ba/go.mod h1:0ZUDLmp6m/l4oMsXITQYD6gM1mivhulLBc6eAEiVs+E=
 github.com/sourcekris/goflint v0.0.0-20211214114659-67377a315483 h1:s4B0tygPjNPEeh3yryQUf7Iv7sERGWh+EQ1RebcaYE4=
 github.com/sourcekris/goflint v0.0.0-20211214114659-67377a315483/go.mod h1:0ZUDLmp6m/l4oMsXITQYD6gM1mivhulLBc6eAEiVs+E=
+github.com/sourcekris/goflint v1.0.0 h1:gQvY4aBwNHxUtVVSCcAGLRj2PpQXSihhOYnB+iapoD8=
+github.com/sourcekris/goflint v1.0.0/go.mod h1:0ZUDLmp6m/l4oMsXITQYD6gM1mivhulLBc6eAEiVs+E=
 github.com/sourcekris/gogmpecm v0.0.0-20211122043024-f069ae059454 h1:b0pXhpE54+kWdu5rCd65saEnEeJtudyJPVfA3tY1nzY=
 github.com/sourcekris/gogmpecm v0.0.0-20211122043024-f069ae059454/go.mod h1:tXu70utapcitOP5k9+RhQOkWC4dYlu9tWpYK8Pf8pek=
 github.com/sourcekris/gogmpecm v0.0.0-20211214113902-8a5f196d84bc h1:ZOmgsxlLvnd6cSgW//Q7oBmHZ1j+SCX8ziHOuBGm/Ro=
