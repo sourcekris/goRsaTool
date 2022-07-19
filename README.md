@@ -67,13 +67,21 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 ### Installation on Linux / Windows 10
 
 This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu20.04 WSL)
-as well as Kali Linux 2021.3.
+as well as Kali Linux 2022.2.
 
   ```shell
   sudo apt install git golang libflint-dev libecm-dev make
   git clone https://github.com/sourcekris/goRsaTool
   cd goRsaTool
-  make
+  sudo make install
+  ```
+
+For Arch Linux including Athena OS:
+
+  ```shell
+  sudo pacman -S git go flint gmp-ecm make
+  git clone https://github.com/sourcekris/goRsaTool
+  cd goRsaTool
   sudo make install
   ```
 
