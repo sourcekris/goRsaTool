@@ -183,7 +183,7 @@ func (e *Curve) Poly(n, x *fmp.Fmpz, r *Integers) *fmp.Fmpz {
 }
 
 // Attack implements the Qi Cheng attack.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	js := []*fmp.Fmpz{
 		fmp.NewFmpz(0),
@@ -217,10 +217,11 @@ func Attack(ks []*keys.RSA) error {
 
 			if g.Cmp(ln.BigOne) > 0 {
 				k.PackGivenP(g)
-				return nil
+				ch <- nil
+				return
 			}
 		}
 	}
 
-	return fmt.Errorf("%s attack failed - no factors found", name)
+	ch <- fmt.Errorf("%s attack failed - no factors found", name)
 }
