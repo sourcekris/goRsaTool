@@ -12,7 +12,7 @@ const name = "brents variant of pollard rho factorization"
 
 // Attack conducts Pollard's Rho method Richard Brent variant for factoring
 // large composites. See: https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
-func Attack(kks []*keys.RSA) error {
+func Attack(kks []*keys.RSA, ch chan error) {
 	kk := kks[0]
 
 	var (
@@ -65,5 +65,5 @@ func Attack(kks []*keys.RSA) error {
 	}
 
 	kk.PackGivenP(g)
-	return nil
+	ch <- nil
 }

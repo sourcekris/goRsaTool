@@ -68,10 +68,11 @@ func fullReverse(n, e *fmp.Fmpz, c [2]*fmp.Fmpz) *fmp.Fmpz {
 
 // Attack performs a variant of the wiener attack ported from the python version here:
 // https://github.com/MxRy/rsa-attacks/blob/master/wiener-attack.py
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	if k.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	ts := fmp.NewFmpz(42)
@@ -82,10 +83,12 @@ func Attack(ks []*keys.RSA) error {
 		if squareAndMultiply(newc, c[1], k.Key.N).Equals(ts) {
 			if pp := fullReverse(k.Key.N, k.Key.PublicKey.E, c); pp != nil {
 				k.PackGivenP(pp)
-				return nil
+				ch <- nil
+				return
 			}
 			k.PackGivenP(ln.FindPGivenD(c[1], k.Key.PublicKey.E, k.Key.N))
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
@@ -94,5 +97,5 @@ func Attack(ks []*keys.RSA) error {
 	}
 
 	// Try the next variant approach.
-	return wienervariant.Attack(ks)
+	wienervariant.Attack(ks, ch)
 }

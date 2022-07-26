@@ -12,7 +12,7 @@ import (
 const name = "william's p+1"
 
 // Attack performs williams P+1 factorization.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	p := primegen.New()
 	v := fmp.NewFmpz(0)
@@ -34,7 +34,7 @@ func Attack(ks []*keys.RSA) error {
 			if g.Cmp(ln.BigOne) > 0 && g.Cmp(k.Key.N) < 0 {
 				// Found P.
 				k.PackGivenP(g)
-				return nil
+				ch <- nil
 			}
 
 			if g.Equals(k.Key.N) {

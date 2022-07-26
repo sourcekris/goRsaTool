@@ -4,10 +4,8 @@
 package ecm
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/jbarham/primegen"
 
@@ -16,9 +14,6 @@ import (
 
 	fmp "github.com/sourcekris/goflint"
 )
-
-// timeout puts a limit on how long ecm should attempt to find a solution.
-var timeout = time.Minute * 5
 
 // name is the name of this attack.
 const name = "ecm factorization"
@@ -51,7 +46,7 @@ func (p point) Equals(q point) bool {
 	return p.x.Equals(q.x) && p.y.Equals(q.y)
 }
 
-func (p point) Add(ch chan bool, q point, n, a, res *fmp.Fmpz) point {
+func (p point) Add(q point, n, a, res *fmp.Fmpz) point {
 	if p.Zero() {
 		return q
 	}
@@ -73,7 +68,7 @@ func (p point) Add(ch chan bool, q point, n, a, res *fmp.Fmpz) point {
 	f := new(fmp.Fmpz).GCD(denom, n)
 	if !f.Equals(ln.BigOne) {
 		res.Set(f)
-		ch <- true
+		return point{fmp.NewFmpz(0), fmp.NewFmpz(0)}
 	}
 	s := new(fmp.Fmpz).Mul(num, new(fmp.Fmpz).ModInverse(denom, n)).ModZ(n)
 	rx := new(fmp.Fmpz).ExpXI(s, 2).SubZ(p.x).SubZ(q.x).ModZ(n)
@@ -81,17 +76,17 @@ func (p point) Add(ch chan bool, q point, n, a, res *fmp.Fmpz) point {
 	return point{rx, ry}
 }
 
-func (p point) Mul(ch chan bool, k uint64, n, a, res *fmp.Fmpz) point {
+func (p point) Mul(k uint64, n, a, res *fmp.Fmpz) point {
 	// compute q=kp by repeated doubling
 	q := point{fmp.NewFmpz(0), fmp.NewFmpz(0)}
 	for ; k > 1; k >>= 1 {
 		if k&1 != 0 {
-			q = q.Add(ch, p, n, a, res)
+			q = q.Add(p, n, a, res)
 		}
-		p = p.Add(ch, p, n, a, res)
+		p = p.Add(p, n, a, res)
 	}
 
-	return q.Add(ch, p, n, a, res)
+	return q.Add(p, n, a, res)
 }
 
 // see http://en.wikipedia.org/wiki/Lenstra_elliptic_curve_factorization
@@ -134,50 +129,60 @@ func (p point) Mul(ch chan bool, k uint64, n, a, res *fmp.Fmpz) point {
 // with lots of small factors.  If we reach the 0 element, then choose
 // a new a and try again.  If the divide fails, we've found a factor
 // of n.
-func ecm(ch chan bool, n, res *fmp.Fmpz, state *fmp.FlintRandT) {
-	pg := primegen.New()
+// func ecm(ch chan bool, n, res *fmp.Fmpz, state *fmp.FlintRandT) {
+// 	pg := primegen.New()
 
+// 	for {
+// 		a := ln.GetRand(state, n)
+// 		if new(fmp.Fmpz).ExpXI(a, 3).MulI(4).AddI(27).ModZ(n).IsZero() {
+// 			// n divides 4a^3+27 - curve has repeating factors, so skip it.
+// 			continue
+// 		}
+
+// 		p := point{fmp.NewFmpz(0), fmp.NewFmpz(1)}
+// 		for {
+// 			p = p.Mul(ch, pg.Next(), n, a, res)
+// 			if p.Zero() {
+// 				// this curve didn't work
+// 				break
+// 			}
+// 		}
+// 	}
+// }
+
+// Attack implements the ECM factorization method.
+func Attack(ks []*keys.RSA, ch chan error) {
+	var (
+		k     = ks[0]
+		res   = new(fmp.Fmpz)
+		state = new(fmp.FlintRandT)
+	)
+
+	if k.Verbose {
+		log.Printf("%s attempt beginning", name)
+	}
+
+	pg := primegen.New()
 	for {
-		a := ln.GetRand(state, n)
-		if new(fmp.Fmpz).ExpXI(a, 3).MulI(4).AddI(27).ModZ(n).IsZero() {
+		a := ln.GetRand(state, k.Key.N)
+		if new(fmp.Fmpz).ExpXI(a, 3).MulI(4).AddI(27).ModZ(k.Key.N).IsZero() {
 			// n divides 4a^3+27 - curve has repeating factors, so skip it.
 			continue
 		}
 
 		p := point{fmp.NewFmpz(0), fmp.NewFmpz(1)}
 		for {
-			p = p.Mul(ch, pg.Next(), n, a, res)
+			p = p.Mul(pg.Next(), k.Key.N, a, res)
 			if p.Zero() {
 				// this curve didn't work
 				break
 			}
+
+			if res != nil && res.Cmp(ln.BigZero) > 0 {
+				k.PackGivenP(res)
+				ch <- nil
+				return
+			}
 		}
-	}
-}
-
-// Attack implements the ECM factorization method.
-func Attack(ks []*keys.RSA) error {
-	var (
-		k     = ks[0]
-		res   = new(fmp.Fmpz)
-		state = new(fmp.FlintRandT)
-		ch    = make(chan bool)
-		ctx   = context.Background()
-	)
-
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	if k.Verbose {
-		log.Printf("%s attempt beginning with timeout %v", name, timeout)
-	}
-
-	go ecm(ch, k.Key.N, res, state)
-	select {
-	case <-ch:
-		k.PackGivenP(res)
-		return nil
-	case <-ctx.Done():
-		return fmt.Errorf("%s failed - no factors found", name)
 	}
 }

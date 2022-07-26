@@ -15,7 +15,9 @@ func TestAttack(t *testing.T) {
 	}
 
 	k, _ := keys.NewRSA(keys.PrivateFromPublic(fmpPubKey), nil, nil, "", false)
-	err := Attack([]*keys.RSA{k})
+	ch := make(chan error)
+	go Attack([]*keys.RSA{k}, ch)
+	err := <-ch
 	if err != nil {
 		t.Errorf("attack")
 	}

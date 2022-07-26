@@ -26,8 +26,11 @@ func TestAttack(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		ch := make(chan error)
 		k, _ := keys.NewRSA(keys.PrivateFromPublic(&keys.FMPPublicKey{N: tc.n, E: tc.e}), nil, nil, "", false)
-		err := Attack([]*keys.RSA{k})
+		go Attack([]*keys.RSA{k}, ch)
+
+		err := <-ch
 		if err != nil {
 			t.Errorf("Attack() failed: %s expected no error got error: %v", tc.name, err)
 		}

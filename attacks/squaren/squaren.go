@@ -13,21 +13,23 @@ import (
 const name = "square n"
 
 // Attack recovers the private key when N is square.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	p := new(fmp.Fmpz).Root(t.Key.N, 2)
 
 	if new(fmp.Fmpz).Mul(p, p).Cmp(t.Key.N) != 0 {
-		return fmt.Errorf("%s failed - n is not square", name)
+		ch <- fmt.Errorf("%s failed - n is not square", name)
+		return
 	}
 
 	t.Key.Primes = append(t.Key.Primes, p, p)
 	phin := new(fmp.Fmpz).Mul(p, new(fmp.Fmpz).Sub(p, ln.BigOne))
 	t.PackGivenD(new(fmp.Fmpz).ModInverse(t.Key.PublicKey.E, phin))
 
-	return nil
+	ch <- nil
 }

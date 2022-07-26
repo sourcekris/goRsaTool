@@ -52,16 +52,14 @@ OUTER:
 }
 
 // Attack implements the defectivee method against RSA given at least one prime.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 
-	var (
-		p, q *fmp.Fmpz
-		// ms   []*fmp.Fmpz
-	)
+	var p, q *fmp.Fmpz
 
 	k := ks[0]
 	if k.Key.Primes == nil {
-		return fmt.Errorf("%s attack requires the modulus to already be factored, provide at least one prime with -p flag", name)
+		ch <- fmt.Errorf("%s attack requires the modulus to already be factored, provide at least one prime with -p flag", name)
+		return
 	}
 
 	if len(k.Key.Primes) == 1 {
@@ -69,13 +67,15 @@ func Attack(ks []*keys.RSA) error {
 		q = new(fmp.Fmpz).Div(k.Key.N, p)
 
 		if new(fmp.Fmpz).Mul(p, q).Cmp(k.Key.N) != 0 {
-			return fmt.Errorf("%s failed. n is not the product of primes p and q", name)
+			ch <- fmt.Errorf("%s failed. n is not the product of primes p and q", name)
+			return
 		}
 	}
 
 	// TODO: Use a hueristic instead like, "are all of the bytes in m considered printable?"
 	if k.KnownPlainText == nil {
-		return fmt.Errorf("%s requires a crib, part of the plaintext, so we know when our solution is found (e.g. CTF flag format)", name)
+		ch <- fmt.Errorf("%s requires a crib, part of the plaintext, so we know when our solution is found (e.g. CTF flag format)", name)
+		return
 	}
 
 	e := new(fmp.Fmpz).Set(k.Key.PublicKey.E)
@@ -86,7 +86,8 @@ func Attack(ks []*keys.RSA) error {
 	d := new(fmp.Fmpz).ModInverse(phi, e)
 
 	if d.Cmp(ln.BigZero) != 0 {
-		return fmt.Errorf("%s failed: e is probably co-prime to phi(n) since there exists an inverse modulus of e, phi(n): %v", name, d)
+		ch <- fmt.Errorf("%s failed: e is probably co-prime to phi(n) since there exists an inverse modulus of e, phi(n): %v", name, d)
+		return
 	}
 
 	// Find e'th roots of unity modulo n.
@@ -98,7 +99,8 @@ func Attack(ks []*keys.RSA) error {
 
 	testC := new(fmp.Fmpz).Exp(m, e, n)
 	if testC.Cmp(c) != 0 {
-		return fmt.Errorf("%s failed to find a possible plaintext for the given ciphertext and key", name)
+		ch <- fmt.Errorf("%s failed to find a possible plaintext for the given ciphertext and key", name)
+		return
 	}
 
 	// Maybe the first m is the right one? If so pack the key and return.
@@ -106,7 +108,7 @@ func Attack(ks []*keys.RSA) error {
 		k.Key.D = new(fmp.Fmpz).Set(d)
 		k.PlainText = ln.NumberToBytes(m)
 		k.Key.Primes = append(k.Key.Primes, q)
-		return nil
+		ch <- nil
 	}
 
 	// Search the roots for a plaintext matching our crib.
@@ -116,9 +118,9 @@ func Attack(ks []*keys.RSA) error {
 			k.Key.D = new(fmp.Fmpz).Set(d)
 			k.PlainText = ln.NumberToBytes(mt)
 			k.Key.Primes = append(k.Key.Primes, q)
-			return nil
+			ch <- nil
 		}
 	}
 
-	return nil
+	ch <- nil
 }

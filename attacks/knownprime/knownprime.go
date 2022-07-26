@@ -13,20 +13,23 @@ import (
 const name = "knownprime"
 
 // Attack implements the knownprime attack.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	if t.Key.Primes == nil {
-		return fmt.Errorf("%s attack failed, no prime provided. Use the -p flag or provide a 'p = ' field in the key", name)
+		ch <- fmt.Errorf("%s attack failed, no prime provided. Use the -p flag or provide a 'p = ' field in the key", name)
+		return
 	}
 
 	// Sanity check the prime is actually a factor of n.
 	f := new(fmp.Fmpz).Mod(t.Key.N, t.Key.Primes[0])
 	if f.Cmp(ln.BigZero) != 0 {
-		return fmt.Errorf("provided prime is not a factor of n: p %% n = %v", f)
+		ch <- fmt.Errorf("provided prime is not a factor of n: p %% n = %v", f)
+		return
 	}
 
 	if t.Verbose {
@@ -34,5 +37,5 @@ func Attack(ts []*keys.RSA) error {
 	}
 
 	t.PackGivenP(t.Key.Primes[0])
-	return nil
+	ch <- nil
 }

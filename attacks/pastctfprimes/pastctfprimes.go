@@ -16,17 +16,19 @@ import (
 const name = "past ctf primes"
 
 // Attack implements the PastCTFPrimes attack.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	var primes []fmp.Fmpz
 
 	file, err := os.Open(t.PastPrimesFile)
 	if err != nil {
-		return err
+		ch <- err
+		return
 	}
 
 	defer file.Close()
@@ -47,9 +49,10 @@ func Attack(ts []*keys.RSA) error {
 		modp = modp.Mod(t.Key.N, &p)
 		if modp.Equals(ln.BigZero) {
 			t.PackGivenP(&p)
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
-	return fmt.Errorf("%s attack failed", name)
+	ch <- fmt.Errorf("%s attack failed", name)
 }

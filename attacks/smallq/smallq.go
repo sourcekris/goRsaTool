@@ -1,10 +1,7 @@
 package smallq
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/jbarham/primegen"
 	"github.com/sourcekris/goRsaTool/keys"
@@ -13,49 +10,37 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// timeout puts a limit on how long we should attempt to find a factor.
-var timeout = time.Minute * 3
-
 // name is the name of this attack.
 const name = "small q"
 
-func smallq(ch chan bool, n, pc *fmp.Fmpz) {
-
-	p := primegen.New()
-	modp := new(fmp.Fmpz)
-	for {
-		pc.SetUint64(p.Next())
-		if modp.Mod(n, pc).Equals(ln.BigZero) {
-			ch <- true
-			return
-		}
+func chk(p, n *fmp.Fmpz) (bool, *fmp.Fmpz) {
+	zz := new(fmp.Fmpz).Set(p)
+	if new(fmp.Fmpz).Mod(n, zz).Equals(ln.BigZero) {
+		return true, zz
 	}
+	return false, nil
 }
 
 // Attack iterate small primes until we timeout and test them as factors of N.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	p := new(fmp.Fmpz)
-	ch := make(chan bool)
 
 	if t.Verbose {
-		log.Printf("%s attempt beginning with timeout %v", name, timeout)
+		log.Printf("%s attempt beginning", name)
 	}
-	go smallq(ch, t.Key.N, p)
 
-	select {
-	case <-ch:
-		t.PackGivenP(p)
-		return nil
-	case <-ctx.Done():
-		return fmt.Errorf("%s failed - no factors found - last prime tried %v", name, p)
+	pc := new(fmp.Fmpz)
+	pr := primegen.New()
+	for {
+		pc.SetUint64(pr.Next())
+		if res, pp := chk(pc, t.Key.N); res {
+			t.PackGivenP(pp)
+			ch <- nil
+			return
+		}
 	}
 }

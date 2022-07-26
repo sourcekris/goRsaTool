@@ -54,8 +54,10 @@ func TestAttack(t *testing.T) {
 			CipherText:  ln.NumberToBytes(tc.c),
 			KeyFilename: tc.name,
 		}
-
-		if err := Attack([]*keys.RSA{k}); err != nil {
+		ch := make(chan error)
+		go Attack([]*keys.RSA{k}, ch)
+		err := <-ch
+		if err != nil {
 			t.Errorf("%s failed - got unexpected error: %v", tc.name, err)
 		}
 

@@ -13,19 +13,22 @@ import (
 const name = "hastads broadcast"
 
 // Attack implements the hastads broadcast attack against three keys and their ciphertexts.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	// Check key parameters are compatible with the attack.
 	if len(ks) < 2 {
-		return fmt.Errorf("%s attack requires 2+ public keys, got: %d", name, len(ks))
+		ch <- fmt.Errorf("%s attack requires 2+ public keys, got: %d", name, len(ks))
+		return
 	}
 	for _, k := range ks {
 		if k.CipherText == nil {
-			return fmt.Errorf("%s failed - supply ciphertext for each key", name)
+			ch <- fmt.Errorf("%s failed - supply ciphertext for each key", name)
+			return
 		}
 
 		// It's possible this works for other small primes though.
 		if k.Key.PublicKey.E.Cmp(ln.BigThree) > 0 {
-			return fmt.Errorf("%s failed - exponents should be 3 but key exponent is: %v", name, k.Key.PublicKey.E)
+			ch <- fmt.Errorf("%s failed - exponents should be 3 but key exponent is: %v", name, k.Key.PublicKey.E)
+			return
 		}
 	}
 
@@ -44,8 +47,9 @@ func Attack(ks []*keys.RSA) error {
 	test := new(fmp.Fmpz).ExpXIM(solution, k, ks[0].Key.N)
 	if test.Equals(ln.BytesToNumber(ks[0].CipherText)) {
 		ks[0].PlainText = ln.NumberToBytes(solution)
-		return nil
+		ch <- nil
+		return
 	}
 
-	return fmt.Errorf("%s attack failed", name)
+	ch <- fmt.Errorf("%s attack failed", name)
 }

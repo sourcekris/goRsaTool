@@ -38,7 +38,9 @@ func TestAttack(t *testing.T) {
 		k, _ := keys.NewRSA(keys.PrivateFromPublic(&keys.FMPPublicKey{N: tc.n, E: tc.e}), nil, nil, "", false)
 		k.Key.Primes = append(k.Key.Primes, tc.p)
 
-		err := Attack([]*keys.RSA{k})
+		ch := make(chan error)
+		go Attack([]*keys.RSA{k}, ch)
+		err := <-ch
 		if err != nil && !tc.wantErr {
 			t.Errorf("Attack() failed: %s expected no error got error: %v", tc.name, err)
 		}

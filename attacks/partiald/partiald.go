@@ -14,16 +14,18 @@ import (
 const name = "partiald"
 
 // Attack implements the Partial D attack.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 
 	// Validate all the parameters are sane.
 	t := ts[0]
 	if t.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	if t.DLSB == nil {
-		return fmt.Errorf("%s failed - supply the LSB of 'd' using the -partiald flag or a 'd0 = ' field in the key", name)
+		ch <- fmt.Errorf("%s failed - supply the LSB of 'd' using the -partiald flag or a 'd0 = ' field in the key", name)
+		return
 	}
 
 	if t.Verbose {
@@ -62,10 +64,11 @@ func Attack(ts []*keys.RSA) error {
 			m := new(fmp.Fmpz).Pow(new(fmp.Fmpz).Pow(ln.BigTwo, t.Key.PublicKey.E, t.Key.N), d, t.Key.N)
 			if m.Cmp(ln.BigTwo) == 0 {
 				t.PackGivenP(ln.FindPGivenD(d, t.Key.PublicKey.E, t.Key.N))
-				return nil
+				ch <- nil
+				return
 			}
 		}
 	}
 
-	return fmt.Errorf("%s failed to recover the private key", name)
+	ch <- fmt.Errorf("%s failed to recover the private key", name)
 }

@@ -15,11 +15,12 @@ const name = "wiener"
 // Attack implements the Wiener attack on an RSA public key and this implementation is based on the
 // python implementation of the algorithm by Pablo Celayes:
 // https://github.com/pablocelayes/rsa-wiener-attack
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
 		// Key already factored.
-		return nil
+		ch <- nil
+		return
 	}
 
 	frac := ln.RationalToContfract(t.Key.PublicKey.E, t.Key.N)
@@ -40,7 +41,8 @@ func Attack(ts []*keys.RSA) error {
 				if !ts.Equals(ln.BigNOne) && z.Add(s, ts).Mod(z, ln.BigTwo).Equals(ln.BigZero) {
 					// We found d, pack the private key.
 					t.PackGivenP(ln.FindPGivenD(d, t.Key.PublicKey.E, t.Key.N))
-					return nil
+					ch <- nil
+					return
 				}
 			}
 		}
@@ -51,5 +53,5 @@ func Attack(ts []*keys.RSA) error {
 	}
 
 	// Try the variant approach.
-	return wiener2.Attack(ts)
+	wiener2.Attack(ts, ch)
 }

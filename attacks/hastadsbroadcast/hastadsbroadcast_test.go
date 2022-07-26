@@ -54,7 +54,10 @@ func TestAttack(t *testing.T) {
 			}),
 		})
 
-		if err := Attack(ks); err != nil {
+		ch := make(chan error)
+		go Attack(ks, ch)
+		err := <-ch
+		if err != nil {
 			t.Errorf("%s failed - got unexpected error: %v", tc.name, err)
 		}
 

@@ -13,11 +13,12 @@ const name = "wiener multiprime"
 
 // Attack implements the Wiener attack on an RSA public key where the modulus is composed of
 // more than 2 primes.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
 		// Key already factored.
-		return nil
+		ch <- nil
+		return
 	}
 
 	// Encrypt something simple to validate our decryption later.
@@ -43,13 +44,13 @@ func Attack(ts []*keys.RSA) error {
 				m1 := new(fmp.Fmpz).Pow(c, d, t.Key.N)
 				if m1.Cmp(m) == 0 {
 					t.PackGivenD(d)
-					return nil
+					ch <- nil
+					return
 				}
 			}
 			q0 = q0.Set(q1)
 		}
 	}
 
-	// Try the variant approach.
-	return fmt.Errorf("%s attack failed", name)
+	ch <- fmt.Errorf("%s attack failed", name)
 }

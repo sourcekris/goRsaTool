@@ -1,8 +1,10 @@
 package attacks
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/sourcekris/goRsaTool/attacks/brokenrsa"
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
@@ -35,57 +37,61 @@ import (
 	"github.com/sourcekris/goRsaTool/keys"
 )
 
+// default timeout 3m0s
+const DefaultTimeout int = 180
+
 // SupportedAttacks stores the list of registered attacks we support.
 var SupportedAttacks *Attacks
 
 func init() {
 	SupportedAttacks = NewAttacks()
-	// TODO(sewid): Register them in each package init function.
-	SupportedAttacks.RegisterAttack("crtsolver", false, true, crt.Attack)
-	SupportedAttacks.RegisterAttack("factordb", false, true, factordb.Attack)
-	SupportedAttacks.RegisterAttack("hastads", false, true, hastads.Attack)
-	SupportedAttacks.RegisterAttack("hastadsbroadcast", true, true, hastadsbroadcast.Attack)
-	SupportedAttacks.RegisterAttack("commonfactors", true, true, commonfactor.Attack)
-	SupportedAttacks.RegisterAttack("commonmodulus", true, true, commonmodulus.Attack)
-	SupportedAttacks.RegisterAttack("partiald", false, false, partiald.Attack)
-	SupportedAttacks.RegisterAttack("knownprime", false, false, knownprime.Attack)
-	SupportedAttacks.RegisterAttack("brokenrsa", false, true, brokenrsa.Attack)
-	SupportedAttacks.RegisterAttack("notableprimes", false, true, notableprimes.Attack)
-	SupportedAttacks.RegisterAttack("pastctf", false, true, pastctfprimes.Attack)
-	SupportedAttacks.RegisterAttack("smallq", false, true, smallq.Attack)
-	SupportedAttacks.RegisterAttack("wiener", false, true, wiener.Attack)
-	SupportedAttacks.RegisterAttack("wienermultiprime", false, true, wienermultiprime.Attack)
-	SupportedAttacks.RegisterAttack("qicheng", false, true, qicheng.Attack)
-	SupportedAttacks.RegisterAttack("fermat", false, true, fermat.Attack)
-	SupportedAttacks.RegisterAttack("londahl", false, true, londahl.Attack)
-	SupportedAttacks.RegisterAttack("smallfractions", false, true, smallfractions.Attack)
-	SupportedAttacks.RegisterAttack("manysmallprimes", false, true, manysmallprimes.Attack)
-	SupportedAttacks.RegisterAttack("ecm", false, true, gmpecm.Attack)
-	SupportedAttacks.RegisterAttack("franklinreiter", true, true, franklinreiter.Attack)
-	SupportedAttacks.RegisterAttack("pollardsp1", false, true, pollardsp1.Attack)
-	SupportedAttacks.RegisterAttack("pollardsrho", false, true, pollardsrho.Attack)
-	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, pollardrhobrent.Attack)
-	SupportedAttacks.RegisterAttack("williamsp1", false, true, williamsp1.Attack)
-	SupportedAttacks.RegisterAttack("defectivee", false, true, defectivee.Attack)
-	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, oraclemodulus.Attack)
-	SupportedAttacks.RegisterAttack("squaren", false, true, squaren.Attack)
+	// TODO(sourcekris): Register them in each package init function.
+	SupportedAttacks.RegisterAttack("crtsolver", false, true, DefaultTimeout, crt.Attack)
+	SupportedAttacks.RegisterAttack("factordb", false, true, DefaultTimeout, factordb.Attack)
+	SupportedAttacks.RegisterAttack("hastads", false, true, DefaultTimeout, hastads.Attack)
+	SupportedAttacks.RegisterAttack("hastadsbroadcast", true, true, DefaultTimeout, hastadsbroadcast.Attack)
+	SupportedAttacks.RegisterAttack("commonfactors", true, true, DefaultTimeout, commonfactor.Attack)
+	SupportedAttacks.RegisterAttack("commonmodulus", true, true, DefaultTimeout, commonmodulus.Attack)
+	SupportedAttacks.RegisterAttack("partiald", false, false, DefaultTimeout, partiald.Attack)
+	SupportedAttacks.RegisterAttack("knownprime", false, false, DefaultTimeout, knownprime.Attack)
+	SupportedAttacks.RegisterAttack("brokenrsa", false, true, DefaultTimeout, brokenrsa.Attack)
+	SupportedAttacks.RegisterAttack("notableprimes", false, true, DefaultTimeout, notableprimes.Attack)
+	SupportedAttacks.RegisterAttack("pastctf", false, true, DefaultTimeout, pastctfprimes.Attack)
+	SupportedAttacks.RegisterAttack("smallq", false, true, DefaultTimeout, smallq.Attack)
+	SupportedAttacks.RegisterAttack("wiener", false, true, DefaultTimeout, wiener.Attack)
+	SupportedAttacks.RegisterAttack("wienermultiprime", false, true, DefaultTimeout, wienermultiprime.Attack)
+	SupportedAttacks.RegisterAttack("qicheng", false, true, DefaultTimeout, qicheng.Attack)
+	SupportedAttacks.RegisterAttack("fermat", false, true, DefaultTimeout, fermat.Attack)
+	SupportedAttacks.RegisterAttack("londahl", false, true, DefaultTimeout, londahl.Attack)
+	SupportedAttacks.RegisterAttack("smallfractions", false, true, DefaultTimeout, smallfractions.Attack)
+	SupportedAttacks.RegisterAttack("manysmallprimes", false, true, DefaultTimeout, manysmallprimes.Attack)
+	SupportedAttacks.RegisterAttack("ecm", false, true, DefaultTimeout, gmpecm.Attack)
+	SupportedAttacks.RegisterAttack("franklinreiter", true, true, DefaultTimeout, franklinreiter.Attack)
+	SupportedAttacks.RegisterAttack("pollardsp1", false, true, DefaultTimeout, pollardsp1.Attack)
+	SupportedAttacks.RegisterAttack("pollardsrho", false, true, DefaultTimeout, pollardsrho.Attack)
+	SupportedAttacks.RegisterAttack("pollardrhobrent", false, true, DefaultTimeout, pollardrhobrent.Attack)
+	SupportedAttacks.RegisterAttack("williamsp1", false, true, DefaultTimeout, williamsp1.Attack)
+	SupportedAttacks.RegisterAttack("defectivee", false, true, DefaultTimeout, defectivee.Attack)
+	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, DefaultTimeout, oraclemodulus.Attack)
+	SupportedAttacks.RegisterAttack("squaren", false, true, DefaultTimeout, squaren.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
-	SupportedAttacks.RegisterAttack("mersenne", false, false, notableprimes.Attack)
-	SupportedAttacks.RegisterAttack("lucas", false, false, notableprimes.Attack)
-	SupportedAttacks.RegisterAttack("novelty", false, false, notableprimes.Attack)
-	SupportedAttacks.RegisterAttack("pastprimes", false, false, pastctfprimes.Attack)
-	SupportedAttacks.RegisterAttack("pastctfprimes", false, false, pastctfprimes.Attack)
-	SupportedAttacks.RegisterAttack("sexyprimes", false, false, fermat.Attack)
+	SupportedAttacks.RegisterAttack("mersenne", false, false, DefaultTimeout, notableprimes.Attack)
+	SupportedAttacks.RegisterAttack("lucas", false, false, DefaultTimeout, notableprimes.Attack)
+	SupportedAttacks.RegisterAttack("novelty", false, false, DefaultTimeout, notableprimes.Attack)
+	SupportedAttacks.RegisterAttack("pastprimes", false, false, DefaultTimeout, pastctfprimes.Attack)
+	SupportedAttacks.RegisterAttack("pastctfprimes", false, false, DefaultTimeout, pastctfprimes.Attack)
+	SupportedAttacks.RegisterAttack("sexyprimes", false, false, DefaultTimeout, fermat.Attack)
 }
 
-type attackFunc func([]*keys.RSA) error
+type attackFunc func([]*keys.RSA, chan error)
 
 // Attack encodes a single attack and what features it supports.
 type Attack struct {
 	Name          string
 	SupportsMulti bool
 	Unnatended    bool
+	Timeout       int
 	F             attackFunc
 }
 
@@ -100,12 +106,12 @@ func NewAttacks() *Attacks {
 }
 
 // RegisterAttack adds a new attack to the receiving Attacks.
-func (a *Attacks) RegisterAttack(name string, multi bool, unnatended bool, f attackFunc) {
+func (a *Attacks) RegisterAttack(name string, multi bool, unnatended bool, timeout int, f attackFunc) {
 	if a == nil {
 		a = NewAttacks()
 	}
 
-	a.Supported = append(a.Supported, &Attack{name, multi, unnatended, f})
+	a.Supported = append(a.Supported, &Attack{name, multi, unnatended, timeout, f})
 }
 
 // IsSupported returns true if name attack is supported.
@@ -142,7 +148,20 @@ func (a *Attacks) Execute(name string, t []*keys.RSA) error {
 
 	for _, a := range SupportedAttacks.Supported {
 		if a.Name == name {
-			return a.F(t)
+			ctx := context.Background()
+			ctx, cancel := context.WithTimeout(ctx, time.Duration(a.Timeout*int(time.Second)))
+			defer cancel()
+
+			ch := make(chan error)
+
+			go a.F(t, ch)
+
+			select {
+			case result := <-ch:
+				return result
+			case <-ctx.Done():
+				return fmt.Errorf("%s failed to factorize the key in the given time", name)
+			}
 		}
 	}
 

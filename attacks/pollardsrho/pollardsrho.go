@@ -11,7 +11,7 @@ import (
 const name = "pollard's rho"
 
 // Attack uses Pollard's Rho factorization method.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	var (
 		state = new(fmp.FlintRandT)
@@ -30,5 +30,5 @@ func Attack(ks []*keys.RSA) error {
 
 	k.PackGivenP(g)
 
-	return nil
+	ch <- nil
 }

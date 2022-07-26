@@ -15,10 +15,11 @@ import (
 const name = "wiener variant"
 
 // Attack performs a variant of the wiener attack by Andrej Dujella.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	if k.Key.D != nil {
-		return nil
+		ch <- nil
+		return
 	}
 
 	var (
@@ -38,7 +39,8 @@ func Attack(ks []*keys.RSA) error {
 				mMaybe := new(fmp.Fmpz).Exp(fakeC, d, k.Key.N)
 				if mMaybe.Equals(fakeM) {
 					k.PackGivenP(ln.FindPGivenD(d, k.Key.PublicKey.E, k.Key.N))
-					return nil
+					ch <- nil
+					return
 				}
 			}
 		}
@@ -46,5 +48,5 @@ func Attack(ks []*keys.RSA) error {
 		q0.Set(q1)
 	}
 
-	return fmt.Errorf("%s attack failed", name)
+	ch <- fmt.Errorf("%s attack failed", name)
 }

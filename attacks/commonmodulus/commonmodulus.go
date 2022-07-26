@@ -13,17 +13,20 @@ import (
 const name = "common modulus"
 
 // Attack implements the common modulus attack against two keys.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	if len(ks) != 2 {
-		return fmt.Errorf("%s attack expects exactly 2 keys - got %d keys", name, len(ks))
+		ch <- fmt.Errorf("%s attack expects exactly 2 keys - got %d keys", name, len(ks))
+		return
 	}
 
 	if ks[0].CipherText == nil || ks[1].CipherText == nil {
-		return fmt.Errorf("%s attack requires each key be associated with a ciphertext", name)
+		ch <- fmt.Errorf("%s attack requires each key be associated with a ciphertext", name)
+		return
 	}
 
 	if !ks[0].Key.N.Equals(ks[1].Key.N) {
-		return fmt.Errorf("%s attack requires that both keys share the same modulus", name)
+		ch <- fmt.Errorf("%s attack requires that both keys share the same modulus", name)
+		return
 	}
 
 	c1 := ln.BytesToNumber(ks[0].CipherText)
@@ -47,5 +50,5 @@ func Attack(ks []*keys.RSA) error {
 
 	ks[0].PlainText = ln.NumberToBytes(new(fmp.Fmpz).Mul(p1, p2).ModZ(n))
 
-	return nil
+	ch <- nil
 }

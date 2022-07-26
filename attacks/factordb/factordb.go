@@ -45,11 +45,12 @@ func askFactorDB(hc *http.Client, url string) (*http.Response, error) {
 }
 
 // Attack factors an RSA Public Key using FactorDB API.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	t := ts[0]
 	if t.Key.D != nil {
 		// Key already factored.
-		return nil
+		ch <- nil
+		return
 	}
 
 	hc := &http.Client{
@@ -58,34 +59,40 @@ func Attack(ts []*keys.RSA) error {
 
 	r, err := asker(hc, base+t.Key.N.String())
 	if err != nil {
-		return err
+		ch <- err
+		return
 	}
 	defer r.Body.Close()
 
 	if r.StatusCode != 200 {
-		return fmt.Errorf("%s failed to lookup modulus - unexpected http code: %d", name, r.StatusCode)
+		ch <- fmt.Errorf("%s failed to lookup modulus - unexpected http code: %d", name, r.StatusCode)
+		return
 	}
 
 	js, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return err
+		ch <- err
+		return
 	}
 
 	fdb := factorDB{}
 	if err := json.Unmarshal(js, &fdb); err != nil {
-		return err
+		ch <- err
+		return
 	}
 
 	if fdb.Status == "FF" {
 		if len(fdb.Factors) < 1 {
-			return fmt.Errorf("%s failed due to an unknown error - modulus status is FF but primes were not found", name)
+			ch <- fmt.Errorf("%s failed due to an unknown error - modulus status is FF but primes were not found", name)
+			return
 		}
 
 		var primes []*fmp.Fmpz
 		for _, f := range fdb.Factors {
 			prime, ok := f[0].(string)
 			if !ok {
-				return fmt.Errorf("%s failed asserting that the factor is a string: %v", name, f)
+				ch <- fmt.Errorf("%s failed asserting that the factor is a string: %v", name, f)
+				return
 			}
 			primes = append(primes, ln.FmpString(prime))
 		}
@@ -93,15 +100,18 @@ func Attack(ts []*keys.RSA) error {
 		// RSA normally has 2 primes but can have more. Handle the simple case first.
 		if len(primes) == 2 {
 			t.PackGivenP(primes[0])
-			return nil
+			ch <- nil
+			return
 		}
 
 		if err := t.PackMultiPrime(primes); err != nil {
-			return err
+			ch <- err
+			return
 		}
 
-		return nil
+		ch <- nil
+		return
 	}
 
-	return fmt.Errorf("%s failed - the modulus is not fully factored on factordb (status = %s)", name, fdb.Status)
+	ch <- fmt.Errorf("%s failed - the modulus is not fully factored on factordb (status = %s)", name, fdb.Status)
 }

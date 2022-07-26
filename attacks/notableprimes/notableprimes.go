@@ -48,7 +48,7 @@ func lucasNumber(n int) *fmp.Fmpz {
 // TODO(kris): Add phi, GF and other notable primes.
 
 // Attack checks the key modulus to see if it factors with any notable primes.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 
 	// Test for primes of the form 313333337.
@@ -60,7 +60,8 @@ func Attack(ks []*keys.RSA) error {
 
 		if new(fmp.Fmpz).Mod(k.Key.N, p).Equals(ln.BigZero) {
 			k.PackGivenP(p)
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
@@ -73,7 +74,8 @@ func Attack(ks []*keys.RSA) error {
 
 		if new(fmp.Fmpz).Mod(k.Key.N, p).Equals(ln.BigZero) {
 			k.PackGivenP(p)
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
@@ -87,7 +89,8 @@ func Attack(ks []*keys.RSA) error {
 
 		if new(fmp.Fmpz).Mod(k.Key.N, mp).Equals(ln.BigZero) {
 			k.PackGivenP(mp)
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
@@ -100,9 +103,10 @@ func Attack(ks []*keys.RSA) error {
 
 		if new(fmp.Fmpz).Mod(k.Key.N, lnum).Equals(ln.BigZero) {
 			k.PackGivenP(lnum)
-			return nil
+			ch <- nil
+			return
 		}
 	}
 
-	return fmt.Errorf("%s was unable to factor the key", name)
+	ch <- fmt.Errorf("%s was unable to factor the key", name)
 }

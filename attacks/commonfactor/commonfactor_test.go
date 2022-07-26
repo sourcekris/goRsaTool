@@ -36,7 +36,9 @@ func TestAttack(t *testing.T) {
 			E: fmp.NewFmpz(3),
 		}), nil, nil, "", false)
 
-		err := Attack([]*keys.RSA{k1, k2})
+		ch := make(chan error)
+		go Attack([]*keys.RSA{k1, k2}, ch)
+		err := <-ch
 		if err != nil {
 			t.Errorf("Attack() failed: %s expected no error got error: %v", tc.name, err)
 		}

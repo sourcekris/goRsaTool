@@ -16,20 +16,22 @@ import (
 const name = "brokenrsa"
 
 // Attack implements the brokenrsa method against ciphertext in multiple keys.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 
 	k := ks[0]
 	if k.CipherText == nil {
-		return fmt.Errorf("invalid arguments for attack %s: this attack requires the ciphertext", name)
+		ch <- fmt.Errorf("invalid arguments for attack %s: this attack requires the ciphertext", name)
+		return
 	}
 	d, u, _ := ln.XGCD(k.Key.PublicKey.E, k.Key.N)
 	if !d.Equals(ln.BigOne) {
-		return fmt.Errorf("n and e were not coprime so %s attack will not work: GCE(e,n) == %v", name, d)
+		ch <- fmt.Errorf("n and e were not coprime so %s attack will not work: GCE(e,n) == %v", name, d)
+		return
 	}
 
 	ct := ln.BytesToNumber(k.CipherText)
 	pt := new(fmp.Fmpz).Mul(ct, u)
 	k.PlainText = ln.NumberToBytes(pt.Mod(pt, k.Key.N))
 
-	return nil
+	ch <- nil
 }

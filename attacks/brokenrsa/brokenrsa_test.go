@@ -48,13 +48,14 @@ func TestAttack(t *testing.T) {
 		if tc.ct != nil {
 			k.CipherText = ln.NumberToBytes(tc.ct)
 		}
-
-		err := Attack([]*keys.RSA{k})
+		ch := make(chan error)
+		go Attack([]*keys.RSA{k}, ch)
+		err := <-ch
 		if err != nil && !tc.wantErr {
 			t.Errorf("Attack() failed: %s expected no error got error: %v", tc.name, err)
 		}
 
-		if string(k.PlainText) != tc.want {
+		if string(k.PlainText) != tc.want && !tc.wantErr {
 			t.Errorf("Attack() failed: %s got/want mismatch %s/%s", tc.name, string(k.PlainText), tc.want)
 		}
 	}

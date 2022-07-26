@@ -67,17 +67,20 @@ func (s *sigAttack) attempt(v bool) []byte {
 }
 
 // Attack implements the franklin reiter related message attack against two keys.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	if len(ks) != 2 {
-		return fmt.Errorf("%s requires exactly 2 keys to work - got %d", name, len(ks))
+		ch <- fmt.Errorf("%s requires exactly 2 keys to work - got %d", name, len(ks))
+		return
 	}
 
 	if ks[0].KnownPlainText == nil || ks[1].KnownPlainText == nil {
-		return fmt.Errorf("%s requires each key has a corresponding known plaintext component", name)
+		ch <- fmt.Errorf("%s requires each key has a corresponding known plaintext component", name)
+		return
 	}
 
 	if ks[0].CipherText == nil || ks[1].CipherText == nil {
-		return fmt.Errorf("%s requires each key has a corresponding ciphertext", name)
+		ch <- fmt.Errorf("%s requires each key has a corresponding ciphertext", name)
+		return
 	}
 
 	sa := &sigAttack{n: ks[0].Key.N, e: ks[0].Key.PublicKey.E.GetInt()}
@@ -88,8 +91,9 @@ func Attack(ks []*keys.RSA) error {
 
 	if res := sa.attempt(ks[0].Verbose); res != nil {
 		ks[0].PlainText = res
-		return nil
+		ch <- nil
+		return
 	}
 
-	return fmt.Errorf("%s failed to recover the plaintext", name)
+	ch <- fmt.Errorf("%s failed to recover the plaintext", name)
 }

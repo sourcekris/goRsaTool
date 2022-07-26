@@ -12,7 +12,7 @@ import (
 const name = "modulus recovery via encryption oracle"
 
 // Attack calculates an RSA modulus when we know the ciphertext of 2, 3, 4 and 9.
-func Attack(ts []*keys.RSA) error {
+func Attack(ts []*keys.RSA, ch chan error) {
 	var (
 		e2, e3, e4, e9 *fmp.Fmpz
 		ok             bool
@@ -20,27 +20,33 @@ func Attack(ts []*keys.RSA) error {
 
 	t := ts[0]
 	if t.OracleCiphertexts == nil {
-		return fmt.Errorf("%s failed, input requires the ciphertext of integers 2, 3, 4, and 9", name)
+		ch <- fmt.Errorf("%s failed, input requires the ciphertext of integers 2, 3, 4, and 9", name)
+		return
 	}
 
 	if len(t.OracleCiphertexts) != 4 {
-		return fmt.Errorf("%s failed, this attack requires the ciphertext of integers 2, 3, 4, and 9", name)
+		ch <- fmt.Errorf("%s failed, this attack requires the ciphertext of integers 2, 3, 4, and 9", name)
+		return
 	}
 
 	if e2, ok = t.OracleCiphertexts[2]; !ok {
-		return fmt.Errorf("%s failed, missing the ciphertext of 2", name)
+		ch <- fmt.Errorf("%s failed, missing the ciphertext of 2", name)
+		return
 	}
 
 	if e3, ok = t.OracleCiphertexts[3]; !ok {
-		return fmt.Errorf("%s failed, missing the ciphertext of 3", name)
+		ch <- fmt.Errorf("%s failed, missing the ciphertext of 3", name)
+		return
 	}
 
 	if e4, ok = t.OracleCiphertexts[4]; !ok {
-		return fmt.Errorf("%s failed, missing the ciphertext of 4", name)
+		ch <- fmt.Errorf("%s failed, missing the ciphertext of 4", name)
+		return
 	}
 
 	if e9, ok = t.OracleCiphertexts[9]; !ok {
-		return fmt.Errorf("%s failed, missing the ciphertext of 9", name)
+		ch <- fmt.Errorf("%s failed, missing the ciphertext of 9", name)
+		return
 	}
 
 	// n = GCD(e2**2 - e4, e3**2 - e9)
@@ -55,5 +61,5 @@ func Attack(ts []*keys.RSA) error {
 		fmt.Printf("n = %v", n)
 	}
 
-	return nil
+	ch <- nil
 }

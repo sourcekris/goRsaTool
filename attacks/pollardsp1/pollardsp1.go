@@ -22,7 +22,7 @@ var primeSieve = ln.SieveOfEratosthenesFmp
 
 // Attack implements the Pollards P minus 1 factorization technique. This technique was used in
 // BostonKeyParty 2017 challenge "RSA Buffet".
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	// Solution based on https://github.com/HackThisSite/ Python solution.
 	// Solution is derived from the work here: https://math.berkeley.edu/~sagrawal/su14_math55/notes_pollard.pdf
@@ -42,14 +42,16 @@ func Attack(ks []*keys.RSA) error {
 	}
 	d := ln.FindGcd(a.Sub(a, ln.BigOne), n)
 	if d.Equals(n) {
-		return fmt.Errorf("%s failed - unable to factor key with a of: %d (try another a?)", name, startA)
+		ch <- fmt.Errorf("%s failed - unable to factor key with a of: %d (try another a?)", name, startA)
+		return
 	}
 
 	if d.Cmp(ln.BigOne) > 0 {
 		// Success
 		k.PackGivenP(d)
-		return nil
+		ch <- nil
+		return
 	}
 
-	return fmt.Errorf("%s attack failed - unable to factor key with b of: %d", name, startB)
+	ch <- fmt.Errorf("%s attack failed - unable to factor key with b of: %d", name, startB)
 }

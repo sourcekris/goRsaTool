@@ -25,10 +25,10 @@ var (
 )
 
 // Attack implements SmallFractions attack.
-func Attack(ks []*keys.RSA) error {
+func Attack(ks []*keys.RSA, ch chan error) {
 	k := ks[0]
 	if k.Key.D != nil {
-		return nil
+		ch <- nil
 	}
 
 	var num, den int64
@@ -121,7 +121,8 @@ func Attack(ks []*keys.RSA) error {
 							}
 							if fmpz(0).Mod(k.Key.N, pp).Equals(ln.BigZero) {
 								k.PackGivenP(pp)
-								return nil
+								ch <- nil
+								return
 							}
 						}
 					}
@@ -130,5 +131,5 @@ func Attack(ks []*keys.RSA) error {
 		}
 	}
 
-	return fmt.Errorf("%s did not find the factors", name)
+	ch <- fmt.Errorf("%s did not find the factors", name)
 }
