@@ -70,11 +70,15 @@ This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu
 as well as Kali Linux 2022.2.
 
   ```shell
-  sudo apt install git golang libflint-dev libecm-dev make
+  sudo apt update && sudo apt install git golang libflint-dev libecm-dev make
   git clone https://github.com/sourcekris/goRsaTool
   cd goRsaTool
   sudo make install
   ```
+
+* **Note**: a breaking change was published in Kali Linux in a package called `libflint-2.8.5` which was later fixed in `libflint17` 
+  which is based on FLINT 2.9.0. If you get `goflint` package build errors, upgrade to `libflint17` or build FLINT2 2.9.0+
+  from source. On my system `sudo apt update && sudo apt install libflint-dev` was enough to correct the build errors.
 
 For Arch Linux including Athena OS:
 
