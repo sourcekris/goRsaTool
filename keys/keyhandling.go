@@ -290,8 +290,8 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 	return k, nil
 }
 
-// ImportKey imports a PEM key file and returns a FMPPrivateKey object or error.
-func ImportKey(kb []byte) (*FMPPrivateKey, error) {
+// ImportKey imports a PEM key file and returns a RSA object or error.
+func ImportKey(kb []byte) (*RSA, error) {
 	// Decode the PEM data to extract the DER format key.
 	block, _ := pem.Decode(kb)
 	if block == nil {
@@ -302,7 +302,7 @@ func ImportKey(kb []byte) (*FMPPrivateKey, error) {
 	priv, err := parseBigPrivateRsaKey(block.Bytes)
 	if err == nil {
 		// If there was an error, try to parse it an alternative way below.
-		return priv, nil
+		return NewRSA(priv, nil, nil, "", false)
 	}
 
 	// Extract a FMPPublicKey from the DER decoded data and pack a private key struct.
@@ -311,5 +311,5 @@ func ImportKey(kb []byte) (*FMPPrivateKey, error) {
 		return nil, fmt.Errorf("ImportKey: failed to parse the key as either a public or private key: %v", err)
 	}
 
-	return PrivateFromPublic(key), nil
+	return NewRSA(PrivateFromPublic(key), nil, nil, "", false)
 }

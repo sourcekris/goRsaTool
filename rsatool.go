@@ -6,12 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/sourcekris/goRsaTool/attacks"
 	"github.com/sourcekris/goRsaTool/attacks/jwtmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/signatures"
 	"github.com/sourcekris/goRsaTool/keys"
+	"github.com/sourcekris/goRsaTool/ln"
 	"github.com/sourcekris/goRsaTool/utils"
 
 	fmp "github.com/sourcekris/goflint"
@@ -26,6 +28,7 @@ var (
 	createKeyMode  = fset.Bool("createkey", false, "Create a public key given an E and N.")
 	exponentArg    = fset.String("e", "", "The exponent value - for use with createkey flag.")
 	modulusArg     = fset.String("n", "", "The modulus value - for use with createkey flag.")
+	cArg           = fset.String("c", "", "An integer ciphertext.")
 	primeArg       = fset.String("p", "", "One of the primes. If provided will shortcut the attack phase and produce a private key.")
 	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
 	d0Arg          = fset.String("d0", "", "Give LSBs of d, used in partiald attacks.")
@@ -36,6 +39,8 @@ var (
 	ptList         = fset.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
 	sigList        = fset.String("siglist", "", "Comma seperated list of signatures files.")
 	jwtList        = fset.String("jwtlist", "", "Comma seperated list of files containing JWTs.")
+	hintList       = fset.String("hintlist", "", "Comma seperated list of hints.")
+	bruteMax       = fset.String("brutemax", "4096", "Maximum value for brute force related attacks.")
 	attack         = fset.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = fset.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
@@ -88,6 +93,8 @@ func fileList(fl string) []string {
 func main() {
 	fset.Parse(os.Args[1:])
 
+	var useFlagsForKey bool
+
 	logger = log.New(os.Stderr, "rsatool: ", log.Lshortfile)
 
 	if *verboseMode {
@@ -111,36 +118,63 @@ func main() {
 		klist = append(klist, *keyFile)
 	}
 
+	// If no key file or key file list are provided, do we have n and e to make a key up on the fly with?
+	if klist == nil {
+		if *modulusArg != "" && *exponentArg != "" {
+			klist = []string{"ignored"}
+			useFlagsForKey = true
+		}
+	}
+
 	// We need klist and clist to be the same length for now.
 	if len(klist) > 0 && len(clist) > 0 && len(klist) != len(clist) {
 		log.Fatalf("when using -keylist and -ctlist there should be the same number of files in each list")
 	}
 
-	// We got a list of keys to work on, so lets do that.
-	if len(klist) > 0 {
+	// We got one or more keys to work on, so lets do that.
+	if len(klist) > 0 || useFlagsForKey {
 		var rsaKeys []*keys.RSA
 		for i, kf := range klist {
 			var (
 				targetRSA *keys.RSA
 				nonPemKey bool
+				err       error
 			)
-			kb, err := ioutil.ReadFile(kf)
-			if err != nil {
-				log.Fatal(err)
-			}
 
-			key, err := keys.ImportKey(kb)
-			if err != nil {
-				// Failed to read a valid PEM key. Maybe it is an integer list type key?
-				targetRSA, err = keys.ImportIntegerList(kb)
+			if !useFlagsForKey {
+				kb, err := ioutil.ReadFile(kf)
 				if err != nil {
-					logger.Fatalf("failed reading key file: %v", err)
+					log.Fatal(err)
 				}
+				targetRSA, err = keys.ImportKey(kb)
+				if err != nil {
+					// Failed to read a valid PEM key. Maybe it is an integer list type key?
+					targetRSA, err = keys.ImportIntegerList(kb)
+					if err != nil {
+						logger.Fatalf("failed reading key file: %v", err)
+					}
 
-				nonPemKey = true
-				targetRSA.PastPrimesFile = *pastPrimesFile
-				targetRSA.Verbose = *verboseMode
+					nonPemKey = true
+				}
+			} else {
+				// Also include c if it is provided on command line.
+				var cliCt []byte
+				if *cArg != "" {
+					cliCt = ln.NumberToBytes(ln.FmpString(*cArg))
+				}
+				targetRSA, err = keys.NewRSA(
+					keys.PrivateFromPublic(
+						&keys.FMPPublicKey{
+							N: ln.FmpString(*modulusArg),
+							E: ln.FmpString(*exponentArg),
+						}), cliCt, nil, "", false)
+				if err != nil {
+					logger.Fatalf("failed converting modulus and exponent into an RSA key: %v", err)
+				}
 			}
+
+			targetRSA.PastPrimesFile = *pastPrimesFile
+			targetRSA.Verbose = *verboseMode
 
 			var (
 				c  []byte
@@ -159,6 +193,8 @@ func main() {
 				if err != nil {
 					logger.Fatalf("failed reading ciphertext file: %v", err)
 				}
+
+				targetRSA.CipherText = c
 			}
 
 			if *d0Arg != "" {
@@ -170,13 +206,6 @@ func main() {
 				targetRSA.DLSB = d0.Bytes()
 			}
 
-			if targetRSA == nil {
-				targetRSA, err = keys.NewRSA(key, c, nil, *pastPrimesFile, *verboseMode)
-				if err != nil {
-					log.Fatalf("failed to create a RSA key from given key data: %v", err)
-				}
-			}
-
 			if *primeArg != "" {
 				p, ok := new(fmp.Fmpz).SetString(*primeArg, 0)
 				if !ok {
@@ -184,6 +213,25 @@ func main() {
 				}
 
 				targetRSA.Key.Primes = append(targetRSA.Key.Primes, p)
+			}
+
+			if *bruteMax != "" {
+				bm, err := strconv.Atoi(*bruteMax)
+				if err != nil {
+					logger.Fatal("failed parsing -brutemax as an integer")
+				}
+				targetRSA.BruteMax = int64(bm)
+			}
+
+			if *hintList != "" {
+				hints := strings.Split(*hintList, ",")
+				if len(hints) == 0 {
+					logger.Fatal("expected at least 1 hint when -hintlist specified")
+				}
+
+				for _, hint := range hints {
+					targetRSA.Hints = append(targetRSA.Hints, ln.FmpString(hint))
+				}
 			}
 
 			// Add the key filename, logger and expected number of primes to the key.

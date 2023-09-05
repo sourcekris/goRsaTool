@@ -96,6 +96,7 @@ func ReportResults(ks []*keys.RSA) {
 		}
 
 		if len(k.PlainText) > 0 {
+			fmt.Printf("Recovered plaintext as an integer: %s\n", ln.BytesToNumber(k.PlainText))
 			fmt.Println("Recovered plaintext: ")
 			fmt.Println(string(k.PlainText))
 		}

@@ -12,7 +12,8 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
-// RSA wraps FMPPrivateKey and adds a field for cipher and plaintexts.
+// RSA wraps FMPPrivateKey and adds a field for cipher and plaintexts as well as other fields
+// needed for various attacks.
 type RSA struct {
 	Key               FMPPrivateKey
 	CipherText        []byte
@@ -20,6 +21,8 @@ type RSA struct {
 	KnownPlainText    []byte
 	DLSB              []byte
 	OracleCiphertexts map[int]*fmp.Fmpz
+	Hints             []*fmp.Fmpz
+	BruteMax          int64
 	KeyFilename       string
 	PastPrimesFile    string
 	NumPrimes         int

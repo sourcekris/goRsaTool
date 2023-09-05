@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sourcekris/goRsaTool/attacks/apbq"
 	"github.com/sourcekris/goRsaTool/attacks/brokenrsa"
 	"github.com/sourcekris/goRsaTool/attacks/commonfactor"
 	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
@@ -74,6 +75,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("defectivee", false, true, DefaultTimeout, defectivee.Attack)
 	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, DefaultTimeout, oraclemodulus.Attack)
 	SupportedAttacks.RegisterAttack("squaren", false, true, DefaultTimeout, squaren.Attack)
+	SupportedAttacks.RegisterAttack("apbq", false, true, DefaultTimeout, apbq.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, false, DefaultTimeout, notableprimes.Attack)
