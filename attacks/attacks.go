@@ -84,6 +84,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("pastprimes", false, false, DefaultTimeout, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("pastctfprimes", false, false, DefaultTimeout, pastctfprimes.Attack)
 	SupportedAttacks.RegisterAttack("sexyprimes", false, false, DefaultTimeout, fermat.Attack)
+	SupportedAttacks.RegisterAttack("smalle", false, true, DefaultTimeout, hastads.Attack)
 }
 
 type attackFunc func([]*keys.RSA, chan error)
