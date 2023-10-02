@@ -33,7 +33,7 @@ func Attack(ks []*keys.RSA, ch chan error) {
 	c2 := ln.BytesToNumber(ks[1].CipherText)
 	n := ks[0].Key.N
 
-	_, u, v := ln.XGCD(ks[0].Key.PublicKey.E, ks[1].Key.PublicKey.E)
+	g, u, v := ln.XGCD(ks[0].Key.PublicKey.E, ks[1].Key.PublicKey.E)
 
 	var p1, p2 *fmp.Fmpz
 	if u.Cmp(ln.BigZero) >= 0 {
@@ -48,7 +48,7 @@ func Attack(ks []*keys.RSA, ch chan error) {
 		p2 = new(fmp.Fmpz).ModInverse(new(fmp.Fmpz).Exp(c2, new(fmp.Fmpz).Mul(v, ln.BigNOne), n), n)
 	}
 
-	ks[0].PlainText = ln.NumberToBytes(new(fmp.Fmpz).Mul(p1, p2).ModZ(n))
+	ks[0].PlainText = ln.NumberToBytes(new(fmp.Fmpz).Root(new(fmp.Fmpz).Mul(p1, p2).ModZ(n), int32(g.GetInt())))
 
 	ch <- nil
 }
