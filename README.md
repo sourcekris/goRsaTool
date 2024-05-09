@@ -66,7 +66,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ### Installation on Linux / Windows 10
 
-This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu20.04 WSL)
+This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu22.04.3 WSL)
 as well as Kali Linux 2024.1.
 
   ```shell
