@@ -57,7 +57,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 
 ## Installation
 
-* Requires go 1.9 +
+* Requires go 1.16 +
 * Get dependencies, you will need:
   * Golang
   * Git
@@ -67,7 +67,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 ### Installation on Linux / Windows 10
 
 This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu20.04 WSL)
-as well as Kali Linux 2022.2.
+as well as Kali Linux 2024.1.
 
   ```shell
   sudo apt update && sudo apt install git golang libflint-dev libecm-dev make
