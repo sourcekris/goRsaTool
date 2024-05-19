@@ -26,7 +26,7 @@ var (
 )
 
 type factorDB struct {
-	ID      string          `json:"id"`
+	ID      int          	`json:"id"`
 	Status  string          `json:"status"`
 	Factors [][]interface{} `json:"factors"`
 }
