@@ -13,6 +13,15 @@ run_test() {
     fi
 }
 
+echo -n "Testing factordb... "
+run_test -attack factordb -key examples/factordb.pub
+
+echo -n "Testing factordb (multiprime)... "
+run_test -attack factordb -key examples/factordb_multiprime.key
+
+echo -n "Testing factordb_parse... "
+run_test -attack factordb -key examples/factordb_parse.pub
+
 echo -n "Testing encryption oracle modulus recovery... "
 run_test -key examples/recover_modulus_from_oracle.txt -attack oraclemodulus
 
@@ -45,15 +54,6 @@ run_test -attack commonfactors -keylist examples/cf1.pub,examples/cf2.pub
 
 echo -n "Testing crtsolve... "
 run_test -attack crtsolver -key examples/crtsolve.key
-
-echo -n "Testing factordb... "
-run_test -attack factordb -key examples/factordb.pub
-
-echo -n "Testing factordb (multiprime)... "
-run_test -attack factordb -key examples/factordb_multiprime.key
-
-echo -n "Testing factordb_parse... "
-run_test -attack factordb -key examples/factordb_parse.pub
 
 echo -n "Testing fermat... "
 run_test -attack fermat -key examples/fermat.pub

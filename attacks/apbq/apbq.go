@@ -38,8 +38,8 @@ func Attack(ks []*keys.RSA, ch chan error) {
 		return
 	}
 
-	for x = 1; x < k.BruteMax; x++ {
-		for y = 1; y < k.BruteMax; y++ {
+	for x = 1; x <= k.BruteMax; x++ {
+		for y = 1; y <= k.BruteMax; y++ {
 			kq := new(fmp.Fmpz).GCD(fmp.NewFmpz(x).MulZ(k.Hints[0]).SubZ(fmp.NewFmpz(y).MulZ(k.Hints[1])), k.Key.N)
 			if kq.Cmp(ln.BigOne) > 0 {
 				k.PackGivenP(kq)

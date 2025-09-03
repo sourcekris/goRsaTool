@@ -1,7 +1,7 @@
 package factordb
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -18,7 +18,7 @@ var jsonBlob string
 func askertest(hc *http.Client, url string) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(strings.NewReader(jsonBlob)),
+		Body:       io.NopCloser(strings.NewReader(jsonBlob)),
 	}, nil
 }
 

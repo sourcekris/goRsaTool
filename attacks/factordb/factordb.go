@@ -3,7 +3,7 @@ package factordb
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"time"
@@ -69,7 +69,7 @@ func Attack(ts []*keys.RSA, ch chan error) {
 		return
 	}
 
-	js, err := ioutil.ReadAll(r.Body)
+	js, err := io.ReadAll(r.Body)
 	if err != nil {
 		ch <- err
 		return

@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -40,7 +39,7 @@ var (
 	sigList        = fset.String("siglist", "", "Comma seperated list of signatures files.")
 	jwtList        = fset.String("jwtlist", "", "Comma seperated list of files containing JWTs.")
 	hintList       = fset.String("hintlist", "", "Comma seperated list of hints.")
-	bruteMax       = fset.String("brutemax", "4096", "Maximum value for brute force related attacks.")
+	bruteMax       = fset.String("brutemax", "4096", "Maximum value for brute force related attacks (e.g. apbq attack).")
 	attack         = fset.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = fset.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
@@ -88,6 +87,23 @@ func fileList(fl string) []string {
 		return fs
 	}
 	return nil
+}
+
+func createKeyFromArgs() (*keys.RSA, error) {
+	var cliCt []byte
+	if *cArg != "" {
+		cliCt = ln.NumberToBytes(ln.FmpString(*cArg))
+	}
+	targetRSA, err := keys.NewRSA(
+		keys.PrivateFromPublic(
+			&keys.FMPPublicKey{
+				N: ln.FmpString(*modulusArg),
+				E: ln.FmpString(*exponentArg),
+			}), cliCt, nil, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("failed converting modulus and exponent into an RSA key: %w", err)
+	}
+	return targetRSA, nil
 }
 
 func main() {
@@ -142,7 +158,7 @@ func main() {
 			)
 
 			if !useFlagsForKey {
-				kb, err := ioutil.ReadFile(kf)
+				kb, err := os.ReadFile(kf)
 				if err != nil {
 					log.Fatal(err)
 				}
