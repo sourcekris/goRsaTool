@@ -273,7 +273,7 @@ func main() {
 
 		for _, e := range errs {
 			if e != nil {
-				logger.Println(e)
+				logger.Fatal(e)
 			}
 		}
 
