@@ -42,6 +42,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * Known prime - not really an attack but a helpful shortcut (`knownprime`)
 * Recovering plaintext when phi(n) are not coprime provided we have at least 1 prime and partial KPT (`defectivee`)
 * Recover private key and plaintext when n is a square. (`squaren`)
+* Recover plaintext from Rabin cryptosystem with e=2 using modular square roots and CRT (`rabin`)
 
 ### Multi-Key Attacks
 
@@ -209,13 +210,16 @@ pollardrhobrent
 williamsp1
 defectivee
 oraclemodulus
+squaren
+apbq
+rabin
 mersenne
 lucas
 novelty
 pastprimes
 pastctfprimes
 sexyprimes
-squaren
+smalle
 ```
 
 ## More Example Usage
@@ -231,6 +235,10 @@ squaren
 ### Attack multiple keys with a hastads broadcast attack
 
 `./gorsatool -keylist examples/hastadsbroadcast1.key,examples/hastadsbroadcast2.key,examples/hastadsbroadcast3.key -attack hastadsbroadcast`
+
+### Decrypt ciphertext from a Rabin cryptosystem key (e=2)
+
+`./gorsatool -key examples/rabin.txt -attack rabin`
 
 ### Recover an RSA Modulus From RSA Signatures and Plaintexts
 

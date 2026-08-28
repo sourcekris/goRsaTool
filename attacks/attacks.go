@@ -29,6 +29,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/pollardsp1"
 	"github.com/sourcekris/goRsaTool/attacks/pollardsrho"
 	"github.com/sourcekris/goRsaTool/attacks/qicheng"
+	"github.com/sourcekris/goRsaTool/attacks/rabin"
 	"github.com/sourcekris/goRsaTool/attacks/smallfractions"
 	"github.com/sourcekris/goRsaTool/attacks/smallq"
 	"github.com/sourcekris/goRsaTool/attacks/squaren"
@@ -76,6 +77,7 @@ func init() {
 	SupportedAttacks.RegisterAttack("oraclemodulus", false, true, DefaultTimeout, oraclemodulus.Attack)
 	SupportedAttacks.RegisterAttack("squaren", false, true, DefaultTimeout, squaren.Attack)
 	SupportedAttacks.RegisterAttack("apbq", false, true, DefaultTimeout, apbq.Attack)
+	SupportedAttacks.RegisterAttack("rabin", false, true, DefaultTimeout, rabin.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
 	SupportedAttacks.RegisterAttack("mersenne", false, false, DefaultTimeout, notableprimes.Attack)
