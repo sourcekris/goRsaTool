@@ -30,6 +30,9 @@ var (
 	// d0RE is the LSB of d regexp.
 	d0RE = regexp.MustCompile(`(?i)^d0`)
 
+	// dLeakLineRE matches partial d leak bitstrings with '?'.
+	dLeakLineRE = regexp.MustCompile(`(?i)^(d_leak|dleak|d-leak)\s*[:=]\s*([01\?]+)`)
+
 	// CRT components regexps.
 	pRE  = regexp.MustCompile(`(?i)^p`)
 	qRE  = regexp.MustCompile(`(?i)^q`)
@@ -116,18 +119,24 @@ func getBase(s string) (string, int) {
 // ImportIntegerList attempts to parse the key (and optionally ciphertext) data as if it was a list of integers N, and e and c.
 func ImportIntegerList(kb []byte) (*RSA, error) {
 	var (
-		n, e, c, p, q, dp, dq, d0 string
-		ct, kpt                   []byte
-		crt                       bool
-		os                        map[int]*fmp.Fmpz
+		n, e, c, p, q, dp, dq, d0, dLeak string
+		ct, kpt                          []byte
+		crt                              bool
+		os                               map[int]*fmp.Fmpz
 	)
 
 	os = make(map[int]*fmp.Fmpz)
 
 	s := bufio.NewScanner(bytes.NewReader(kb))
 	for s.Scan() {
-		if lineRE.MatchString(s.Text()) {
-			for _, sm := range lineRE.FindAllStringSubmatch(s.Text(), -1) {
+		text := s.Text()
+		if sm := dLeakLineRE.FindStringSubmatch(text); len(sm) >= 3 {
+			dLeak = sm[2]
+			continue
+		}
+
+		if lineRE.MatchString(text) {
+			for _, sm := range lineRE.FindAllStringSubmatch(text, -1) {
 				if len(sm) < 3 {
 					continue
 				}
@@ -268,6 +277,11 @@ func ImportIntegerList(kb []byte) (*RSA, error) {
 		}
 
 		k.DLSB = ln.NumberToBytes(fd0)
+	}
+
+	// Place the partial bitstring of D into the k.DLeak field.
+	if dLeak != "" {
+		k.DLeak = dLeak
 	}
 
 	// Add the primes if we got any.

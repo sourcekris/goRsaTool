@@ -12,6 +12,7 @@ import (
 	"github.com/sourcekris/goRsaTool/attacks/commonmodulus"
 	"github.com/sourcekris/goRsaTool/attacks/crt"
 	"github.com/sourcekris/goRsaTool/attacks/defectivee"
+	"github.com/sourcekris/goRsaTool/attacks/dleak"
 	"github.com/sourcekris/goRsaTool/attacks/factordb"
 	"github.com/sourcekris/goRsaTool/attacks/fermat"
 	"github.com/sourcekris/goRsaTool/attacks/franklinreiter"
@@ -78,8 +79,10 @@ func init() {
 	SupportedAttacks.RegisterAttack("squaren", false, true, DefaultTimeout, squaren.Attack)
 	SupportedAttacks.RegisterAttack("apbq", false, true, DefaultTimeout, apbq.Attack)
 	SupportedAttacks.RegisterAttack("rabin", false, true, DefaultTimeout, rabin.Attack)
+	SupportedAttacks.RegisterAttack("dleak", false, false, 300, dleak.Attack)
 
 	// Aliased attacks (names that point to attacks already in the above list).
+	SupportedAttacks.RegisterAttack("partialdleak", false, false, DefaultTimeout, dleak.Attack)
 	SupportedAttacks.RegisterAttack("mersenne", false, false, DefaultTimeout, notableprimes.Attack)
 	SupportedAttacks.RegisterAttack("lucas", false, false, DefaultTimeout, notableprimes.Attack)
 	SupportedAttacks.RegisterAttack("novelty", false, false, DefaultTimeout, notableprimes.Attack)

@@ -43,6 +43,7 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
 * Recovering plaintext when phi(n) are not coprime provided we have at least 1 prime and partial KPT (`defectivee`)
 * Recover private key and plaintext when n is a square. (`squaren`)
 * Recover plaintext from Rabin cryptosystem with e=2 using modular square roots and CRT (`rabin`)
+* Recover private key from partial bitstring leak of d (e.g. from power analysis) with unknown bits marked '?' (`dleak` / `partialdleak`)
 
 ### Multi-Key Attacks
 
@@ -213,6 +214,8 @@ oraclemodulus
 squaren
 apbq
 rabin
+dleak
+partialdleak
 mersenne
 lucas
 novelty
@@ -239,6 +242,10 @@ smalle
 ### Decrypt ciphertext from a Rabin cryptosystem key (e=2)
 
 `./gorsatool -key examples/rabin.txt -attack rabin`
+
+### Recover private key from a partial private exponent bit leak (power analysis)
+
+`./gorsatool -key examples/dleak.txt -attack dleak`
 
 ### Recover an RSA Modulus From RSA Signatures and Plaintexts
 

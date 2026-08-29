@@ -20,6 +20,7 @@ type RSA struct {
 	PlainText         []byte
 	KnownPlainText    []byte
 	DLSB              []byte
+	DLeak             string
 	OracleCiphertexts map[int]*fmp.Fmpz
 	Hints             []*fmp.Fmpz
 	BruteMax          int64

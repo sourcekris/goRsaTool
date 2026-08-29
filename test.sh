@@ -135,3 +135,7 @@ run_test -attack apbq -c 7925658536205496145496105864909913841698804988627111589
 
 echo -n "Testing rabin attack... "
 run_test -key examples/rabin.txt -attack rabin
+
+echo -n "Testing dleak attack... "
+run_test -key examples/dleak.txt -attack dleak
+

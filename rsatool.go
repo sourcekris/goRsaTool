@@ -31,6 +31,7 @@ var (
 	primeArg       = fset.String("p", "", "One of the primes. If provided will shortcut the attack phase and produce a private key.")
 	dArg           = fset.String("d", "", "Give d in createkey mode to create a private key.")
 	d0Arg          = fset.String("d0", "", "Give LSBs of d, used in partiald attacks.")
+	dleakArg       = fset.String("dleak", "", "Give bit leak of d (with '?' for unknown bits) for dleak attack.")
 	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	numP           = fset.Int("numprimes", 2, "Number of primes expected to be factored.")
 	keyList        = fset.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
@@ -220,6 +221,10 @@ func main() {
 				}
 
 				targetRSA.DLSB = d0.Bytes()
+			}
+
+			if *dleakArg != "" {
+				targetRSA.DLeak = *dleakArg
 			}
 
 			if *primeArg != "" {
