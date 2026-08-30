@@ -106,11 +106,27 @@ type Attack struct {
 // Attacks wraps a slice of Attack objects that are supported.
 type Attacks struct {
 	Supported []*Attack
+	Timeout   int
 }
 
 // NewAttacks constructs a new Attacks object.
 func NewAttacks() *Attacks {
 	return &Attacks{}
+}
+
+// SetTimeout sets an override timeout in seconds for all attacks.
+func (a *Attacks) SetTimeout(timeout int) {
+	if a == nil {
+		return
+	}
+	a.Timeout = timeout
+}
+
+// SetTimeout sets an override timeout in seconds for SupportedAttacks.
+func SetTimeout(timeout int) {
+	if SupportedAttacks != nil {
+		SupportedAttacks.SetTimeout(timeout)
+	}
 }
 
 // RegisterAttack adds a new attack to the receiving Attacks.
@@ -144,6 +160,25 @@ func (a *Attacks) SupportsMulti(name string) bool {
 	return false
 }
 
+// GetTimeout returns the timeout in seconds for the given attack.
+// If an override timeout is set on Attacks or SupportedAttacks, it returns that; otherwise it returns the attack's configured timeout.
+func (a *Attacks) GetTimeout(name string) int {
+	if a != nil && a.Timeout > 0 {
+		return a.Timeout
+	}
+	if SupportedAttacks != nil && SupportedAttacks.Timeout > 0 {
+		return SupportedAttacks.Timeout
+	}
+	if a != nil {
+		for _, atk := range a.Supported {
+			if atk.Name == name {
+				return atk.Timeout
+			}
+		}
+	}
+	return DefaultTimeout
+}
+
 // Execute executes the named attack against t.
 func (a *Attacks) Execute(name string, t []*keys.RSA) error {
 	if SupportedAttacks == nil {
@@ -154,15 +189,22 @@ func (a *Attacks) Execute(name string, t []*keys.RSA) error {
 		return fmt.Errorf("unsupported attack: %v", name)
 	}
 
-	for _, a := range SupportedAttacks.Supported {
-		if a.Name == name {
+	for _, atk := range a.Supported {
+		if atk.Name == name {
+			timeout := atk.Timeout
+			if a.Timeout > 0 {
+				timeout = a.Timeout
+			} else if SupportedAttacks.Timeout > 0 {
+				timeout = SupportedAttacks.Timeout
+			}
+
 			ctx := context.Background()
-			ctx, cancel := context.WithTimeout(ctx, time.Duration(a.Timeout*int(time.Second)))
+			ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 			defer cancel()
 
 			ch := make(chan error)
 
-			go a.F(t, ch)
+			go atk.F(t, ch)
 
 			select {
 			case result := <-ch:
@@ -175,3 +217,4 @@ func (a *Attacks) Execute(name string, t []*keys.RSA) error {
 
 	return errors.New("attack not found")
 }
+

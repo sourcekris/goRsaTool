@@ -41,6 +41,7 @@ var (
 	jwtList        = fset.String("jwtlist", "", "Comma seperated list of files containing JWTs.")
 	hintList       = fset.String("hintlist", "", "Comma seperated list of hints.")
 	bruteMax       = fset.String("brutemax", "4096", "Maximum value for brute force related attacks (e.g. apbq attack).")
+	timeoutArg     = fset.Int("timeout", 0, "Timeout for attacks in seconds (overrides default attack timeout).")
 	attack         = fset.String("attack", "all", "Specific attack to try. Specify \"all\" for everything that works unnatended.")
 	list           = fset.Bool("list", false, "List the attacks supported by the attack flag.")
 	logger         *log.Logger
@@ -116,6 +117,13 @@ func main() {
 
 	if *verboseMode {
 		logger.Println("starting up...")
+	}
+
+	if *timeoutArg > 0 {
+		attacks.SetTimeout(*timeoutArg)
+		if *verboseMode {
+			logger.Printf("attack timeout overridden to %d seconds\n", *timeoutArg)
+		}
 	}
 
 	if *list {

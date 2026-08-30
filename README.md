@@ -247,6 +247,10 @@ smalle
 
 `./gorsatool -key examples/dleak.txt -attack dleak`
 
+### Override attack timeout
+
+`./gorsatool -key ./key.pub -attack all -timeout 60`
+
 ### Recover an RSA Modulus From RSA Signatures and Plaintexts
 
 `./rsatool -ptlist message1.txt,message2.txt -siglist sig1,sig2`
