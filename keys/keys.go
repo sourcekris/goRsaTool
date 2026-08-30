@@ -113,18 +113,38 @@ func (t *RSA) PackGivenD(d *fmp.Fmpz) {
 // String returns the key components in a string format.
 func (t *RSA) String() string {
 	var res string
-	res = fmt.Sprintf("%s:\nn = %s\n", t.KeyFilename, t.Key.PublicKey.N)
-	res = fmt.Sprintf("%se = %s\n", res, t.Key.PublicKey.E)
+	res = fmt.Sprintf("%s:\n", t.KeyFilename)
+	if t.Key.PublicKey != nil && t.Key.PublicKey.N != nil {
+		res = fmt.Sprintf("%sn = %s\n", res, t.Key.PublicKey.N)
+	} else if t.Key.N != nil {
+		res = fmt.Sprintf("%sn = %s\n", res, t.Key.N)
+	}
+	if t.Key.PublicKey != nil && t.Key.PublicKey.E != nil {
+		res = fmt.Sprintf("%se = %s\n", res, t.Key.PublicKey.E)
+	}
 
 	if t.Key.D != nil {
 		res = fmt.Sprintf("%sd = %s\n", res, t.Key.D)
-		if len(t.Key.Primes) == 2 {
-			res = fmt.Sprintf("%sp = %s\n", res, t.Key.Primes[0])
-			res = fmt.Sprintf("%sq = %s\n", res, t.Key.Primes[1])
-		} else {
-			for i, p := range t.Key.Primes {
-				res = fmt.Sprintf("%sprime[%d] = %s\n", res, i, p)
-			}
+	}
+
+	if len(t.Key.Primes) == 2 {
+		res = fmt.Sprintf("%sp = %s\n", res, t.Key.Primes[0])
+		res = fmt.Sprintf("%sq = %s\n", res, t.Key.Primes[1])
+	} else if len(t.Key.Primes) > 0 {
+		for i, p := range t.Key.Primes {
+			res = fmt.Sprintf("%sprime[%d] = %s\n", res, i, p)
+		}
+	}
+
+	if t.Key.Precomputed != nil {
+		if t.Key.Precomputed.Dp != nil {
+			res = fmt.Sprintf("%sdp = %s\n", res, t.Key.Precomputed.Dp)
+		}
+		if t.Key.Precomputed.Dq != nil {
+			res = fmt.Sprintf("%sdq = %s\n", res, t.Key.Precomputed.Dq)
+		}
+		if t.Key.Precomputed.Qinv != nil {
+			res = fmt.Sprintf("%sqinv = %s\n", res, t.Key.Precomputed.Qinv)
 		}
 	}
 
@@ -232,9 +252,19 @@ func FMPtoBigPrivateKey(key *FMPPrivateKey) *x509big.BigPrivateKey {
 // FMPtoBigPublicKey takes a FMPPublicKey and returns an x509big.PublicKey using native go
 // big Int types.
 func FMPtoBigPublicKey(key *FMPPublicKey) *x509big.BigPublicKey {
+	if key == nil {
+		return nil
+	}
+	var n, e *big.Int
+	if key.N != nil {
+		n = new(big.Int).SetBytes(key.N.Bytes())
+	}
+	if key.E != nil {
+		e = new(big.Int).SetBytes(key.E.Bytes())
+	}
 	return &x509big.BigPublicKey{
-		N: new(big.Int).SetBytes(key.N.Bytes()),
-		E: new(big.Int).SetBytes(key.E.Bytes()),
+		N: n,
+		E: e,
 	}
 }
 
@@ -257,6 +287,9 @@ func EncodeFMPPrivateKey(priv *FMPPrivateKey) string {
 
 // EncodeFMPPublicKey marshalls an RSA public key using FMP types into a string.
 func EncodeFMPPublicKey(pub *FMPPublicKey) string {
+	if pub == nil || pub.N == nil || pub.E == nil {
+		return ""
+	}
 	privder := x509big.MarshalPKCS1BigPublicKey(FMPtoBigPublicKey(pub))
 	return encodeDerToPem(privder, "RSA PUBLIC KEY")
 }

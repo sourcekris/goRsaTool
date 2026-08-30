@@ -178,10 +178,16 @@ func main() {
 					// Failed to read a valid PEM key. Maybe it is an integer list type key?
 					targetRSA, err = keys.ImportIntegerList(kb)
 					if err != nil {
-						logger.Fatalf("failed reading key file: %v", err)
+						// Failed integer list. Maybe it is a partial PEM/DER or partial integer list key?
+						targetRSA, err = keys.ImportPartialKey(kb)
+						if err != nil {
+							logger.Fatalf("failed reading key file: %v", err)
+						}
 					}
 
-					nonPemKey = true
+					if !strings.Contains(string(kb), "-----BEGIN") {
+						nonPemKey = true
+					}
 				}
 			} else {
 				// Also include c if it is provided on command line.
@@ -274,7 +280,7 @@ func main() {
 			if *dumpKeyMode {
 				targetRSA.DumpKey()
 
-				if nonPemKey && targetRSA.Key.PublicKey.E != nil {
+				if nonPemKey && targetRSA.Key.PublicKey != nil && targetRSA.Key.PublicKey.N != nil && targetRSA.Key.PublicKey.E != nil {
 					// The input was an integer list key so the user might actually want a PEM dump.
 					fmt.Println(keys.EncodeFMPPublicKey(targetRSA.Key.PublicKey))
 				}
