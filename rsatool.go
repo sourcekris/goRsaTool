@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -34,6 +35,7 @@ var (
 	dleakArg       = fset.String("dleak", "", "Give bit leak of d (with '?' for unknown bits) for dleak attack.")
 	cipherText     = fset.String("ciphertext", "", "An RSA encrypted binary file to decrypt, necessary for certain attacks.")
 	numP           = fset.Int("numprimes", 2, "Number of primes expected to be factored.")
+	workersArg     = fset.Int("workers", runtime.NumCPU(), "Number of parallel workers for multi-threaded attacks (defaults to CPU count).")
 	keyList        = fset.String("keylist", "", "Comma seperated list of keys for multi-key attacks.")
 	ctList         = fset.String("ctlist", "", "Comma seperated list of ciphertext binaries for multi-key attacks.")
 	ptList         = fset.String("ptlist", "", "Comma sepereated list of plaintext files for use in signature mode.")
@@ -267,6 +269,7 @@ func main() {
 			targetRSA.KeyFilename = kf
 			targetRSA.Log = logger
 			targetRSA.NumPrimes = *numP
+			targetRSA.Workers = *workersArg
 
 			if *dumpKeyMode {
 				targetRSA.DumpKey()

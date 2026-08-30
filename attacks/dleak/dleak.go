@@ -782,7 +782,7 @@ func Attack(ts []*keys.RSA, ch chan error) {
 		log.Printf("%s attempt beginning for e = %v", name, t.Key.PublicKey.E)
 	}
 
-	p, _, _, err := SolveDLeak(t.Key.N, t.Key.PublicKey.E, t.DLeak, 0, t.Verbose)
+	p, _, _, err := SolveDLeak(t.Key.N, t.Key.PublicKey.E, t.DLeak, t.Workers, t.Verbose)
 	if err != nil {
 		ch <- fmt.Errorf("%s failed: %v", name, err)
 		return

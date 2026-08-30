@@ -27,6 +27,7 @@ type RSA struct {
 	KeyFilename       string
 	PastPrimesFile    string
 	NumPrimes         int
+	Workers           int
 	Verbose           bool
 	Log               *log.Logger
 }
