@@ -217,10 +217,12 @@ func newPrimeFilter256(p uint64, n *fmp.Fmpz) primeFilter256 {
 }
 
 // SolveDLeak recovers prime factors p, q and private exponent d from a partial bitstring leak of d using FLINT.
-func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fmpz, *fmp.Fmpz, *fmp.Fmpz, error) {
+func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int, verbose ...bool) (*fmp.Fmpz, *fmp.Fmpz, *fmp.Fmpz, error) {
 	if n == nil || e == nil || len(dLeak) == 0 {
 		return nil, nil, nil, errors.New("invalid arguments to SolveDLeak")
 	}
+
+	isVerbose := len(verbose) > 0 && verbose[0]
 
 	eVal := e.GetInt()
 	if eVal <= 0 {
@@ -229,6 +231,7 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 
 	dLen := len(dLeak)
 	knownBits := make([]int, dLen)
+	totalUnknown := 0
 	for i := 0; i < dLen; i++ {
 		c := dLeak[dLen-1-i]
 		if c == '0' {
@@ -237,7 +240,13 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 			knownBits[i] = 1
 		} else {
 			knownBits[i] = -1
+			totalUnknown++
 		}
+	}
+
+	if isVerbose {
+		log.Printf("%s: input analyzed - %d-bit modulus, e=%d, %d-bit private exponent leak with %d unknown bits (%.1f%% known)",
+			name, n.Bits(), eVal, dLen, totalUnknown, float64(dLen-totalUnknown)*100.0/float64(dLen))
 	}
 
 	// 1. Recover candidate k using FLINT arithmetic
@@ -268,6 +277,11 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 	// Check top bits matching from bit (halfBits + margin) to dLen-1
 	startTopCheck := (n.Bits() / 2) + 8
 
+	if isVerbose {
+		log.Printf("%s: [Phase 1/2] searching for RSA quotient k in range [%d, %d] using top %d bits...",
+			name, kMin, kMax, dLen-startTopCheck)
+	}
+
 	var matchingK int = -1
 	for kCand := kMin; kCand <= kMax; kCand++ {
 		if kCand <= 0 || kCand >= eVal {
@@ -297,6 +311,11 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 
 	if matchingK == -1 {
 		return nil, nil, nil, fmt.Errorf("failed to recover k from top bits of d leak")
+	}
+
+	if isVerbose {
+		log.Printf("%s: [Phase 1/2] quotient k = %d uniquely identified! Top %d bits of d verified against d_approx with 0 bit errors",
+			name, matchingK, dLen-startTopCheck)
 	}
 
 	kVal := uint64(matchingK)
@@ -360,13 +379,20 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 			numWorkers = 1
 		}
 
+		if isVerbose {
+			log.Printf("%s: [Phase 2/2] single-stage parallel quadratic residue sieve: %d unknown bits in lower half (%d combinations) across %d CPU workers",
+				name, numQ, totalCombinations, numWorkers)
+		}
+
 		var (
-			found int32
-			wg    sync.WaitGroup
-			resP  *fmp.Fmpz
-			resQ  *fmp.Fmpz
-			resD  *fmp.Fmpz
-			mu    sync.Mutex
+			found          int32
+			wg             sync.WaitGroup
+			resP           *fmp.Fmpz
+			resQ           *fmp.Fmpz
+			resD           *fmp.Fmpz
+			mu             sync.Mutex
+			processedCount uint64
+			lastLoggedPct  int64 = -1
 		)
 
 		for w := 0; w < numWorkers; w++ {
@@ -383,6 +409,18 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 				for mask := sIdx; mask < eIdx; mask++ {
 					if atomic.LoadInt32(&found) == 1 {
 						return
+					}
+
+					if (mask & 0xffff) == 0 {
+						curr := atomic.AddUint64(&processedCount, 0x10000)
+						if isVerbose && totalCombinations > 100000 {
+							pct := int64((curr * 100) / totalCombinations)
+							if pct/10 > atomic.LoadInt64(&lastLoggedPct)/10 && pct <= 100 {
+								atomic.StoreInt64(&lastLoggedPct, pct)
+								log.Printf("%s: [Phase 2/2] search progress: %d%% (%d / %d combinations checked)",
+									name, pct, curr, totalCombinations)
+							}
+						}
 					}
 
 					dLow := dBase
@@ -445,6 +483,9 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 							phi := new(fmp.Fmpz).Mul(new(fmp.Fmpz).Sub(pZ, ln.BigOne), new(fmp.Fmpz).Sub(qZ, ln.BigOne))
 							dZ := new(fmp.Fmpz).ModInverse(e, phi)
 							resP, resQ, resD = pZ, qZ, dZ
+							if isVerbose {
+								log.Printf("%s: [Phase 2/2] candidate verified! Modulus N successfully factored into prime factors p and q", name)
+							}
 						}
 						mu.Unlock()
 						return
@@ -520,6 +561,15 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 	nHigh := numQ - nLow
 
 	totalLow := 1 << nLow
+	totalHigh := uint64(1) << nHigh
+
+	if isVerbose {
+		log.Printf("%s: [Phase 2/2] Meet-in-the-Middle solver: %d unknown bits in lower 256 bits, split into low half (%d bits, %d states) and high half (%d bits, %d states)",
+			name, numQ, nLow, totalLow, nHigh, totalHigh)
+		log.Printf("%s: [Phase 2/2] generating and sorting low-half table (%d entries) with 8192 bucket indices...",
+			name, totalLow)
+	}
+
 	xList := make([]u256, totalLow)
 
 	for mask := 0; mask < totalLow; mask++ {
@@ -551,13 +601,17 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 		curB++
 	}
 
+	if isVerbose {
+		log.Printf("%s: [Phase 2/2] low-half table ready. Launching parallel search over %d high-half masks across %d CPU workers...",
+			name, totalHigh, numWorkers)
+	}
+
 	primes := []uint64{3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61}
 	filters256 := make([]primeFilter256, len(primes))
 	for i, p := range primes {
 		filters256[i] = newPrimeFilter256(p, n)
 	}
 
-	totalHigh := uint64(1) << nHigh
 	chunkSize := totalHigh / uint64(numWorkers)
 	if chunkSize == 0 {
 		chunkSize = totalHigh
@@ -568,12 +622,14 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 	sModEVal := uint64(sModE.GetInt())
 
 	var (
-		found int32
-		resP  *fmp.Fmpz
-		resQ  *fmp.Fmpz
-		resD  *fmp.Fmpz
-		mu    sync.Mutex
-		wg    sync.WaitGroup
+		found         int32
+		resP          *fmp.Fmpz
+		resQ          *fmp.Fmpz
+		resD          *fmp.Fmpz
+		mu            sync.Mutex
+		wg            sync.WaitGroup
+		processedHigh uint64
+		lastLoggedPct int64 = -1
 	)
 
 	for w := 0; w < numWorkers; w++ {
@@ -590,6 +646,18 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 			for maskH := sM; maskH < eM; maskH++ {
 				if atomic.LoadInt32(&found) == 1 {
 					return
+				}
+
+				if (maskH & 0x7fff) == 0 {
+					curr := atomic.AddUint64(&processedHigh, 0x8000)
+					if isVerbose && totalHigh > 10000 {
+						pct := int64((curr * 100) / totalHigh)
+						if pct/10 > atomic.LoadInt64(&lastLoggedPct)/10 && pct <= 100 {
+							atomic.StoreInt64(&lastLoggedPct, pct)
+							log.Printf("%s: [Phase 2/2] search progress: %d%% (%d / %d high-half masks checked)",
+								name, pct, curr, totalHigh)
+						}
+					}
 				}
 
 				var z u256
@@ -666,6 +734,9 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int) (*fmp.Fm
 							phi := new(fmp.Fmpz).Mul(new(fmp.Fmpz).Sub(pZ, ln.BigOne), new(fmp.Fmpz).Sub(qZ, ln.BigOne))
 							dZ := new(fmp.Fmpz).ModInverse(e, phi)
 							resP, resQ, resD = pZ, qZ, dZ
+							if isVerbose {
+								log.Printf("%s: [Phase 2/2] candidate verified! Modulus N successfully factored into prime factors p and q", name)
+							}
 						}
 						mu.Unlock()
 						return
@@ -711,7 +782,7 @@ func Attack(ts []*keys.RSA, ch chan error) {
 		log.Printf("%s attempt beginning for e = %v", name, t.Key.PublicKey.E)
 	}
 
-	p, _, _, err := SolveDLeak(t.Key.N, t.Key.PublicKey.E, t.DLeak, 0)
+	p, _, _, err := SolveDLeak(t.Key.N, t.Key.PublicKey.E, t.DLeak, 0, t.Verbose)
 	if err != nil {
 		ch <- fmt.Errorf("%s failed: %v", name, err)
 		return
