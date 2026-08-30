@@ -554,9 +554,9 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int, verbose 
 		uList[j] = fmpToU256(uZ)
 	}
 
-	nLow := 24
-	if numQ < 24 {
-		nLow = numQ / 2
+	nLow := numQ / 2
+	if nLow > 26 {
+		nLow = 26
 	}
 	nHigh := numQ - nLow
 
@@ -564,8 +564,8 @@ func SolveDLeak(n *fmp.Fmpz, e *fmp.Fmpz, dLeak string, numWorkers int, verbose 
 	totalHigh := uint64(1) << nHigh
 
 	if isVerbose {
-		log.Printf("%s: [Phase 2/2] Meet-in-the-Middle solver: %d unknown bits in lower 256 bits, split into low half (%d bits, %d states) and high half (%d bits, %d states)",
-			name, numQ, nLow, totalLow, nHigh, totalHigh)
+		log.Printf("%s: [Phase 2/2] Meet-in-the-Middle solver: %d unknown bits in lower 256 bits, split into low half (%d bits, %d states, ~%.1f MB) and high half (%d bits, %d states)",
+			name, numQ, nLow, totalLow, float64(totalLow*32)/(1024*1024), nHigh, totalHigh)
 		log.Printf("%s: [Phase 2/2] generating and sorting low-half table (%d entries) with 8192 bucket indices...",
 			name, totalLow)
 	}
