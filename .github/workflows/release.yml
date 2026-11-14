@@ -1,0 +1,176 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build (${{ matrix.goos }}-${{ matrix.goarch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install FLINT and GMP-ECM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libflint-dev libecm-dev libgmp-dev libmpfr-dev
+
+      - name: Build binary
+        run: |
+          CGO_ENABLED=1 go build -ldflags="-s -w" -o goRsaTool rsatool.go
+          ./goRsaTool -key examples/small_q.pub -attack smallq > /dev/null
+
+      - name: Package archive
+        run: |
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          ARCHIVE="goRsaTool-${VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz"
+          tar -czf "${ARCHIVE}" goRsaTool
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: goRsaTool-*-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+  build-darwin:
+    name: Build (${{ matrix.goos }}-${{ matrix.goarch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: darwin
+            goarch: arm64
+            runner: macos-14
+          - goos: darwin
+            goarch: amd64
+            runner: macos-13
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install FLINT and build GMP-ECM
+        run: |
+          brew install flint gmp mpfr
+          BREW_PREFIX="$(brew --prefix)"
+          curl -fsSL https://ftp.debian.org/debian/pool/main/g/gmp-ecm/gmp-ecm_7.0.6+ds.orig.tar.xz -o gmp-ecm.tar.xz
+          tar -xf gmp-ecm.tar.xz
+          cd gmp-ecm-7.0.6
+          ./configure --with-gmp="${BREW_PREFIX}" --prefix="${BREW_PREFIX}" --disable-shared --enable-static
+          make -j"$(sysctl -n hw.ncpu)"
+          sudo make install
+
+      - name: Build binary
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export CGO_CPPFLAGS="-I${BREW_PREFIX}/include"
+          export CGO_LDFLAGS="-L${BREW_PREFIX}/lib"
+          CGO_ENABLED=1 go build -ldflags="-s -w" -o goRsaTool rsatool.go
+          ./goRsaTool -key examples/small_q.pub -attack smallq > /dev/null
+
+      - name: Package archive
+        run: |
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          ARCHIVE="goRsaTool-${VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz"
+          tar -czf "${ARCHIVE}" goRsaTool
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: goRsaTool-*-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+  build-windows:
+    name: Build (windows-amd64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Set up MSYS2 UCRT64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-flint
+            mingw-w64-ucrt-x86_64-gmp-ecm
+            mingw-w64-ucrt-x86_64-ntldd
+
+      - name: Build and bundle Windows release
+        run: |
+          export CGO_CPPFLAGS="-I${MSYS_PREFIX}/include"
+          export CGO_LDFLAGS="-L${MSYS_PREFIX}/lib"
+          CGO_ENABLED=1 go build -ldflags="-s -w" -o goRsaTool.exe rsatool.go
+          ./goRsaTool.exe -key examples/small_q.pub -attack smallq > /dev/null
+
+          mkdir -p bundle
+          cp goRsaTool.exe bundle/
+          ntldd -R goRsaTool.exe | awk '/ucrt64\\bin/ {print $3}' | cygpath -u -f - | sort -u | xargs -r -I{} cp "{}" bundle/
+
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          ARCHIVE="goRsaTool-${VERSION}-windows-amd64.zip"
+          (cd bundle && /c/Windows/System32/tar.exe -a -cf "../${ARCHIVE}" *)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-amd64
+          path: goRsaTool-*-windows-amd64.zip
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - build-linux
+      - build-darwin
+      - build-windows
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
