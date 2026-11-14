@@ -86,7 +86,7 @@ func fileList(fl string) []string {
 	if fl != "" {
 		var fs []string
 		for _, k := range strings.Split(fl, ",") {
-			fs = append(fs, strings.Trim(k, "\t\n "))
+			fs = append(fs, strings.TrimSpace(k))
 		}
 		return fs
 	}

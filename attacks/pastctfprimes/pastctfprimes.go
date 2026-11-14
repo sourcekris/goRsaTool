@@ -36,10 +36,11 @@ func Attack(ts []*keys.RSA, ch chan error) {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		if !strings.HasPrefix(line, "#") && len(strings.Trim(line, "\n\r")) != 0 {
-			tmpP, _ := new(fmp.Fmpz).SetString(line, 10)
-			primes = append(primes, *tmpP)
+		line := strings.TrimSpace(scanner.Text())
+		if !strings.HasPrefix(line, "#") && len(line) != 0 {
+			if tmpP, ok := new(fmp.Fmpz).SetString(line, 10); ok {
+				primes = append(primes, *tmpP)
+			}
 		}
 	}
 

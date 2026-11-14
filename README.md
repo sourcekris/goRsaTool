@@ -66,9 +66,9 @@ goal of support as wide a range of factorization methods and RSA attacks as poss
   * FLINT (Fast Library for Number Theory)
   * GMP-ECM (GMP Elliptic Curve Method factorization)
 
-### Installation on Linux / Windows 10
+### Installation on Linux / WSL2
 
-This works on Ubuntu (tested 20.04 LTS) and Windows 10 WSL 2.0 (tested in Ubuntu22.04.3 WSL)
+This works on Ubuntu (tested 20.04 LTS) and Windows 10/11 WSL 2.0 (tested in Ubuntu22.04.3 WSL)
 as well as Kali Linux 2024.1.
 
   ```shell
@@ -90,6 +90,31 @@ For Arch Linux including Athena OS:
   ```
 
 Note: This will install `goRsaTool` binary into `/usr/local/bin`.
+
+### Installing on Windows (Native 64-bit)
+
+To build `goRsaTool.exe` natively on 64-bit Windows, install Go from the official installer and use
+[MSYS2](https://www.msys2.org/) (`UCRT64` environment) to provide the 64-bit MinGW-w64 GCC toolchain,
+FLINT, GMP, MPFR, and GMP-ECM libraries.
+
+1. Install MSYS2 (default location `C:\msys64`), e.g. via `winget`:
+   ```powershell
+   winget install -e --id MSYS2.MSYS2
+   ```
+
+2. Install the 64-bit UCRT64 GCC toolchain, FLINT, and GMP-ECM packages:
+   ```powershell
+   C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-flint mingw-w64-ucrt-x86_64-gmp-ecm make"
+   ```
+
+3. Add `C:\msys64\ucrt64\bin` to your Windows `PATH` (so `cgo` can locate `gcc.exe` and the runtime DLLs) and build:
+   ```powershell
+   $env:PATH = "C:\msys64\ucrt64\bin;" + $env:PATH
+   git clone https://github.com/sourcekris/goRsaTool
+   cd goRsaTool
+   go build
+   ```
+   *(Note: `goflint` and `gogmpecm` already include `#cgo windows` flags pointing to `C:/msys64/ucrt64/include` and `C:/msys64/ucrt64/lib`. If MSYS2 is installed in a non-default directory, set `CGO_CPPFLAGS` and `CGO_LDFLAGS` accordingly.)*
 
 ### Installing on OSX
 
